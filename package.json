@@ -1,0 +1,20 @@
+{
+  "name": "sentinelgrc-ai",
+  "private": true,
+  "description": "SentinelGRC AI — governance, risk, compliance, third-party risk and AI governance platform",
+  "workspaces": [
+    "apps/web",
+    "services/api"
+  ],
+  "engines": {
+    "node": ">=24"
+  },
+  "scripts": {
+    "dev:api": "npm run start:dev -w services/api",
+    "dev:web": "npm run dev -w apps/web",
+    "build": "npm run build -w services/api && npm run build -w apps/web",
+    "lint": "npm run lint -w services/api && npm run lint -w apps/web",
+    "typecheck": "npm run typecheck -w services/api && npm run typecheck -w apps/web",
+    "test": "npm run test -w services/api && npm run test -w apps/web"
+  }
+}

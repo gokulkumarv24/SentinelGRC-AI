@@ -1,0 +1,33 @@
+# Secrets — never commit (spec §0.1 rule 6)
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Dependencies and builds
+node_modules/
+.next/
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Local evidence storage and reports (outside web root, never committed)
+storage/
+var/
+
+# Test artifacts
+playwright-report/
+test-results/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.log
+
+# Generated Prisma client (rebuilt by `npm install` / `npm run db:generate`)
+services/api/src/generated/
