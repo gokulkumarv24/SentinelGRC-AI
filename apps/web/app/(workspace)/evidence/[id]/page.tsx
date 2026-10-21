@@ -1,5 +1,6 @@
 "use client";
 
+import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
 import { Archive, Download, Eye, Link2, Unlink } from "lucide-react";
 import { use, useState } from "react";
@@ -204,6 +205,12 @@ export default function EvidenceDetailPage({ params }: PageProps<"/evidence/[id]
               {PREVIEWABLE.has(e.mediaType ?? "") && can("evidence.download") && <div className="mt-3"><Preview evidence={e} /></div>}
             </Section>
           )}
+          <Section title="AI assistance" description="Optional drafts from the file text. They never change this evidence or any linked record.">
+            <div className="space-y-4">
+              <AiAssist artifactType="evidence_summary" targetId={e.id} />
+              <AiAssist artifactType="evidence_statements" targetId={e.id} />
+            </div>
+          </Section>
           <Section title="Linked records" actions={can("evidence.link") && !archived && <AddLinkDialog evidenceId={e.id} />}>
             {e.links.length === 0 ? (
               <p className="text-sm text-muted-foreground">Not linked to any record.</p>

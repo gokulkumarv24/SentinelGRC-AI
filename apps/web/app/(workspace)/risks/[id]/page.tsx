@@ -1,5 +1,6 @@
 "use client";
 
+import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
 import { Link2, Pencil, Plus, ShieldCheck, Unlink } from "lucide-react";
 import Link from "next/link";
@@ -212,6 +213,10 @@ export default function RiskDetailPage({ params }: PageProps<"/risks/[id]">) {
                 ))}
               </ul>
             )}
+          </Section>
+
+          <Section title="AI assistance">
+            <AiAssist artifactType="risk_summary" targetId={risk.id} />
           </Section>
 
           <Section title="History" description="Every change to scores, owner, status and treatment.">

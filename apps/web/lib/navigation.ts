@@ -28,6 +28,7 @@ import {
   Bell,
   History,
   Network,
+  Sparkles,
 } from "lucide-react";
 
 export interface NavItem {
@@ -94,6 +95,7 @@ export const NAVIGATION: NavSection[] = [
     title: "Reporting",
     items: [
       { title: "Reports", href: "/reports", icon: FileBarChart, permission: "report.read" },
+      { title: "AI Drafts", href: "/assistant", icon: Sparkles, permission: "assistant.use" },
       { title: "Audit Log", href: "/audit-log", icon: ScrollText, permission: "audit.read" },
     ],
   },

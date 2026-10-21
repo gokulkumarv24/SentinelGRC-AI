@@ -107,6 +107,13 @@ export const DEFAULT_WORKFLOWS: DefaultWorkflow[] = [
     configuration: { handler: 'notify_questionnaire_submitted', event: 'vendor_assessment.submitted' },
   },
   {
+    key: 'report_generation',
+    name: 'Report generation',
+    description: 'Generates a requested report in the background, stores it privately and notifies the requester.',
+    triggerType: 'event',
+    configuration: { handler: 'generate_report', event: 'report.requested' },
+  },
+  {
     key: 'ai_model_change',
     name: 'AI model or purpose change',
     description: 'Requests reassessment and notifies the AI governance officer when a model, provider or purpose changes.',

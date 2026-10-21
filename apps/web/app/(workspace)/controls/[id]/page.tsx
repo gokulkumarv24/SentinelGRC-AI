@@ -1,5 +1,6 @@
 "use client";
 
+import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConical, Link2, Play, Plus, Upload } from "lucide-react";
 import Link from "next/link";
@@ -182,6 +183,11 @@ export default function ControlDetailPage({ params }: PageProps<"/controls/[id]"
                     ))}
                   </tbody>
                 </table>
+              </div>
+            )}
+            {c.tests[0] && c.tests[0].result !== "pass" && (
+              <div className="mt-4 border-t pt-3">
+                <AiAssist artifactType="control_failure_explanation" targetId={c.tests[0].id} title="Explain the latest result" />
               </div>
             )}
           </Section>

@@ -1,5 +1,6 @@
 "use client";
 
+import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
 import { Plus } from "lucide-react";
 import Link from "next/link";
@@ -157,6 +158,13 @@ export default function FindingDetailPage({ params }: PageProps<"/findings/[id]"
               </ul>
             </Section>
           )}
+
+          <Section title="AI assistance" description="Advisory drafts. Severity and status change only through the normal, audited actions above.">
+            <div className="space-y-4">
+              <AiAssist artifactType="finding_draft" targetId={f.id} />
+              <AiAssist artifactType="remediation_options" targetId={f.id} />
+            </div>
+          </Section>
 
           <Section title="Timeline">
             <ol className="relative space-y-3 border-l pl-4">

@@ -85,3 +85,19 @@ Connectors implement one `IntegrationAdapter` contract (provider and version, sc
 
 ## D-015 — Email delivery
 Email goes through an outbox, delivered by the worker over SMTP (nodemailer ≥ 10.1.7; 7.x had open advisories). Messages are suppressed when no provider is configured. They are also suppressed when the recipient's domain is not on `EMAIL_ALLOWED_RECIPIENT_DOMAINS`, and in demo mode without an allowlist, so the demo never mails real people. Addresses must be plain ASCII so comments, quoting or IDN tricks cannot slip past the allowlist. Delivery is attempted up to 5 times with backoff, and the status is mirrored to the notification.
+
+## D-016 — AI assistant: drafts only, provider adapter, mock by default
+- `LlmProvider` has two implementations. The default `mock` provider makes no model call: it builds extractive, deterministic drafts from the supplied sources. `openai-compatible` (for example Groq) uses JSON mode, a timeout, one retry for transient errors, never follows redirects, and requires https except for localhost.
+- Three switches must all allow AI: `AI_ENABLED` (platform), `settings.aiFeaturesEnabled` (organization), and `AI_DATA_SHARING_APPROVED` for any provider that sends data off the host.
+- Context is loaded only through tenant-scoped, permission-checked queries.
+- Before anything is sent, content is redacted (secrets, emails, phone numbers, card numbers, IBANs, IP addresses), restricted evidence is never sent externally, and input is capped at `AI_MAX_INPUT_CHARS`. Content that looks like instructions to an AI is flagged as a limitation and handled as data only.
+- Untrusted content is wrapped in `<untrusted_data>`. The model has no tools, and output must match one strict schema. A citation to a source that wasn't supplied, a suggested control that doesn't exist, or an out-of-range value (for example a severity) marks the draft invalid.
+- Every draft is stored with the requester, source record IDs and versions, provider, model, prompt version, token counts, the redaction summary, the validation result, the reviewer's decision and edits, and whether it was used in a record. Reviewing a draft never changes any other record.
+- No vector database (spec §11.2): retrieval is permission-filtered database reads plus bounded document text. PDF text comes from `unpdf` (pdf.js 6.4); other binary types are not analysed, and that is stated as a limitation.
+
+## D-017 — Reports
+- Twelve report builders produce a renderer-independent model (metrics with definitions, sections, exclusions, source appendix), rendered as PDF (pdfkit), CSV (formula-neutralized, UTF-8 BOM) or Excel (exceljs, values written as text, not formulas).
+- Generation runs in the worker via the `report.requested` event. The requester's permissions are re-checked at generation time. Files are stored privately under the evidence storage key rules with a SHA-256 checksum; downloads are authenticated, verified against the checksum, audited and sent with `no-store`.
+- The PDF shows Draft or Final, the generation time with the organization's time zone, page numbers and a Draft watermark, and states that the report is not an audit opinion or attestation.
+- A vendor assessment report can be Final only once the assessment is decided.
+- Generated files are derived data: they are deleted at the end of the organization's report retention period and the run is marked expired.

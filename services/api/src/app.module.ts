@@ -52,6 +52,11 @@ import { IntegrationsController, WorkflowsController } from './modules/workflows
 import { WorkflowsService } from './modules/workflows/workflows.service.js';
 import { IntegrationsService } from './modules/integrations/integrations.service.js';
 import { EmailDeliveryService } from './modules/notifications/email-delivery.service.js';
+import { ReportBuilders } from './modules/reports/report-builders.js';
+import { AssistantController } from './modules/assistant/assistant.controller.js';
+import { AssistantService } from './modules/assistant/assistant.service.js';
+import { ReportsController } from './modules/reports/reports.controller.js';
+import { ReportsService } from './modules/reports/reports.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
 const CORE_PROVIDERS = [
@@ -99,6 +104,9 @@ export const DOMAIN_SERVICES = [
   WorkflowHandlers,
   WorkflowRunner,
   EmailDeliveryService,
+  ReportBuilders,
+  ReportsService,
+  AssistantService,
 ];
 
 @Global()
@@ -126,6 +134,8 @@ export class DomainModule {}
     AiGovernanceController,
     WorkflowsController,
     IntegrationsController,
+    ReportsController,
+    AssistantController,
   ],
   providers: [
     { provide: APP_GUARD, useClass: SecurityGuard },

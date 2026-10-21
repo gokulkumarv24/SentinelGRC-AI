@@ -1,7 +1,8 @@
 "use client";
 
+import { AiAssist, useAiStatus } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
-import { ExternalLink, Link2 } from "lucide-react";
+import { ExternalLink, Link2, Sparkles } from "lucide-react";
 import Link from "next/link";
 import { use, useMemo, useState } from "react";
 import { IllustrativeBadge, StatusBadge } from "@/components/common/badges";
@@ -55,6 +56,8 @@ export default function FrameworkDetailPage({ params }: PageProps<"/compliance/f
   const { id } = use(params);
   const can = useCan();
   const [filter, setFilter] = useState("");
+  const [suggestFor, setSuggestFor] = useState<string | null>(null);
+  const ai = useAiStatus();
   const query = useQuery({ queryKey: ["frameworks", id], queryFn: () => api.get<FrameworkDetail>(`/frameworks/${id}`) });
   const compliance = useQuery({ queryKey: ["compliance", id], queryFn: () => api.get<FrameworkCompliance>(`/compliance/frameworks/${id}`) });
   const map = useApiMutation({
@@ -114,6 +117,13 @@ export default function FrameworkDetailPage({ params }: PageProps<"/compliance/f
                       )}
                     </div>
                     {r.summary && !isGroup && <p className="text-xs text-muted-foreground">{r.summary}</p>}
+                    {!isGroup && r.controls.length === 0 && can("mapping.manage") && ai.data?.enabled && (
+                      suggestFor === r.id ? (
+                        <div className="mt-2"><AiAssist artifactType="mapping_suggestions" targetId={r.id} title="Candidate controls (AI draft)" /></div>
+                      ) : (
+                        <Button size="xs" variant="link" className="h-auto px-0" onClick={() => setSuggestFor(r.id)}><Sparkles aria-hidden /> Suggest controls</Button>
+                      )
+                    )}
                     {!isGroup && (
                       <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
                         {r.controls.length === 0 ? (

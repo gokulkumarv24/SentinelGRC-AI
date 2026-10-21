@@ -1,5 +1,6 @@
 "use client";
 
+import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
 import { Copy, Paperclip, Save, Send, Undo2 } from "lucide-react";
 import Link from "next/link";
@@ -309,6 +310,9 @@ export default function AssessmentPage({ params }: PageProps<"/vendors/assessmen
               </div>
             </Section>
           )}
+          <Section title="AI assistance" description="Draft observations against each question's criteria. The deterministic score above is authoritative.">
+            <AiAssist artifactType="vendor_observations" targetId={assessment.id} />
+          </Section>
           {assessment.findings.length > 0 && (
             <Section title="Findings from this assessment">
               <ul className="divide-y">
