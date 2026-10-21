@@ -1,0 +1,21 @@
+# Keep build contexts small and free of secrets and local state.
+**/node_modules
+**/.next
+**/.next-e2e
+**/dist
+**/coverage
+**/test-results
+**/playwright-report
+**/*.tsbuildinfo
+services/api/src/generated
+.git
+.github
+var
+.env
+.env.*
+!.env.example
+deploy/*.env
+*.log
+*.png
+docs
+SENTINELGRC_MASTER_SPEC.md

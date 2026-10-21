@@ -1,0 +1,102 @@
+# Local full stack (development only). Production uses deploy/docker-compose.prod.yml.
+#
+#   cp .env.example .env            # then set AUTH_SECRET (see the comment in .env.example)
+#   docker compose up --build       # db → release (migrations + reference data) → api, worker, web
+#   docker compose exec api node dist/cli/seed-demo.js     # optional synthetic demo data
+#   open http://localhost:3000
+#   docker compose --profile ops run --rm backup           # backup into ./var/backups
+#   docker compose down             # stop (add -v to delete the database and storage volumes)
+#
+# Every port is bound to 127.0.0.1 only. The database password below is for this local stack only.
+
+x-api-env: &api-env
+  APP_ENV: development
+  DATABASE_URL: postgresql://sentinel:${POSTGRES_PASSWORD:-local-dev-only}@db:5432/sentinelgrc
+  PUBLIC_APP_URL: http://localhost:3000
+  CORS_ORIGINS: http://localhost:3000
+  API_PORT: "4000"
+  STORAGE_BACKEND: local
+  LOCAL_STORAGE_PATH: /app/var/storage
+
+services:
+  db:
+    image: postgres:18.4-bookworm
+    environment:
+      POSTGRES_USER: sentinel
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-local-dev-only}
+      POSTGRES_DB: sentinelgrc
+    volumes:
+      - pgdata:/var/lib/postgresql
+    ports:
+      - "127.0.0.1:5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U sentinel -d sentinelgrc"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  release:
+    build: { context: ., dockerfile: services/api/Dockerfile, target: release }
+    env_file: .env
+    environment: *api-env
+    depends_on:
+      db: { condition: service_healthy }
+    restart: "no"
+
+  api:
+    build: { context: ., dockerfile: services/api/Dockerfile, target: runtime }
+    env_file: .env
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "false"
+    volumes:
+      - storage:/app/var/storage
+    ports:
+      - "127.0.0.1:4000:4000"
+    depends_on:
+      release: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  worker:
+    build: { context: ., dockerfile: services/api/Dockerfile, target: runtime }
+    command: ["node", "dist/worker.js"]
+    env_file: .env
+    environment:
+      <<: *api-env
+      WORKER_ENABLED: "true"
+    volumes:
+      - storage:/app/var/storage
+    healthcheck:
+      disable: true
+    depends_on:
+      release: { condition: service_completed_successfully }
+    restart: unless-stopped
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+      args: { API_BASE_URL: "http://api:4000" }
+    ports:
+      - "127.0.0.1:3000:3000"
+    depends_on:
+      api: { condition: service_healthy }
+    restart: unless-stopped
+
+  backup:
+    profiles: ["ops"]
+    build: { context: ops/backup }
+    environment:
+      DATABASE_URL: postgresql://sentinel:${POSTGRES_PASSWORD:-local-dev-only}@db:5432/sentinelgrc
+      BACKUP_DIR: /backups
+      STORAGE_DIR: /storage
+      BACKUP_AGE_RECIPIENT: ${BACKUP_AGE_RECIPIENT:-}
+    volumes:
+      - ./var/backups:/backups
+      - storage:/storage:ro
+    depends_on:
+      db: { condition: service_healthy }
+
+volumes:
+  pgdata:
+  storage:

@@ -1,0 +1,29 @@
+# Reverse proxy with automatic HTTPS (Let's Encrypt). The browser only ever talks to this origin.
+{$SENTINELGRC_DOMAIN} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+
+	# `route` runs in the written order (Caddy otherwise sorts directives by type).
+	route {
+		# Readiness details and API docs are for internal use only.
+		@internal path /api/v1/ready /api/v1/docs* /api/v1/openapi.json
+		respond @internal 404
+
+		# API traffic goes straight to the API (uploads up to MAX_UPLOAD_SIZE_MB plus form overhead).
+		request_body /api/v1/* {
+			max_size 30MB
+		}
+		reverse_proxy /api/v1/* api:4000
+
+		reverse_proxy web:3000
+	}
+
+	log {
+		output stdout
+		format json
+	}
+}

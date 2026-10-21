@@ -32,3 +32,7 @@ Thumbs.db
 
 # Generated Prisma client (rebuilt by `npm install` / `npm run db:generate`)
 services/api/src/generated/
+
+# Deployment environment files hold production secrets — never commit them.
+deploy/*.env
+!deploy/*.env.example

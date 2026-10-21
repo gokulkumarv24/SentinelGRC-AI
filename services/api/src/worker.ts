@@ -2,6 +2,7 @@ import { Logger, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { CoreModule, DomainModule } from './app.module.js';
+import { createLogger } from './common/logger.js';
 import { loadEnv } from './config/env.js';
 import { EmailDeliveryService } from './modules/notifications/email-delivery.service.js';
 import { WorkflowRunner } from './modules/workflows/workflow-runner.service.js';
@@ -11,6 +12,7 @@ import { WorkflowRunner } from './modules/workflows/workflow-runner.service.js';
 class WorkerModule {}
 
 const env = loadEnv();
+Logger.overrideLogger(createLogger(env));
 const logger = new Logger('Worker');
 if (!env.WORKER_ENABLED) {
   logger.log('WORKER_ENABLED is false; exiting without processing jobs.');
@@ -18,7 +20,7 @@ if (!env.WORKER_ENABLED) {
 }
 
 const app = await NestFactory.createApplicationContext(WorkerModule, {
-  logger: env.APP_ENV === 'production' ? ['error', 'warn', 'log'] : ['error', 'warn', 'log', 'debug'],
+  logger: createLogger(env),
 });
 app.enableShutdownHooks();
 const runner = app.get(WorkflowRunner);

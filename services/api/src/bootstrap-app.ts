@@ -5,6 +5,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { AppModule } from './app.module.js';
+import { createLogger } from './common/logger.js';
 import { loadEnv } from './config/env.js';
 
 export const API_PREFIX = 'api/v1';
@@ -13,7 +14,7 @@ export const API_PREFIX = 'api/v1';
 export async function createApp(options: { logger?: boolean } = {}): Promise<INestApplication> {
   const env = loadEnv();
   const app = await NestFactory.create<NestExpressApplication>(AppModule, {
-    logger: options.logger === false ? false : env.APP_ENV === 'production' ? ['error', 'warn', 'log'] : ['error', 'warn', 'log', 'debug'],
+    logger: options.logger === false ? false : createLogger(env),
     bodyParser: false,
   });
   if (env.TRUST_PROXY) app.set('trust proxy', 1);
@@ -37,15 +38,20 @@ export async function createApp(options: { logger?: boolean } = {}): Promise<INe
   app.enableShutdownHooks();
 
   if (env.APP_ENV !== 'production') {
-    const config = new DocumentBuilder()
-      .setTitle('SentinelGRC AI API')
-      .setDescription('Governance, risk, compliance, third-party risk and AI governance API. Cookie session + X-CSRF-Token.')
-      .setVersion('1.0.0')
-      .addCookieAuth('sg_session')
-      .build();
-    SwaggerModule.setup(`${API_PREFIX}/docs`, app, () => SwaggerModule.createDocument(app, config), {
+    SwaggerModule.setup(`${API_PREFIX}/docs`, app, () => openApiDocument(app), {
       jsonDocumentUrl: `${API_PREFIX}/openapi.json`,
     });
   }
   return app;
+}
+
+/** The OpenAPI document served in development and exported by `npm run openapi`. */
+export function openApiDocument(app: INestApplication) {
+  const config = new DocumentBuilder()
+    .setTitle('SentinelGRC AI API')
+    .setDescription('Governance, risk, compliance, third-party risk and AI governance API. Cookie session + X-CSRF-Token.')
+    .setVersion('1.0.0')
+    .addCookieAuth('sg_session')
+    .build();
+  return SwaggerModule.createDocument(app, config);
 }

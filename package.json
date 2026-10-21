@@ -10,11 +10,23 @@
     "node": ">=24"
   },
   "scripts": {
+    "dev:db": "npm run db:local -w services/api",
     "dev:api": "npm run start:dev -w services/api",
+    "dev:worker": "npm run dev:worker -w services/api",
     "dev:web": "npm run dev -w apps/web",
+    "db:migrate": "npm run db:migrate -w services/api && npm run reference:sync -w services/api",
+    "admin:create": "npm run admin:create -w services/api --",
+    "seed:demo": "npm run seed:demo -w services/api --",
     "build": "npm run build -w services/api && npm run build -w apps/web",
     "lint": "npm run lint -w services/api && npm run lint -w apps/web",
     "typecheck": "npm run typecheck -w services/api && npm run typecheck -w apps/web",
-    "test": "npm run test -w services/api && npm run test -w apps/web"
+    "test": "npm run test -w services/api && npm run test -w apps/web",
+    "test:api": "npm run test:api -w services/api",
+    "test:e2e": "npm run test:e2e -w apps/web",
+    "openapi": "npm run build -w services/api && npm run openapi -w services/api",
+    "restore:verify": "npm run restore:verify -w services/api --",
+    "stack:up": "docker compose up --build -d",
+    "stack:down": "docker compose down",
+    "stack:backup": "docker compose --profile ops run --rm backup"
   }
 }

@@ -1,0 +1,106 @@
+# Production template for a single host (VPS) behind Caddy with automatic TLS. Review before use.
+# See docs/DEPLOYMENT.md. Nothing here runs demo seeds, exposes the database, or uses development credentials.
+#
+#   cp deploy/production.env.example deploy/production.env   # fill in; keep it out of git (chmod 600)
+#   export SENTINELGRC_VERSION=1.0.0 REGISTRY=ghcr.io/<owner>
+#   docker compose -f deploy/docker-compose.prod.yml --env-file deploy/production.env run --rm release
+#   docker compose -f deploy/docker-compose.prod.yml --env-file deploy/production.env up -d api worker web caddy
+#
+# Prefer a managed PostgreSQL and S3-compatible object storage; the `db` service is provided for
+# single-host installs and is reachable only on the internal network.
+
+x-app: &app
+  env_file: production.env
+  restart: unless-stopped
+  read_only: true
+  tmpfs: ["/tmp"]
+  cap_drop: ["ALL"]
+  security_opt: ["no-new-privileges:true"]
+  networks: [internal]
+  logging:
+    driver: json-file
+    options: { max-size: "20m", max-file: "5" }
+
+services:
+  caddy:
+    image: caddy:2.10.2
+    restart: unless-stopped
+    ports: ["80:80", "443:443"]
+    environment:
+      SENTINELGRC_DOMAIN: ${SENTINELGRC_DOMAIN:?set SENTINELGRC_DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [internal, edge]
+    depends_on: [web, api]
+
+  release:
+    <<: *app
+    image: ${REGISTRY:?set REGISTRY}/sentinelgrc-release:${SENTINELGRC_VERSION:?set SENTINELGRC_VERSION}
+    read_only: false
+    restart: "no"
+    profiles: ["release"]
+
+  api:
+    <<: *app
+    image: ${REGISTRY}/sentinelgrc-api:${SENTINELGRC_VERSION}
+    environment: { WORKER_ENABLED: "false" }
+    volumes: ["storage:/app/var/storage"]
+    deploy: { resources: { limits: { memory: 768m, cpus: "1.0" } } }
+
+  worker:
+    <<: *app
+    image: ${REGISTRY}/sentinelgrc-api:${SENTINELGRC_VERSION}
+    command: ["node", "dist/worker.js"]
+    environment: { WORKER_ENABLED: "true" }
+    volumes: ["storage:/app/var/storage"]
+    healthcheck: { disable: true }
+    deploy: { resources: { limits: { memory: 768m, cpus: "1.0" } } }
+
+  web:
+    <<: *app
+    image: ${REGISTRY}/sentinelgrc-web:${SENTINELGRC_VERSION}
+    env_file: []
+    deploy: { resources: { limits: { memory: 512m, cpus: "1.0" } } }
+
+  db:
+    image: postgres:18.4-bookworm
+    profiles: ["bundled-db"]
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-sentinel}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB:-sentinelgrc}
+    volumes: ["pgdata:/var/lib/postgresql"]
+    networks: [internal]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  backup:
+    image: ${REGISTRY}/sentinelgrc-backup:${SENTINELGRC_VERSION}
+    profiles: ["ops"]
+    environment:
+      DATABASE_URL: ${BACKUP_DATABASE_URL:?set BACKUP_DATABASE_URL}
+      BACKUP_DIR: /backups
+      STORAGE_DIR: /storage
+      BACKUP_AGE_RECIPIENT: ${BACKUP_AGE_RECIPIENT:?set BACKUP_AGE_RECIPIENT}
+      BACKUP_REQUIRE_ENCRYPTION: "1"
+      BACKUP_RETENTION_DAYS: ${BACKUP_RETENTION_DAYS:-30}
+    volumes:
+      - ${BACKUP_HOST_DIR:?set BACKUP_HOST_DIR}:/backups
+      - storage:/storage:ro
+    networks: [internal]
+
+networks:
+  internal: { internal: true }
+  edge: {}
+
+volumes:
+  storage:
+  pgdata:
+  caddy_data:
+  caddy_config:
