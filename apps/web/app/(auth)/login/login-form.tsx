@@ -10,16 +10,12 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Field, FieldError, FieldGroup, FieldLabel } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
 import { api, ApiError } from "@/lib/api";
+import { safeNext } from "@/lib/safe-next";
 
 const schema = z.object({
   email: z.email("Enter a valid email address"),
   password: z.string().min(1, "Enter your password"),
 });
-
-/** Only same-site relative paths are accepted as post-login destinations (no open redirect). */
-function safeNext(next: string | null): string {
-  return next && next.startsWith("/") && !next.startsWith("//") && !next.startsWith("/\\") ? next : "/dashboard";
-}
 
 export function LoginForm() {
   const params = useSearchParams();
