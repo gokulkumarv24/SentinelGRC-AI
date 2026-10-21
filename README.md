@@ -94,7 +94,7 @@ It prints a one-time password, which must be changed at first sign-in.
 
 ## Deployment
 
-See [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): images, least-privilege database roles, configuration, the release step, the first admin, backups, and the pre- and post-deployment checklists.
+Free demo on Render + Neon: [docs/DEPLOY_RENDER.md](docs/DEPLOY_RENDER.md). Production: [docs/DEPLOYMENT.md](docs/DEPLOYMENT.md): images, least-privilege database roles, configuration, the release step, the first admin, backups, and the pre- and post-deployment checklists.
 
 ## Limitations
 
