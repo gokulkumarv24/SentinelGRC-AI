@@ -46,6 +46,12 @@ import { AiRecordsService } from './modules/ai-governance/ai-records.service.js'
 import { AiSystemsService } from './modules/ai-governance/ai-systems.service.js';
 import { EntityResolver } from './modules/shared/entity-resolver.service.js';
 import { EventQueue } from './modules/workflows/event-queue.service.js';
+import { WorkflowHandlers } from './modules/workflows/workflow-handlers.js';
+import { WorkflowRunner } from './modules/workflows/workflow-runner.service.js';
+import { IntegrationsController, WorkflowsController } from './modules/workflows/workflows.controller.js';
+import { WorkflowsService } from './modules/workflows/workflows.service.js';
+import { IntegrationsService } from './modules/integrations/integrations.service.js';
+import { EmailDeliveryService } from './modules/notifications/email-delivery.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
 const CORE_PROVIDERS = [
@@ -88,6 +94,11 @@ export const DOMAIN_SERVICES = [
   AiSystemsService,
   AiAssessmentsService,
   AiRecordsService,
+  IntegrationsService,
+  WorkflowsService,
+  WorkflowHandlers,
+  WorkflowRunner,
+  EmailDeliveryService,
 ];
 
 @Global()
@@ -113,6 +124,8 @@ export class DomainModule {}
     VendorsController,
     VendorPortalController,
     AiGovernanceController,
+    WorkflowsController,
+    IntegrationsController,
   ],
   providers: [
     { provide: APP_GUARD, useClass: SecurityGuard },

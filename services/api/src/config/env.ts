@@ -57,6 +57,7 @@ const schema = z
     SENTRY_DSN: z.string().optional(),
     DEMO_MODE: bool,
     WORKER_ENABLED: bool,
+    WORKER_POLL_SECONDS: z.coerce.number().int().min(1).max(3600).default(15),
   })
   .superRefine((env, ctx) => {
     if (env.APP_ENV !== 'production') return;

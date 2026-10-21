@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { conflict, notFound } from '../../common/errors.js';
 import { randomUUID } from 'node:crypto';
 import { maybeContext } from '../../common/request-context.js';
 import type { Prisma } from '../../generated/prisma/client.js';
@@ -27,7 +28,7 @@ export class EventQueue {
           status: 'queued',
           triggerSource: 'event',
           idempotencyKey: key,
-          nextAttemptAt: new Date(),
+          nextAttemptAt: null, // runnable immediately
           resultSummary: { event, payload } as Prisma.InputJsonValue,
           correlationId: ctx?.requestId ?? randomUUID(),
           initiatedBy: ctx?.user?.id ?? null,
@@ -36,5 +37,27 @@ export class EventQueue {
       });
     }
     return definitions.length;
+  }
+
+  /** Queues a manual run of one workflow (optionally with a payload); the worker executes it. */
+  async enqueueManual(tx: Tx, organizationId: string, definitionKeyOrId: { key: string } | { id: string }, payload: Record<string, unknown> = {}): Promise<string> {
+    const def = await tx.workflowDefinition.findFirst({ where: { organizationId, ...definitionKeyOrId } });
+    if (!def) throw notFound('Workflow');
+    if (!def.enabled) throw conflict('This workflow is disabled');
+    const ctx = maybeContext();
+    const run = await tx.workflowRun.create({
+      data: {
+        organizationId,
+        workflowDefinitionId: def.id,
+        status: 'queued',
+        triggerSource: 'manual',
+        idempotencyKey: `${def.key}:manual:${randomUUID()}`,
+        nextAttemptAt: null, // runnable immediately
+        resultSummary: { payload } as Prisma.InputJsonValue,
+        correlationId: ctx?.requestId ?? randomUUID(),
+        initiatedBy: ctx?.user?.id ?? null,
+      },
+    });
+    return run.id;
   }
 }

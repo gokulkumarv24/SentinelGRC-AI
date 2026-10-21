@@ -101,7 +101,7 @@ export default function AiAssessmentPage({ params }: PageProps<"/ai-governance/a
         actions={editable && <Button onClick={() => save.mutate()} disabled={!dirty || save.isPending}>Save progress</Button>}
       />
       <div className="grid gap-4 xl:grid-cols-[1fr_360px]">
-        <Tabs defaultValue="Govern">
+        <Tabs defaultValue="Govern" className="min-w-0">
           <TabsList className="mb-3">
             {FUNCTIONS.map((f) => (
               <TabsTrigger key={f} value={f}>

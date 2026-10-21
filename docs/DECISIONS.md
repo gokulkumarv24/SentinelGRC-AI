@@ -65,3 +65,23 @@ Docker Desktop is not running on the development machine and RAM is limited. `np
 
 ## D-011 — Polymorphic links validated in the service layer
 Evidence links, risk links and AI source references point at several entity types, which foreign keys cannot express. Every such reference goes through `EntityResolver`, which requires the target to exist **in the caller's organization** (spec §5.1). Tests cover cross-tenant link attempts.
+
+## D-012 — Database-backed job queue instead of Redis
+Workflow runs are rows in `workflow_runs`; the worker (`services/api/src/worker.ts`, `npm run start:worker`) claims them with `UPDATE … WHERE id = (SELECT … FOR UPDATE SKIP LOCKED)` and a 10-minute lease. This gives durable, multi-worker-safe processing with no extra infrastructure; Redis/BullMQ can replace it if volume ever justifies it (spec §12.3 "durable queue if workloads justify it").
+- Schedules: each due slot is queued once, using the slot time as the idempotency key; missed slots are skipped, not replayed as a backlog. Schedules are stored in UTC.
+- Events are queued in the same transaction as the change that raised them (transactional outbox).
+- Retries: up to 3 attempts with exponential backoff (30 s doubling, capped at 30 min). Errors are classed as retryable or permanent; a run whose lease expires is re-queued.
+- Steps: each step is recorded, and a step that succeeded is skipped when its run is retried, so one integration that synced is not synced again because another failed. Manual retries create a new linked run, and the original keeps its history.
+- Handlers are idempotent (findings dedupe on their open key, notifications on a per-recipient dedupe key inserted with `ON CONFLICT DO NOTHING`).
+
+## D-013 — Retention never deletes automatically
+Deletion cannot be undone, and legal holds need human judgement. The `evidence_retention_review` workflow therefore only lists archived evidence that is past the organization's retention period and notifies administrators. Deletion stays a deliberate manual action (spec §12.3 "never retry an irreversible action blindly", §16.3).
+
+## D-014 — Integrations: adapters, secret references, full-refresh sync
+Connectors implement one `IntegrationAdapter` contract (provider and version, scopes, health check, paginated cursor collection, per-page timeout, normalized errors). Rows store only non-secret settings plus an optional reference to an `INTEGRATION_*` environment variable. Other names are rejected, so a reference can never expose other secrets.
+- A successful sync replaces the stored records in one transaction.
+- A failed sync keeps the previous records but marks the integration `failing`. Rules that depend on it then report **unknown** rather than trusting stale data.
+- The only connector implemented is the deterministic **demo identity provider** (synthetic privileged accounts, labelled as demo data). No real cloud, IdP or ticketing connector is claimed (spec §13.1).
+
+## D-015 — Email delivery
+Email goes through an outbox, delivered by the worker over SMTP (nodemailer ≥ 10.1.7; 7.x had open advisories). Messages are suppressed when no provider is configured. They are also suppressed when the recipient's domain is not on `EMAIL_ALLOWED_RECIPIENT_DOMAINS`, and in demo mode without an allowlist, so the demo never mails real people. Addresses must be plain ASCII so comments, quoting or IDN tricks cannot slip past the allowlist. Delivery is attempted up to 5 times with backoff, and the status is mirrored to the notification.

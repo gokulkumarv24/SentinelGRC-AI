@@ -85,6 +85,14 @@ export const DEFAULT_WORKFLOWS: DefaultWorkflow[] = [
     configuration: { handler: 'scheduled_reports' },
   },
   {
+    key: 'evidence_retention_review',
+    name: 'Evidence retention review',
+    description: 'Lists archived evidence past the retention period for an administrator to review. Never deletes anything automatically.',
+    triggerType: 'schedule',
+    intervalHours: 24,
+    configuration: { handler: 'evidence_retention_review' },
+  },
+  {
     key: 'high_finding_alert',
     name: 'High/critical finding alert',
     description: 'Notifies the assignee and GRC managers when a high or critical finding is created.',

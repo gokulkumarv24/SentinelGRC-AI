@@ -3,7 +3,6 @@ import { notFound } from '../../common/errors.js';
 import { pageArgs, toPage } from '../../common/pagination.js';
 import { requireOrgId, requireUserId } from '../../common/request-context.js';
 import { loadEnv } from '../../config/env.js';
-import { Prisma } from '../../generated/prisma/client.js';
 import { PrismaService, type Tx } from '../../prisma/prisma.service.js';
 
 export interface NotifyInput {
@@ -55,38 +54,37 @@ export class NotificationsService {
       });
       if (pref && !pref.inApp && !pref.email) continue;
       const wantsEmail = !!pref?.email && loadEnv().EMAIL_PROVIDER !== 'none';
-      try {
-        const notification = await db.notification.create({
-          data: {
+      // ON CONFLICT DO NOTHING: a duplicate must not raise, because an error inside the caller's
+      // transaction would abort it and silently roll back the caller's other writes.
+      const [notification] = await db.notification.createManyAndReturn({
+        data: [{
+          organizationId: input.organizationId,
+          recipientUserId,
+          eventType: input.eventType,
+          title: input.title,
+          message: input.message,
+          entityType: input.entityType,
+          entityId: input.entityId,
+          dedupeKey: input.dedupeKey ?? null,
+          emailStatus: wantsEmail ? 'pending' : 'suppressed',
+        }],
+        skipDuplicates: true,
+      });
+      if (!notification) continue; // same dedupe key + recipient: already delivered
+      created++;
+      if (wantsEmail) {
+        const user = await db.user.findUniqueOrThrow({ where: { id: recipientUserId }, select: { email: true } });
+        await db.outboxEvent.createMany({
+          data: [{
             organizationId: input.organizationId,
-            recipientUserId,
-            eventType: input.eventType,
-            title: input.title,
-            message: input.message,
-            entityType: input.entityType,
-            entityId: input.entityId,
-            dedupeKey: input.dedupeKey ?? null,
-            emailStatus: wantsEmail ? 'pending' : 'suppressed',
-          },
+            channel: 'email',
+            recipient: user.email,
+            subject: input.title,
+            body: `${input.message}\n\nOpen SentinelGRC to view details.`,
+            dedupeKey: `notification:${notification.id}`,
+          }],
+          skipDuplicates: true,
         });
-        created++;
-        if (wantsEmail) {
-          const user = await db.user.findUniqueOrThrow({ where: { id: recipientUserId }, select: { email: true } });
-          await db.outboxEvent.create({
-            data: {
-              organizationId: input.organizationId,
-              channel: 'email',
-              recipient: user.email,
-              subject: input.title,
-              body: `${input.message}\n\nOpen SentinelGRC to view details.`,
-              dedupeKey: `notification:${notification.id}`,
-            },
-          });
-        }
-      } catch (error) {
-        // Unique (org, recipient, dedupeKey): this notification was already delivered.
-        if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') continue;
-        throw error;
       }
     }
     return created;

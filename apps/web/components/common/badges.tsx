@@ -93,6 +93,13 @@ const STATUS_TONES: Record<string, Tone> = {
   succeeded: "ok",
   failed: "danger",
   partially_succeeded: "warn",
+  // integrations
+  not_configured: "muted",
+  configured: "neutral",
+  healthy: "ok",
+  degraded: "warn",
+  failing: "danger",
+  disabled: "muted",
   // generic
   active: "ok",
   suspended: "danger",
