@@ -20,7 +20,7 @@
     "test:cov": "vitest run --coverage",
     "test:api": "vitest run --config ./vitest.config.e2e.ts",
     "db:local": "node scripts/local-db.mjs",
-    "db:schema": "node scripts/add-column-maps.mjs && prisma format && prisma generate",
+    "db:schema": "node scripts/add-column-maps.mjs && prisma format && node scripts/add-column-maps.mjs && prisma format && prisma generate",
     "db:generate": "prisma generate",
     "db:migrate": "prisma migrate deploy",
     "db:migrate:status": "prisma migrate status",

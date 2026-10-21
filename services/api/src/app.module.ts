@@ -40,6 +40,10 @@ import { AssessmentsService } from './modules/vendors/assessments.service.js';
 import { PortalService } from './modules/vendors/portal.service.js';
 import { VendorPortalController, VendorsController } from './modules/vendors/vendors.controller.js';
 import { VendorsService } from './modules/vendors/vendors.service.js';
+import { AiAssessmentsService } from './modules/ai-governance/ai-assessments.service.js';
+import { AiGovernanceController } from './modules/ai-governance/ai-governance.controller.js';
+import { AiRecordsService } from './modules/ai-governance/ai-records.service.js';
+import { AiSystemsService } from './modules/ai-governance/ai-systems.service.js';
 import { EntityResolver } from './modules/shared/entity-resolver.service.js';
 import { EventQueue } from './modules/workflows/event-queue.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
@@ -81,6 +85,9 @@ export const DOMAIN_SERVICES = [
   VendorsService,
   AssessmentsService,
   PortalService,
+  AiSystemsService,
+  AiAssessmentsService,
+  AiRecordsService,
 ];
 
 @Global()
@@ -105,6 +112,7 @@ export class DomainModule {}
     SearchController,
     VendorsController,
     VendorPortalController,
+    AiGovernanceController,
   ],
   providers: [
     { provide: APP_GUARD, useClass: SecurityGuard },

@@ -11,7 +11,7 @@ Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet
 | 3 — Shared GRC core | Done (API + UI) | 14 more API tests (38 total) + 23 unit tests; UI pages for risks, acceptance, findings, remediation, controls, SoA, evidence, members, settings, audit log, notifications; `tsc`, oxlint, eslint clean |
 | 4 — Compliance module | Done (API + UI) | 9 more API tests (47 total) + 17 more unit tests (40 total): framework import/preview/immutable versions, tenant-private frameworks, mapping SoD + version-change re-review, control-check flow (unknown → evidence request; expired → fail → single finding + remediation; re-runs dedup; pass recorded, closes only by a person), manual tests, compliance math, bulk import + CSV injection, template adoption, dashboard tenant isolation. Reference data: NIST CSF 2.0 (6/22/106) and AI RMF 1.0 (19/72) from official NIST sources |
 | 5 — Third-party risk | Done (API + UI) | 6 more API tests (53 total) + 3 unit tests (43 total): explainable inherent score, restricted contacts, answer validation by type, conditional follow-ups, completion rules, template freezing, review-before-decision, tier-based approval thresholds, SoD for high-risk decisions, findings from failed/unsupported answers (optional blanks excluded), shared risk linked to vendor + assessment, material-change reassessment, portal isolation (no internal fields, own evidence only, revoked/expired/unknown links, post-submit lock), cross-tenant 404s |
-| 6 — AI governance | Not started | — |
+| 6 — AI governance | Done (API + UI) | 8 more API tests (61 total), 43 unit tests: AI inventory with material-change reassessment; NIST AI RMF–structured assessment (19 items, Govern/Map/Measure/Manage) with rationale rules, residual-risk notes, shared risk linked to the AI system and reused from the provider vendor's open risk; independent approver (not assessor/submitter); deployment approval only when every §10.5 precondition holds, by someone other than the requester; evaluations require limitations and independent review; incidents (high/critical → finding; root cause before resolve, lessons before close); model changes flag reassessment and queue the change workflow, with separate review; EU AI Act applicability stored as preliminary with dated obligation schedule; cross-tenant 404s. UI pages type-check and lint clean and route correctly (unauthenticated → login); not yet walked through in a browser |
 | 7 — Workflow engine and integrations | Not started | — |
 | 8 — AI assistant and reporting | Not started | — |
 | 9 — UX completion and demo | Not started | — |
@@ -23,7 +23,7 @@ Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet
 npm run typecheck -w services/api      # clean
 npm run lint -w services/api           # oxlint: 0 warnings
 npm test -w services/api               # 43 unit tests passed
-npm run test:api -w services/api       # 53 API tests passed
+npm run test:api -w services/api       # 61 API tests passed
 npm run typecheck -w apps/web          # clean
 npx eslint . (apps/web)                # clean
 ```

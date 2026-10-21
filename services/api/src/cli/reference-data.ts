@@ -165,6 +165,7 @@ export async function loadReferenceData(prisma: PrismaClient, dir = FRAMEWORK_DA
               expectedAnswer: (q.expectedAnswer ?? undefined) as Prisma.InputJsonValue | undefined,
               dependsOnQuestionKey: q.dependsOnQuestionKey,
               dependsOnAnswer: (q.dependsOnAnswer ?? undefined) as Prisma.InputJsonValue | undefined,
+              rmfFunction: q.rmfFunction ?? null,
               sortOrder: i,
             })),
           },

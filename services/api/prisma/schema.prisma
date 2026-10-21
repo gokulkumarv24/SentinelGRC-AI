@@ -1203,6 +1203,7 @@ model AssessmentQuestion {
   expectedAnswer       Json?        @map("expected_answer") // deterministic criterion used by scoring
   dependsOnQuestionKey String?      @map("depends_on_question_key")
   dependsOnAnswer      Json?        @map("depends_on_answer")
+  rmfFunction          String?      @map("rmf_function") // AI templates: NIST AI RMF function used for navigation
   sortOrder            Int          @default(0) @map("sort_order")
 
   template AssessmentTemplate @relation(fields: [templateId], references: [id])
