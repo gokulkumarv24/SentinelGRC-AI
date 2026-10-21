@@ -194,9 +194,9 @@ export class RisksService {
   }
 
   /** Optimistic concurrency: the caller sends the version it edited (spec §3.4). */
-  async update(id: string, version: number, input: Partial<RiskInput> & { status?: RiskStatus }, rationale?: string) {
+  async update(id: string, version: number, input: Partial<RiskInput> & { status?: RiskStatus }, rationale?: string, outerTx?: Tx) {
     const organizationId = requireOrgId();
-    return this.prisma.tx(async (tx) => {
+    const run = async (tx: Tx) => {
       const risk = await tx.risk.findFirst({ where: { id, organizationId } });
       if (!risk) throw notFound('Risk');
       if (risk.version !== version) throw versionConflict();
@@ -256,7 +256,8 @@ export class RisksService {
         await this.audit.record({ action: 'risk.acceptance_invalidated', entityType: 'risk', entityId: id, rationale: 'Risk score changed materially; acceptance requires re-review' }, tx);
       }
       return tx.risk.findUniqueOrThrow({ where: { id } });
-    });
+    };
+    return outerTx ? run(outerTx) : this.prisma.tx(run);
   }
 
   async archive(id: string, rationale: string) {

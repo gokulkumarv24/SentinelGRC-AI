@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import type { Prisma, PrismaClient } from '../generated/prisma/client.js';
 import { manifestSchema } from '../modules/frameworks/manifest.js';
+import { templateFileSchema } from '../modules/vendors/questionnaire.js';
 import { PERMISSIONS, ROLES, type Permission } from '../permissions/catalog.js';
 
 /** <repo>/framework-data (same relative depth from src/cli and dist/cli). */
@@ -46,7 +47,7 @@ interface MappingFile {
  */
 export async function loadReferenceData(prisma: PrismaClient, dir = FRAMEWORK_DATA_DIR, log: (m: string) => void = () => {}) {
   if (!existsSync(dir)) throw new Error(`framework-data directory not found at ${dir}`);
-  const stats = { frameworksAdded: 0, frameworksPresent: 0, mappingsAdded: 0, templatesAdded: 0 };
+  const stats = { frameworksAdded: 0, frameworksPresent: 0, mappingsAdded: 0, templatesAdded: 0, questionnairesAdded: 0 };
 
   for (const file of readdirSync(`${dir}/manifests`).filter((f) => f.endsWith('.json')).sort()) {
     const manifest = manifestSchema.parse(JSON.parse(readFileSync(`${dir}/manifests/${file}`, 'utf8')));
@@ -131,6 +132,46 @@ export async function loadReferenceData(prisma: PrismaClient, dir = FRAMEWORK_DA
         }
       });
       stats.templatesAdded++;
+    }
+  }
+  // Questionnaire templates (vendor security, AI system assessment). Versions are immutable.
+  const qDir = `${dir}/questionnaires`;
+  if (existsSync(qDir)) {
+    for (const file of readdirSync(qDir).filter((f) => f.endsWith('.json')).sort()) {
+      const t = templateFileSchema.parse(JSON.parse(readFileSync(`${qDir}/${file}`, 'utf8')));
+      const exists = await prisma.assessmentTemplate.findFirst({ where: { organizationId: null, key: t.key, version: t.version } });
+      if (exists) continue;
+      await prisma.assessmentTemplate.create({
+        data: {
+          organizationId: null,
+          key: t.key,
+          name: t.name,
+          version: t.version,
+          purpose: t.purpose,
+          description: t.description,
+          frozen: true,
+          questions: {
+            create: t.questions.map((q, i) => ({
+              questionKey: q.questionKey,
+              questionText: q.questionText,
+              category: q.category,
+              responseType: q.responseType,
+              options: q.options,
+              required: q.required,
+              weight: q.weight,
+              important: q.important,
+              guidance: q.guidance,
+              evidenceRequired: q.evidenceRequired,
+              expectedAnswer: (q.expectedAnswer ?? undefined) as Prisma.InputJsonValue | undefined,
+              dependsOnQuestionKey: q.dependsOnQuestionKey,
+              dependsOnAnswer: (q.dependsOnAnswer ?? undefined) as Prisma.InputJsonValue | undefined,
+              sortOrder: i,
+            })),
+          },
+        },
+      });
+      stats.questionnairesAdded++;
+      log(`questionnaire ${t.key} v${t.version}: ${t.questions.length} questions`);
     }
   }
   return stats;

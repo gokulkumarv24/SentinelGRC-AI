@@ -10,7 +10,7 @@ Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet
 | 2 — Identity and tenant security | Done | 24 API tests: login/lockout, session idle + absolute expiry, CSRF + origin, logout, forced password change, invitations, self-role-change block, cross-tenant member/audit isolation, append-only audit trigger |
 | 3 — Shared GRC core | Done (API + UI) | 14 more API tests (38 total) + 23 unit tests; UI pages for risks, acceptance, findings, remediation, controls, SoA, evidence, members, settings, audit log, notifications; `tsc`, oxlint, eslint clean |
 | 4 — Compliance module | Done (API + UI) | 9 more API tests (47 total) + 17 more unit tests (40 total): framework import/preview/immutable versions, tenant-private frameworks, mapping SoD + version-change re-review, control-check flow (unknown → evidence request; expired → fail → single finding + remediation; re-runs dedup; pass recorded, closes only by a person), manual tests, compliance math, bulk import + CSV injection, template adoption, dashboard tenant isolation. Reference data: NIST CSF 2.0 (6/22/106) and AI RMF 1.0 (19/72) from official NIST sources |
-| 5 — Third-party risk | Not started | — |
+| 5 — Third-party risk | Done (API + UI) | 6 more API tests (53 total) + 3 unit tests (43 total): explainable inherent score, restricted contacts, answer validation by type, conditional follow-ups, completion rules, template freezing, review-before-decision, tier-based approval thresholds, SoD for high-risk decisions, findings from failed/unsupported answers (optional blanks excluded), shared risk linked to vendor + assessment, material-change reassessment, portal isolation (no internal fields, own evidence only, revoked/expired/unknown links, post-submit lock), cross-tenant 404s |
 | 6 — AI governance | Not started | — |
 | 7 — Workflow engine and integrations | Not started | — |
 | 8 — AI assistant and reporting | Not started | — |
@@ -22,8 +22,8 @@ Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet
 ```
 npm run typecheck -w services/api      # clean
 npm run lint -w services/api           # oxlint: 0 warnings
-npm test -w services/api               # 40 unit tests passed
-npm run test:api -w services/api       # 47 API tests passed
+npm test -w services/api               # 43 unit tests passed
+npm run test:api -w services/api       # 53 API tests passed
 npm run typecheck -w apps/web          # clean
 npx eslint . (apps/web)                # clean
 ```

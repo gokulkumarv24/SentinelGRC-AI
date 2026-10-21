@@ -36,6 +36,10 @@ import { RisksController } from './modules/risks/risks.controller.js';
 import { RisksService } from './modules/risks/risks.service.js';
 import { ScoringPolicyService } from './modules/risks/scoring-policy.service.js';
 import { SearchController } from './modules/search/search.controller.js';
+import { AssessmentsService } from './modules/vendors/assessments.service.js';
+import { PortalService } from './modules/vendors/portal.service.js';
+import { VendorPortalController, VendorsController } from './modules/vendors/vendors.controller.js';
+import { VendorsService } from './modules/vendors/vendors.service.js';
 import { EntityResolver } from './modules/shared/entity-resolver.service.js';
 import { EventQueue } from './modules/workflows/event-queue.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
@@ -74,6 +78,9 @@ export const DOMAIN_SERVICES = [
   ComplianceService,
   DashboardService,
   ControlImportService,
+  VendorsService,
+  AssessmentsService,
+  PortalService,
 ];
 
 @Global()
@@ -96,6 +103,8 @@ export class DomainModule {}
     ControlsController,
     EvidenceController,
     SearchController,
+    VendorsController,
+    VendorPortalController,
   ],
   providers: [
     { provide: APP_GUARD, useClass: SecurityGuard },
