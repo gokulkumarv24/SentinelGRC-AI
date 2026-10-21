@@ -27,7 +27,8 @@ const schema = z
     SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(24 * 60).default(30),
     SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(72).default(12),
     CORS_ORIGINS: csv,
-    TRUST_PROXY: bool,
+    // false | true (one proxy hop) | number of trusted proxy hops in front of the API.
+    TRUST_PROXY: z.enum(['true', 'false', '1', '0', '2', '3']).default('false').transform((v) => (v === 'true' ? 1 : v === 'false' ? 0 : Number(v))),
     RATE_LIMIT_LOGIN_PER_MINUTE: z.coerce.number().int().positive().default(10),
     RATE_LIMIT_DEFAULT_PER_MINUTE: z.coerce.number().int().positive().default(300),
     RATE_LIMIT_EXPENSIVE_PER_MINUTE: z.coerce.number().int().positive().default(20),
@@ -57,6 +58,7 @@ const schema = z
     SENTRY_DSN: z.string().optional(),
     DEMO_MODE: bool,
     WORKER_ENABLED: bool,
+    RUN_WORKER_IN_API: bool,
     WORKER_POLL_SECONDS: z.coerce.number().int().min(1).max(3600).default(15),
   })
   .superRefine((env, ctx) => {

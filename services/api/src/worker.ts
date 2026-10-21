@@ -1,11 +1,9 @@
 import { Logger, Module } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
-import { setTimeout as sleep } from 'node:timers/promises';
 import { CoreModule, DomainModule } from './app.module.js';
 import { createLogger } from './common/logger.js';
 import { loadEnv } from './config/env.js';
-import { EmailDeliveryService } from './modules/notifications/email-delivery.service.js';
-import { WorkflowRunner } from './modules/workflows/workflow-runner.service.js';
+import { runWorkerLoop } from './modules/workflows/worker-loop.js';
 
 /** The worker shares business services with the API but exposes no HTTP routes (spec §3.2). */
 @Module({ imports: [CoreModule, DomainModule] })
@@ -23,9 +21,6 @@ const app = await NestFactory.createApplicationContext(WorkerModule, {
   logger: createLogger(env),
 });
 app.enableShutdownHooks();
-const runner = app.get(WorkflowRunner);
-const email = app.get(EmailDeliveryService);
-
 const controller = new AbortController();
 for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   process.once(signal, () => {
@@ -34,20 +29,5 @@ for (const signal of ['SIGINT', 'SIGTERM'] as const) {
   });
 }
 
-const orgs = await runner.ensureDefaults();
-logger.log(`Worker started: ${orgs} organization(s), polling every ${env.WORKER_POLL_SECONDS}s.`);
-
-while (!controller.signal.aborted) {
-  try {
-    const { scheduled, processed } = await runner.tick();
-    const mail = await email.deliverPending();
-    if (scheduled || processed || mail.delivered || mail.failed) logger.log({ scheduled, processed, mail }, 'Worker tick');
-  } catch (error) {
-    // A database outage must not kill the loop; the next tick retries.
-    logger.error({ err: error }, 'Worker tick failed');
-  }
-  await sleep(env.WORKER_POLL_SECONDS * 1000, undefined, { signal: controller.signal }).catch(() => undefined);
-}
-
+await runWorkerLoop(app, env.WORKER_POLL_SECONDS, logger, controller.signal);
 await app.close();
-logger.log('Worker stopped.');

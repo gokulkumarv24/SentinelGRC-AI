@@ -30,7 +30,15 @@ COPY services/api/package.json services/api/
 RUN npm ci --workspace services/api --omit=dev --ignore-scripts \
  && mkdir -p services/api/node_modules
 
-# ── Runtime: API (default) and worker (`node dist/worker.js`) ────────────────
+# ── Release: run once per deploy, before new API/worker containers start ─────
+FROM build AS release
+COPY framework-data /app/framework-data
+RUN chown -R node:node /app/services/api
+USER node
+WORKDIR /app/services/api
+CMD ["sh", "-c", "npx prisma migrate deploy && node dist/cli/sync-reference.js"]
+
+# ── Runtime: API (default) and worker (`node dist/worker.js`). Last stage = default build target. ──
 FROM ${NODE_IMAGE} AS runtime
 ENV NODE_ENV=production APP_ENV=production LOCAL_STORAGE_PATH=/app/var/storage
 WORKDIR /app
@@ -48,11 +56,3 @@ EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s --start-period=20s --retries=3 \
   CMD node -e "fetch('http://127.0.0.1:'+(process.env.API_PORT||4000)+'/api/v1/health').then(r=>process.exit(r.ok?0:1),()=>process.exit(1))"
 CMD ["node", "dist/main.js"]
-
-# ── Release: run once per deploy, before new API/worker containers start ─────
-FROM build AS release
-COPY framework-data /app/framework-data
-RUN chown -R node:node /app/services/api
-USER node
-WORKDIR /app/services/api
-CMD ["sh", "-c", "npx prisma migrate deploy && node dist/cli/sync-reference.js"]

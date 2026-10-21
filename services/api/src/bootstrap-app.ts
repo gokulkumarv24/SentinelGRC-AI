@@ -17,7 +17,7 @@ export async function createApp(options: { logger?: boolean } = {}): Promise<INe
     logger: options.logger === false ? false : createLogger(env),
     bodyParser: false,
   });
-  if (env.TRUST_PROXY) app.set('trust proxy', 1);
+  if (env.TRUST_PROXY) app.set('trust proxy', env.TRUST_PROXY);
   app.disable('x-powered-by');
   app.useBodyParser('json', { limit: '1mb' });
   app.useBodyParser('urlencoded', { extended: false, limit: '100kb' });
