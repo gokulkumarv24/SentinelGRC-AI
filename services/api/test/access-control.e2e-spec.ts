@@ -129,4 +129,20 @@ describe('RBAC, separation of duties and tenant isolation (identity)', () => {
     expect(res.body.error.code).toBe('validation_error');
     expect(res.body.error.details.fields.map((f: { path: string }) => f.path)).toEqual(expect.arrayContaining(['email', 'roles.0']));
   });
+  it('reports getting-started progress from the organization’s own records only', async () => {
+    const orgA = await createOrg(ctx.prisma);
+    const orgB = await createOrg(ctx.prisma);
+    const { client: a } = await loginAs(ctx, orgA.id, ['org_admin', 'grc_manager']);
+    const { client: b } = await loginAs(ctx, orgB.id, ['grc_manager']);
+    const done = (body: { steps: Array<{ key: string; done: boolean }> }) => body.steps.filter((s) => s.done).map((s) => s.key);
+    const fresh = await a.get('/organizations/current/onboarding');
+    expect(fresh.status).toBe(200);
+    expect(fresh.body.complete).toBe(false);
+    expect(done(fresh.body)).toEqual([]);
+
+    expect((await b.post('/risks', { title: 'Other org risk', description: 'd', category: 'c', likelihood: 2, impact: 2 })).status).toBe(201);
+    expect(done((await a.get('/organizations/current/onboarding')).body)).toEqual([]);
+    expect((await a.post('/risks', { title: 'Own risk', description: 'd', category: 'c', likelihood: 2, impact: 2 })).status).toBe(201);
+    expect(done((await a.get('/organizations/current/onboarding')).body)).toEqual(['risks']);
+  });
 });

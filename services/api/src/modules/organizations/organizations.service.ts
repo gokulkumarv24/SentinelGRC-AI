@@ -71,6 +71,32 @@ export class OrganizationsService {
     });
   }
 
+  /** Getting-started checklist: which setup steps the organization has completed (counts only, tenant-scoped). */
+  async onboarding() {
+    const organizationId = requireOrgId();
+    const org = await this.prisma.organization.findUniqueOrThrow({ where: { id: organizationId }, select: { settings: true, timezone: true } });
+    const settings = org.settings as { frameworksInScope?: string[] };
+    const [members, controls, evidence, risks, integrations, vendors, aiSystems] = await Promise.all([
+      this.prisma.membership.count({ where: { organizationId, status: 'active' } }),
+      this.prisma.control.count({ where: { organizationId, active: true } }),
+      this.prisma.evidence.count({ where: { organizationId, archivedAt: null } }),
+      this.prisma.risk.count({ where: { organizationId, archivedAt: null } }),
+      this.prisma.integration.count({ where: { organizationId } }),
+      this.prisma.vendor.count({ where: { organizationId } }),
+      this.prisma.aiSystem.count({ where: { organizationId } }),
+    ]);
+    const steps = [
+      { key: 'frameworks', done: (settings.frameworksInScope?.length ?? 0) > 0, count: settings.frameworksInScope?.length ?? 0 },
+      { key: 'controls', done: controls > 0, count: controls },
+      { key: 'members', done: members > 1, count: members },
+      { key: 'evidence', done: evidence > 0, count: evidence },
+      { key: 'risks', done: risks > 0, count: risks },
+      { key: 'integrations', done: integrations > 0, count: integrations },
+      { key: 'third_parties', done: vendors + aiSystems > 0, count: vendors + aiSystems },
+    ];
+    return { timezone: org.timezone, steps, complete: steps.every((s) => s.done) };
+  }
+
   async current() {
     const org = await this.prisma.organization.findUniqueOrThrow({ where: { id: requireOrgId() } });
     return { ...org, settings: { ...DEFAULT_SETTINGS, ...(org.settings as OrganizationSettings) } };

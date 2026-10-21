@@ -13,6 +13,7 @@ export const USERS = {
   auditor: "auditor@northstar-demo.example",
   contributor: "contributor@northstar-demo.example",
   harbor: "ops.lead@harbor-logistics-demo.example",
+  platform: "platform.admin@sentinelgrc-demo.example",
 } as const;
 export type UserKey = keyof typeof USERS;
 
@@ -30,13 +31,14 @@ function passwordFor(email: string) {
   return pw;
 }
 
-export async function signIn(page: Page, user: UserKey) {
+export async function signIn(page: Page, user: UserKey | { email: string; password: string }, options: { expectDashboard?: boolean } = {}) {
+  const email = typeof user === "string" ? USERS[user] : user.email;
   await page.goto("/login");
-  await page.getByLabel("Email").fill(USERS[user]);
-  await page.getByLabel("Password").fill(passwordFor(USERS[user]));
+  await page.getByLabel("Email").fill(email);
+  await page.getByLabel("Password").fill(typeof user === "string" ? passwordFor(email) : user.password);
   await page.getByRole("button", { name: "Sign in" }).click();
   await expect(page).toHaveURL(/\/dashboard/);
-  await expect(page.getByRole("heading", { name: "Executive dashboard" })).toBeVisible();
+  if (options.expectDashboard !== false) await expect(page.getByRole("heading", { name: "Executive dashboard" })).toBeVisible();
 }
 
 /** Calls the API with the page's session (cookie + CSRF header), for setup steps that are not under test. */

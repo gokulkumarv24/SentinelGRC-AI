@@ -16,13 +16,14 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar";
-import { useActiveOrg, useCan } from "@/hooks/use-me";
+import { useActiveOrg, useCan, useMe } from "@/hooks/use-me";
 import { NAVIGATION } from "@/lib/navigation";
 
 /** Only links the member may use are shown; the API still authorizes every request. */
 export function AppSidebar() {
   const pathname = usePathname();
   const can = useCan();
+  const me = useMe();
   const org = useActiveOrg();
   const allHrefs = NAVIGATION.flatMap((s) => s.items.map((i) => i.href));
   // Longest matching prefix wins, so /risks/acceptance does not also highlight /risks.
@@ -49,7 +50,7 @@ export function AppSidebar() {
       </SidebarHeader>
       <SidebarContent>
         {NAVIGATION.map((section) => {
-          const items = section.items.filter((i) => can(i.permission));
+          const items = section.items.filter((i) => (i.platformAdmin ? !!me.data?.user.isPlatformAdmin : can(i.permission)));
           if (!items.length) return null;
           return (
             <SidebarGroup key={section.title}>

@@ -2,8 +2,9 @@
 
 import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
-import { Copy, Paperclip, Save, Send, Undo2 } from "lucide-react";
+import { Copy, FileBarChart, Paperclip, Save, Send, Undo2 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { humanize, SeverityBadge, StatusBadge } from "@/components/common/badges";
@@ -148,6 +149,12 @@ export default function AssessmentPage({ params }: PageProps<"/vendors/assessmen
   });
   const submit = useApiMutation({ mutationFn: () => api.post<{ evidenceGaps: string[] }>(`/assessments/${id}/submit`), success: (r) => (r.evidenceGaps.length ? `Submitted with ${r.evidenceGaps.length} evidence gap(s)` : "Submitted for review"), invalidate });
   const saveReviews = useApiMutation({ mutationFn: () => api.post(`/assessments/${id}/review`, { reviews: Object.entries(reviews).map(([questionId, r]) => ({ questionId, reviewerStatus: r.reviewerStatus, reviewerNotes: r.reviewerNotes || null })) }), success: "Review saved", invalidate });
+  const router = useRouter();
+  const report = useApiMutation({
+    mutationFn: (final: boolean) => api.post("/reports", { reportType: "vendor_assessment", format: "pdf", reportStatus: final ? "final" : "draft", filters: { assessmentId: id } }),
+    success: "Report queued — it will be ready on the Reports page shortly",
+    onSuccess: () => router.push("/reports"),
+  });
   const returnIt = useApiMutation({ mutationFn: (message: string) => api.post(`/assessments/${id}/return`, { message }), success: "Returned for clarification", invalidate });
   const decide = useApiMutation({ mutationFn: (rationale: string) => api.post<{ findingsCreated: number; tier: string }>(`/assessments/${id}/decision`, { decision, rationale }), success: (r) => `Decision recorded · residual tier ${r.tier} · ${r.findingsCreated} finding(s) created`, invalidate });
   const saveNotes = useApiMutation({ mutationFn: () => api.put(`/assessments/${id}/internal-notes`, { internalNotes: notes ?? "" }), success: "Internal notes saved", invalidate });
@@ -187,6 +194,11 @@ export default function AssessmentPage({ params }: PageProps<"/vendors/assessmen
                 </Button>
                 <ConfirmDialog trigger={<Button disabled={dirty}><Send aria-hidden /> Submit</Button>} title="Submit for review" description="Answers are locked once submitted and the questionnaire version is frozen." confirmLabel="Submit" onConfirm={() => submit.mutateAsync()} />
               </>
+            )}
+            {can("report.generate") && (
+              <Button variant="outline" onClick={() => report.mutate(["approved", "closed"].includes(assessment.status))} disabled={report.isPending}>
+                <FileBarChart aria-hidden /> {["approved", "closed"].includes(assessment.status) ? "Vendor report" : "Draft vendor report"}
+              </Button>
             )}
             {reviewing && can("vendor_assessment.review") && (
               <ConfirmDialog trigger={<Button variant="outline"><Undo2 aria-hidden /> Return for clarification</Button>} title="Return for clarification" requireRationale rationaleLabel="Message to the vendor" confirmLabel="Return" onConfirm={(m) => returnIt.mutateAsync(m)} />

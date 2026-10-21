@@ -9,6 +9,7 @@ import { DateText } from "@/components/common/date-text";
 import { PageHeader, Section } from "@/components/common/page-header";
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { ChartCard, ChartTooltip, StatTile } from "@/components/charts/chart-card";
+import { GettingStarted } from "@/components/onboarding/getting-started";
 import { Button } from "@/components/ui/button";
 import { Tooltip as UiTooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useActiveOrg, useCan } from "@/hooks/use-me";
@@ -122,6 +123,9 @@ export function DashboardView() {
           ))}
         </nav>
       )}
+      <div className="mb-4">
+        <GettingStarted />
+      </div>
 
       <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
         <StatTile label="Active risks" value={s.risks.active} sub={`${s.risks.bySeverity.critical} critical · ${s.risks.bySeverity.high} high`} href="/risks" />

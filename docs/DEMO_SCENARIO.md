@@ -33,6 +33,7 @@ Sign-in details for new demo users are written to `var/demo-credentials.txt`, wh
 | auditor@northstar-demo.example | Auditor | Read-only access, reports, audit log |
 | contributor@northstar-demo.example | Contributor | Limited create rights; no approvals |
 | ops.lead@harbor-logistics-demo.example | GRC manager in **another** organization | Tenant isolation |
+| platform.admin@sentinelgrc-demo.example | Platform admin, member of no organization | Creating organizations and inviting their first admin (no access to tenant data) |
 
 ## What the seed creates
 
@@ -62,9 +63,10 @@ Sign-in details for new demo users are written to `var/demo-credentials.txt`, wh
 2. **A finding is created or updated idempotently.** **Findings**: *Expired evidence for BCP-01* and *Privileged accounts without MFA* each exist once. The detection count and *last detected* show they were re-detected on later runs rather than duplicated.
 3. **A remediation task is assigned.** **Remediation**: every open finding has a task with an owner, a priority and a due date. The *training completion* task is completed, and its finding was closed by the GRC manager.
 4. **A vendor assessment produces a documented risk score and an evidence-backed finding.** Sign in as *vendor.manager*, open **Vendors → Cloudbase Hosting → assessment**:
-   - The inherent and residual scores come with a factor breakdown.
+   - The inherent score, control effectiveness and residual score are shown separately, with the factor breakdown (Cloudbase lands in the high tier).
    - The responses cite the attached certificate evidence.
-   - Findings were raised for missing MFA (high) and missing supporting evidence (low).
+   - Findings were raised for missing administrator MFA and slow breach notification (important gaps), and for missing supporting evidence (low).
+   - **Vendor report** on the assessment page generates the vendor assessment PDF.
 5. **A vendor risk is linked to a relevant control.** **Risks →** the Cloudbase vendor risk: the *Controls* section shows TPR-01 (*mitigates*, partially effective).
 6. **An AI system assessment creates or links a shared risk.** Sign in as *ai.officer*, open **AI Governance → Support reply assistant**: the unsatisfactory prompt-injection item created a shared risk in the register, linked to the system and its assessment, with a documented residual score.
 7. **A reviewer approves or rejects a proposed action.** The CISO approved:
@@ -76,6 +78,10 @@ Sign-in details for new demo users are written to `var/demo-credentials.txt`, wh
    The GRC manager approved the risk owner's acceptance request (**Risks → Acceptance**). In each case the system blocks the requester from approving their own request.
 8. **A report includes the source records and correct calculations.** Sign in as *grc.manager* or *auditor*, open **Reports**, and download the *Executive risk summary (DEMO)*. Its counts match the Risks and Findings pages, and the appendix lists the source record IDs. The risk register CSV reconciles row by row.
 9. **A restricted user is denied access to another organization's data.** Sign in as *ops.lead@harbor-logistics-demo.example*: no Northstar records appear anywhere, and any Northstar URL returns "not found". The seed checks this in both directions on every run and fails if either request succeeds.
+
+## Organization setup
+
+Sign in as *platform.admin*: with no organization, the app offers **Platform → Organizations**. Create an organization there. It gets default roles, workflows and settings, plus a one-time invitation link for its first administrator, valid for 72 hours. When that administrator signs in, the dashboard shows a **Set up …** checklist (frameworks, controls, team, evidence, risks, integrations, vendors/AI). It is built from the organization's own records and can be hidden.
 
 ## Notes
 

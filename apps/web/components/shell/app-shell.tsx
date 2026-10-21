@@ -1,8 +1,10 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, type ReactNode } from "react";
 import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
+import { Button } from "@/components/ui/button";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { useMe } from "@/hooks/use-me";
 import { AppSidebar } from "./app-sidebar";
@@ -42,8 +44,16 @@ export function AppShell({ children }: { children: ReactNode }) {
       <SidebarInset>
         <TopBar />
         <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-6">
-          {!me.data.activeOrganizationId && pathname !== "/account/password" ? (
-            <EmptyState title="No organization" description="Your account is not an active member of any organization. Ask an administrator for an invitation." />
+          {!me.data.activeOrganizationId && pathname !== "/account/password" && !(me.data.user.isPlatformAdmin && pathname.startsWith("/platform")) ? (
+            me.data.user.isPlatformAdmin ? (
+              <EmptyState
+                title="No organization selected"
+                description="You are a platform administrator without an organization membership. Create an organization and invite its first administrator."
+                action={<Button asChild><Link href="/platform/organizations">Manage organizations</Link></Button>}
+              />
+            ) : (
+              <EmptyState title="No organization" description="Your account is not an active member of any organization. Ask an administrator for an invitation." />
+            )
           ) : (
             children
           )}

@@ -54,7 +54,7 @@ const days = (n: number) => new Date(Date.now() + n * DAY).toISOString();
 const NORTHSTAR = { slug: 'northstar-demo', name: 'Northstar Digital Services (DEMO)' };
 const HARBOR = { slug: 'harbor-logistics-demo', name: 'Harbor Logistics (DEMO)' };
 
-const PEOPLE: Array<{ key: string; email: string; name: string; roles: RoleKey[]; org: 'northstar' | 'harbor' }> = [
+const PEOPLE: Array<{ key: string; email: string; name: string; roles: RoleKey[]; org: 'northstar' | 'harbor' | null; platformAdmin?: boolean }> = [
   { key: 'admin', email: 'admin@northstar-demo.example', name: 'Demo Admin', roles: ['org_admin'], org: 'northstar' },
   { key: 'grc', email: 'grc.manager@northstar-demo.example', name: 'Priya Raman (demo GRC manager)', roles: ['grc_manager'], org: 'northstar' },
   { key: 'ciso', email: 'ciso@northstar-demo.example', name: 'Elena Duarte (demo CISO, approver)', roles: ['grc_manager', 'vendor_manager', 'ai_governance_officer'], org: 'northstar' },
@@ -65,6 +65,8 @@ const PEOPLE: Array<{ key: string; email: string; name: string; roles: RoleKey[]
   { key: 'auditor', email: 'auditor@northstar-demo.example', name: 'Daniel Kim (demo auditor)', roles: ['auditor'], org: 'northstar' },
   { key: 'contributor', email: 'contributor@northstar-demo.example', name: 'Aisha Bello (demo contributor)', roles: ['contributor'], org: 'northstar' },
   { key: 'harbor', email: 'ops.lead@harbor-logistics-demo.example', name: 'Tom Reyes (demo, other organization)', roles: ['grc_manager'], org: 'harbor' },
+  // Platform operator: creates organizations, belongs to none (no tenant data access).
+  { key: 'platform', email: 'platform.admin@sentinelgrc-demo.example', name: 'Pat Morgan (demo platform admin)', roles: [], org: null, platformAdmin: true },
 ];
 
 class ApiError extends Error {}
@@ -177,12 +179,12 @@ try {
   const roleRows = new Map((await prisma.role.findMany()).map((r) => [r.key, r.id]));
   const users: Record<string, { id: string; client: DemoClient }> = {};
   for (const p of PEOPLE) {
-    const organizationId = p.org === 'northstar' ? northstar.id : harbor.id;
+    const organizationId = p.org === 'northstar' ? northstar.id : p.org === 'harbor' ? harbor.id : null;
     let user = await prisma.user.findUnique({ where: { email: p.email } });
     if (!user) {
       const password = `Demo-${randomBytes(12).toString('base64url')}`;
       user = await prisma.user.create({
-        data: { email: p.email, displayName: p.name, passwordHash: await argon2.hash(password, { type: argon2.argon2id, memoryCost: 19_456, timeCost: 2, parallelism: 1 }) },
+        data: { email: p.email, displayName: p.name, isPlatformAdmin: !!p.platformAdmin, passwordHash: await argon2.hash(password, { type: argon2.argon2id, memoryCost: 19_456, timeCost: 2, parallelism: 1 }) },
       });
       credentials.push(`${p.email.padEnd(42)} ${password}   (${p.roles.join(', ')})`);
       restoreMustChange.set(user.id, !args['no-force-change']);
@@ -194,6 +196,7 @@ try {
         await prisma.user.update({ where: { id: user.id }, data: { mustChangePassword: false } });
       }
     }
+    if (!organizationId) continue; // no tenant membership, so no session is needed for seeding
     let membership = await prisma.membership.findFirst({ where: { userId: user.id, organizationId } });
     membership ??= await prisma.membership.create({ data: { userId: user.id, organizationId } });
     for (const role of p.roles) {
@@ -207,7 +210,7 @@ try {
   }
   const as = (key: string) => users[key].client;
   const id = (key: string) => users[key].id;
-  log('Demo users', `${PEOPLE.length} (one per role, plus an independent approver and a user in another organization)`);
+  log('Demo users', `${PEOPLE.length} (one per role, an independent approver, a user in another organization and a platform admin)`);
 
   const org = northstar.id;
   const drain = (now?: Date) => runner.drain({ organizationId: org, now, max: 200 });

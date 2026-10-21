@@ -2,6 +2,7 @@ import {
   Activity,
   BadgeCheck,
   Bot,
+  Building,
   Building2,
   ClipboardCheck,
   ClipboardList,
@@ -36,6 +37,8 @@ export interface NavItem {
   href: string;
   icon: LucideIcon;
   permission: string;
+  /** Shown only to platform administrators (not an organization permission). */
+  platformAdmin?: boolean;
 }
 
 export interface NavSection {
@@ -108,5 +111,9 @@ export const NAVIGATION: NavSection[] = [
       { title: "Framework Settings", href: "/settings/frameworks", icon: Settings2, permission: "framework.read" },
       { title: "Notifications", href: "/settings/notifications", icon: Bell, permission: "dashboard.read" },
     ],
+  },
+  {
+    title: "Platform",
+    items: [{ title: "Organizations", href: "/platform/organizations", icon: Building, permission: "", platformAdmin: true }],
   },
 ];

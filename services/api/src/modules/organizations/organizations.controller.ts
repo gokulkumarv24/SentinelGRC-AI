@@ -63,6 +63,12 @@ export class OrganizationsController {
     return this.orgs.create(body);
   }
 
+  @Get('organizations/current/onboarding')
+  @RequirePermission('org.read')
+  onboarding() {
+    return this.orgs.onboarding();
+  }
+
   @Get('organizations/current')
   @RequirePermission('org.read')
   current() {
