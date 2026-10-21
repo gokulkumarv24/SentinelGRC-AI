@@ -73,6 +73,9 @@ describe('Reports and AI assistant', () => {
       await runner.drain({ organizationId: org.id, max: 100 });
       const statuses = await ctx.prisma.reportRun.findMany({ where: { id: { in: all } }, select: { reportType: true, status: true, errorCode: true } });
       expect(statuses.filter((s) => s.status !== 'ready')).toEqual([]);
+      // The workflow runs that generated them must succeed too (not just the report rows).
+      const runs = await ctx.prisma.workflowRun.findMany({ where: { organizationId: org.id, definition: { key: 'report_generation' } }, select: { status: true, errorCode: true } });
+      expect(runs.filter((r) => r.status !== 'succeeded')).toEqual([]);
     });
 
     it('enforces report permissions, filter scope, final-status rules and tenant isolation', async () => {

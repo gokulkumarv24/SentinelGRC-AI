@@ -144,7 +144,8 @@ export class WorkflowRunner {
         if (!handler) throw new PermanentError('unknown_handler', `No handler named "${handlerName}" is available`);
         const result = await this.step(run.id, `handler:${handlerName}`, async () => {
           const r = await handler(ctx);
-          return { status: r.status ?? 'succeeded', ...r.summary };
+          // The summary is spread first: a handler's summary fields must never overwrite the run status.
+          return { ...r.summary, status: r.status ?? 'succeeded' };
         });
         const { status, ...summary } = result as { status: 'succeeded' | 'partially_succeeded' } & Record<string, unknown>;
         await this.prisma.workflowRun.update({

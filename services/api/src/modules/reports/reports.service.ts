@@ -59,7 +59,7 @@ export class ReportsService implements OnModuleInit {
       const id = c.payload.reportRunId;
       if (typeof id !== 'string') throw new PermanentError('invalid_payload', 'Missing reportRunId');
       const run = await this.generate(c.organizationId, id, c.now);
-      return { summary: { reportRunId: id, status: run.status, reportStatus: run.reportStatus } };
+      return { summary: { reportRunId: id, reportRunStatus: run.status, reportStatus: run.reportStatus } };
     });
     this.handlers.register('scheduled_reports', async (c) => {
       const expired = await this.expireOld(c.organizationId, c.now);

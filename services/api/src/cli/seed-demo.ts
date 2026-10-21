@@ -15,7 +15,7 @@
 import type { INestApplication } from '@nestjs/common';
 import argon2 from 'argon2';
 import { randomBytes } from 'node:crypto';
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
 import { parseArgs } from 'node:util';
 import PDFDocument from 'pdfkit';
@@ -164,6 +164,14 @@ try {
   const harbor = await ensureOrg(HARBOR);
   log('Organizations', `${northstar.name}, ${harbor.name}`);
 
+  const credentialsFile = new URL('../../../../var/demo-credentials.txt', import.meta.url);
+  const previousCredentials = new Map<string, string>();
+  if (existsSync(credentialsFile)) {
+    for (const line of readFileSync(credentialsFile, 'utf8').split('\n')) {
+      const email = line.split(/\s+/)[0];
+      if (email.includes('@') && !line.includes('(existing user')) previousCredentials.set(email, line);
+    }
+  }
   const roleRows = new Map((await prisma.role.findMany()).map((r) => [r.key, r.id]));
   const users: Record<string, { id: string; client: DemoClient }> = {};
   for (const p of PEOPLE) {
@@ -177,7 +185,8 @@ try {
       credentials.push(`${p.email.padEnd(42)} ${password}   (${p.roles.join(', ')})`);
       restoreMustChange.set(user.id, !args['no-force-change']);
     } else {
-      credentials.push(`${p.email.padEnd(42)} (existing user — password unchanged)   (${p.roles.join(', ')})`);
+      // Keep the line from an earlier run so reruns don't lose the one-time passwords.
+      credentials.push(previousCredentials.get(p.email) ?? `${p.email.padEnd(42)} (existing user — password unchanged)   (${p.roles.join(', ')})`);
       if (user.mustChangePassword) {
         restoreMustChange.set(user.id, true);
         await prisma.user.update({ where: { id: user.id }, data: { mustChangePassword: false } });
@@ -515,11 +524,9 @@ try {
   for (const [userId, mustChange] of restoreMustChange) await prisma.user.update({ where: { id: userId }, data: { mustChangePassword: mustChange } });
   for (const s of sessionIds) await sessions.revoke(s, 'demo_seed_complete');
   sessionIds.length = 0;
-  const dir = new URL('../../../../var/', import.meta.url);
-  mkdirSync(dir, { recursive: true });
-  const file = new URL('demo-credentials.txt', dir);
+  mkdirSync(new URL('.', credentialsFile), { recursive: true });
   writeFileSync(
-    file,
+    credentialsFile,
     [
       'SentinelGRC demo users — LOCAL DEVELOPMENT ONLY. Fictional accounts; never reuse these passwords.',
       args['no-force-change'] ? 'Password change at first sign-in: NOT forced (--no-force-change).' : 'Each new user must change the password at first sign-in.',
