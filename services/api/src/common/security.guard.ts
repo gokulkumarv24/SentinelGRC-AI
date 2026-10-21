@@ -1,11 +1,11 @@
 import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import type { Request } from 'express';
+import type { Request, Response } from 'express';
 import { loadEnv } from '../config/env.js';
 import { AuditService } from '../modules/audit/audit.service.js';
 import { SessionService } from '../modules/auth/session.service.js';
 import type { Permission } from '../permissions/catalog.js';
-import { CSRF_HEADER, csrfCookieName, readCookie, sessionCookieName } from './cookies.js';
+import { clearSessionCookies, CSRF_HEADER, csrfCookieName, readCookie, sessionCookieName } from './cookies.js';
 import {
   AUTH_ONLY_KEY,
   CSRF_EXEMPT_KEY,
@@ -50,7 +50,11 @@ export class SecurityGuard implements CanActivate {
     // 2. Session
     const token = readCookie(req, sessionCookieName());
     const resolved = token ? await this.sessions.resolve(token) : null;
-    if (!resolved) throw new AppError(401, 'unauthenticated', 'Your session has expired. Please sign in again.');
+    if (!resolved) {
+      // A stale cookie would make the web app believe the user is still signed in (redirect loop), so drop it.
+      if (token) clearSessionCookies(context.switchToHttp().getResponse<Response>());
+      throw new AppError(401, 'unauthenticated', 'Your session has expired. Please sign in again.');
+    }
     ctx.user = resolved.user;
     ctx.sessionId = resolved.sessionId;
     ctx.membership = resolved.membership;

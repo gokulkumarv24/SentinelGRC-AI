@@ -2,7 +2,7 @@ import { Body, Controller, Get, HttpCode, Param, Post, Res } from '@nestjs/commo
 import { ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
-import { csrfCookieName, csrfCookieOptions, sessionCookieName, sessionCookieOptions } from '../../common/cookies.js';
+import { clearSessionCookies, csrfCookieName, csrfCookieOptions, sessionCookieName, sessionCookieOptions } from '../../common/cookies.js';
 import { AuthenticatedOnly, Public, RateLimit } from '../../common/decorators.js';
 import { ApiZodBody, requiredText, uuid, zod } from '../../common/validation.js';
 import { AuthService } from './auth.service.js';
@@ -35,8 +35,7 @@ export class AuthController {
   @HttpCode(200)
   async logout(@Res({ passthrough: true }) res: Response) {
     await this.auth.logout();
-    res.clearCookie(sessionCookieName(), { path: '/' });
-    res.clearCookie(csrfCookieName(), { path: '/' });
+    clearSessionCookies(res);
     return { ok: true };
   }
 

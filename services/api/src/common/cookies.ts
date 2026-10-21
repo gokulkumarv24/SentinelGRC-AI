@@ -1,4 +1,4 @@
-import type { CookieOptions, Request } from 'express';
+import type { CookieOptions, Request, Response } from 'express';
 import { loadEnv } from '../config/env.js';
 
 /**
@@ -22,4 +22,13 @@ export function csrfCookieOptions(maxAgeMs: number): CookieOptions {
 export function readCookie(req: Request, name: string): string | undefined {
   const value = (req.cookies as Record<string, string> | undefined)?.[name];
   return typeof value === 'string' && value.length > 0 && value.length < 512 ? value : undefined;
+}
+
+/**
+ * Removes the session and CSRF cookies. The attributes must match how they were set:
+ * browsers ignore a `__Host-` cookie deletion that lacks `Secure`.
+ */
+export function clearSessionCookies(res: Response): void {
+  res.clearCookie(sessionCookieName(), { httpOnly: true, secure: secure(), sameSite: 'lax', path: '/' });
+  res.clearCookie(csrfCookieName(), { httpOnly: false, secure: secure(), sameSite: 'strict', path: '/' });
 }

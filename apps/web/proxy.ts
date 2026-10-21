@@ -19,7 +19,8 @@ export function proxy(request: NextRequest) {
     url.search = pathname === "/" ? "" : `?next=${encodeURIComponent(pathname + search)}`;
     return NextResponse.redirect(url);
   }
-  if (hasSession && pathname === "/login") {
+  // `?expired=1` means the API already rejected this cookie; showing /login breaks any redirect loop.
+  if (hasSession && pathname === "/login" && !request.nextUrl.searchParams.has("expired")) {
     const url = request.nextUrl.clone();
     url.pathname = "/dashboard";
     url.search = "";

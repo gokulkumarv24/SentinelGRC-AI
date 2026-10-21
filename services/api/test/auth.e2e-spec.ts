@@ -100,7 +100,12 @@ describe('Authentication and sessions', () => {
     const org = await createOrg(ctx.prisma);
     const idle = await loginAs(ctx, org.id, ['auditor']);
     await ctx.prisma.session.updateMany({ where: { userId: idle.user.id }, data: { idleExpiresAt: new Date(Date.now() - 1000) } });
-    expect((await idle.client.get('/users/me')).status).toBe(401);
+    const expired = await idle.client.get('/users/me');
+    expect(expired.status).toBe(401);
+    // The stale cookies are removed so the web app cannot loop between /login and the workspace.
+    const cleared = ([] as string[]).concat(expired.headers['set-cookie'] ?? []);
+    expect(cleared.some((c) => /^sg_session=;/.test(c) && /Expires=Thu, 01 Jan 1970/.test(c))).toBe(true);
+    expect(cleared.some((c) => /^sg_csrf=;/.test(c))).toBe(true);
 
     const absolute = await loginAs(ctx, org.id, ['auditor']);
     await ctx.prisma.session.updateMany({
