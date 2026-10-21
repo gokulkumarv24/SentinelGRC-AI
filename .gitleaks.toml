@@ -1,0 +1,8 @@
+# Secret-scan configuration (CI: gitleaks). Default rules, plus one allowlisted test file whose
+# credentials are deliberately fake fixtures for the AI redaction tests.
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Fake credentials used to test redaction"
+paths = ['''services/api/src/modules/assistant/assistant\.spec\.ts''']
