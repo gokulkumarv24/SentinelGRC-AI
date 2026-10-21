@@ -49,7 +49,11 @@ COPY package.json ./
 COPY services/api/package.json ./services/api/
 COPY framework-data ./framework-data
 # Private evidence/report storage lives on a mounted volume, never in a web root.
-RUN mkdir -p /app/var/storage && chown -R node:node /app/var
+# npm/corepack are not needed at runtime (the process starts with `node`); removing them drops their
+# bundled dependencies (e.g. tar) from the image's attack surface and vulnerability scan.
+RUN mkdir -p /app/var/storage && chown -R node:node /app/var \
+ && rm -rf /usr/local/lib/node_modules/npm /usr/local/lib/node_modules/corepack \
+           /usr/local/bin/npm /usr/local/bin/npx /usr/local/bin/corepack
 USER node
 WORKDIR /app/services/api
 EXPOSE 4000
