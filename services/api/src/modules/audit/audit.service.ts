@@ -62,8 +62,12 @@ export class AuditService {
     await (tx ?? this.prisma).auditEvent.create({ data });
   }
 
-  /** Fire-and-forget variant for denial logging where the request is already failing. */
-  recordQuietly(input: AuditInput): void {
-    this.record(input).catch((err: unknown) => this.logger.warn({ err }, 'Failed to write audit event'));
+  /** For denial logging where the request is already failing: an audit write error must not mask the 403. */
+  async recordQuietlyAwait(input: AuditInput): Promise<void> {
+    try {
+      await this.record(input);
+    } catch (err) {
+      this.logger.warn({ err }, 'Failed to write audit event');
+    }
   }
 }

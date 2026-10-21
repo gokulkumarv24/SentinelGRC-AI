@@ -101,7 +101,8 @@ export function meetsCriterion(answer: unknown, criterion: Criterion | null | un
   if ('max' in criterion) return typeof answer === 'number' && answer <= criterion.max;
   if ('notEmpty' in criterion) return typeof answer === 'string' ? answer.trim().length > 0 : Array.isArray(answer) && answer.length > 0;
   if ('withinDays' in criterion) {
-    const date = new Date(String(answer));
+    if (typeof answer !== 'string' && typeof answer !== 'number') return false;
+    const date = new Date(answer);
     if (Number.isNaN(date.getTime())) return false;
     return (now.getTime() - date.getTime()) / 86_400_000 <= criterion.withinDays && date <= now;
   }

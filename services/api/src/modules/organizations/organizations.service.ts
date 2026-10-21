@@ -78,7 +78,7 @@ export class OrganizationsService {
 
   async updateCurrent(input: { name?: string; industry?: string | null; timezone?: string; settings?: OrganizationSettings }) {
     const before = await this.current();
-    const settings = { ...before.settings, ...(input.settings ?? {}) };
+    const settings = { ...before.settings, ...input.settings };
     const updated = await this.prisma.tx(async (tx) => {
       const org = await tx.organization.update({
         where: { id: before.id },

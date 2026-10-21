@@ -42,3 +42,26 @@ The spec file contains the master specification (§0–§29) followed by an earl
 5. Docs: union of §4, §22.3 (`INCIDENT_RESPONSE.md`) and the blueprint (`BUILD_PLAN.md`, `framework-mappings.md`).
 6. `framework-data/manifests/<framework>/` plus `framework-data/mappings/`.
 7. The repository root is the existing workspace folder, not a nested `sentinelgrc-ai/`.
+
+## D-006 — Toolchain follows the official scaffolds
+NestJS 12's CLI now generates ES modules, **Vitest** and **oxlint** (not Jest/ESLint); Next.js 16 ships ESLint 9 and Turbopack. We keep those defaults rather than retrofitting older tools. The spec's "pytest + HTTPX" maps to Vitest + Supertest against the real HTTP stack and a real PostgreSQL.
+
+## D-007 — Embedded PostgreSQL for local development and tests
+Docker Desktop is not running on the development machine and RAM is limited. `npm run db:local -w services/api` starts a real PostgreSQL 18 server (`embedded-postgres`) under `var/pgdata` on 127.0.0.1:54329 with UTF-8 encoding and SCRAM auth. Tests always use `TEST_DATABASE_URL`, and the test setup drops and re-migrates that database from empty on each run. Neon and Docker Postgres remain supported through `DATABASE_URL`.
+
+## D-008 — Sessions, CSRF and the web/API boundary
+- Opaque random session tokens in an HttpOnly `SameSite=Lax` cookie (`__Host-` prefixed in production); only SHA-256 hashes stored; 30-minute sliding idle timeout, 12-hour absolute lifetime, revocation on logout/password change.
+- CSRF: double-submit token (readable `sg_csrf` cookie echoed in `X-CSRF-Token`, verified against the hash stored on the session) plus an Origin allowlist check.
+- The browser only talks to the web origin; Next.js rewrites `/api/v1/*` to the API, so cookies are first-party and CORS is not needed in normal operation.
+- Active organization is stored on the session and re-validated against the membership on every request.
+
+## D-009 — Next.js rendering and CSP
+`cacheComponents` is off: every page is per-user and authenticated, so static shells add nothing. Scripts use a per-request nonce with `strict-dynamic`. Styles allow `'unsafe-inline'` because Radix UI and Recharts set inline `style` attributes, which nonces cannot cover; style injection is a lower-risk vector than script injection.
+
+## D-010 — Pagination, errors and keys
+- One pagination style: `page` / `pageSize` (≤ 100) with explicit sort allowlists.
+- Errors: `{ error: { code, message, details? }, requestId }`; other tenants' records return 404 (same as missing) to avoid leaking existence.
+- Human-readable keys (`RSK-0001`, `FND-0001`) are generated under a transaction-scoped advisory lock per organization.
+
+## D-011 — Polymorphic links validated in the service layer
+Evidence links, risk links and AI source references point at several entity types, which foreign keys cannot express. Every such reference goes through `EntityResolver`, which requires the target to exist **in the caller's organization** (spec §5.1). Tests cover cross-tenant link attempts.

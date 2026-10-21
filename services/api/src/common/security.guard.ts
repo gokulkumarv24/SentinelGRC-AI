@@ -68,15 +68,15 @@ export class SecurityGuard implements CanActivate {
     if (meta<boolean>(AUTH_ONLY_KEY)) return true;
     if (meta<boolean>(PLATFORM_ADMIN_KEY)) {
       if (resolved.user.isPlatformAdmin) return true;
-      return this.deny(req, 'platform_admin');
+      return await this.deny(req, 'platform_admin');
     }
     const permission = meta<Permission>(PERMISSION_KEY);
-    if (!permission) return this.deny(req, 'route_without_permission');
+    if (!permission) return await this.deny(req, 'route_without_permission');
     if (!resolved.membership) throw new AppError(403, 'no_organization', 'Select an organization to continue.');
     if (resolved.user.mustChangePassword) {
       throw new AppError(403, 'password_change_required', 'You must change your password before continuing.');
     }
-    if (!resolved.membership.permissions.has(permission)) return this.deny(req, permission);
+    if (!resolved.membership.permissions.has(permission)) return await this.deny(req, permission);
     return true;
   }
 
@@ -96,8 +96,9 @@ export class SecurityGuard implements CanActivate {
     if (!allowed.has(origin)) throw new AppError(403, 'origin_not_allowed', 'Request origin is not allowed');
   }
 
-  private deny(req: Request, required: string): never {
-    this.audit.recordQuietly({
+  /** Records the denial before responding, so the audit trail never lags the response. */
+  private async deny(req: Request, required: string): Promise<never> {
+    await this.audit.recordQuietlyAwait({
       action: 'authz.denied',
       entityType: 'route',
       entityId: null,

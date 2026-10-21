@@ -6,7 +6,11 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "typecheck": "next typegen && tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "api:types": "openapi-typescript http://localhost:4000/api/v1/openapi.json -o lib/openapi.d.ts"
   },
   "dependencies": {
     "@hookform/resolvers": "5.9.2",

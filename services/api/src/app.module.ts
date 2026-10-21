@@ -9,28 +9,80 @@ import { AuthController } from './modules/auth/auth.controller.js';
 import { AuthService } from './modules/auth/auth.service.js';
 import { PasswordService } from './modules/auth/password.service.js';
 import { SessionService } from './modules/auth/session.service.js';
+import { ControlsController } from './modules/controls/controls.controller.js';
+import { ControlsService } from './modules/controls/controls.service.js';
+import { EvidenceController } from './modules/evidence/evidence.controller.js';
+import { EvidenceService } from './modules/evidence/evidence.service.js';
+import { StorageService } from './modules/evidence/storage.js';
+import { FindingsController } from './modules/findings/findings.controller.js';
+import { FindingsService } from './modules/findings/findings.service.js';
 import { HealthController } from './modules/health/health.controller.js';
+import { NotificationsController } from './modules/notifications/notifications.controller.js';
+import { NotificationsService } from './modules/notifications/notifications.service.js';
 import { MembersService } from './modules/organizations/members.service.js';
 import { OrganizationBootstrapService } from './modules/organizations/organization-bootstrap.service.js';
 import { OrganizationsController } from './modules/organizations/organizations.controller.js';
 import { OrganizationsService } from './modules/organizations/organizations.service.js';
+import { RemediationController } from './modules/remediation/remediation.controller.js';
+import { RemediationService } from './modules/remediation/remediation.service.js';
+import { RisksController } from './modules/risks/risks.controller.js';
+import { RisksService } from './modules/risks/risks.service.js';
+import { ScoringPolicyService } from './modules/risks/scoring-policy.service.js';
+import { SearchController } from './modules/search/search.controller.js';
+import { EntityResolver } from './modules/shared/entity-resolver.service.js';
+import { EventQueue } from './modules/workflows/event-queue.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
 
-/** Infrastructure shared by every feature module. */
+const CORE_PROVIDERS = [
+  PrismaService,
+  AuditService,
+  SessionService,
+  PasswordService,
+  OrganizationBootstrapService,
+  EntityResolver,
+  NotificationsService,
+  EventQueue,
+  StorageService,
+  ScoringPolicyService,
+];
+
+/** Infrastructure shared by every feature module and by the worker process. */
 @Global()
-@Module({
-  providers: [PrismaService, AuditService, SessionService, PasswordService, OrganizationBootstrapService],
-  exports: [PrismaService, AuditService, SessionService, PasswordService, OrganizationBootstrapService],
-})
+@Module({ providers: CORE_PROVIDERS, exports: CORE_PROVIDERS })
 export class CoreModule {}
 
+/** Business services shared by the API and the worker. */
+export const DOMAIN_SERVICES = [
+  AuthService,
+  MembersService,
+  OrganizationsService,
+  RisksService,
+  FindingsService,
+  RemediationService,
+  ControlsService,
+  EvidenceService,
+];
+
+@Global()
+@Module({ imports: [CoreModule], providers: DOMAIN_SERVICES, exports: DOMAIN_SERVICES })
+export class DomainModule {}
+
 @Module({
-  imports: [CoreModule],
-  controllers: [HealthController, AuthController, OrganizationsController, AuditController],
+  imports: [CoreModule, DomainModule],
+  controllers: [
+    HealthController,
+    AuthController,
+    OrganizationsController,
+    AuditController,
+    NotificationsController,
+    RisksController,
+    FindingsController,
+    RemediationController,
+    ControlsController,
+    EvidenceController,
+    SearchController,
+  ],
   providers: [
-    AuthService,
-    MembersService,
-    OrganizationsService,
     { provide: APP_GUARD, useClass: SecurityGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
   ],

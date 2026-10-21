@@ -28,6 +28,7 @@ export class OrganizationBootstrapService {
           name: wf.name,
           description: wf.description,
           triggerType: wf.triggerType,
+          eventType: typeof wf.configuration.event === 'string' ? wf.configuration.event : null,
           scheduleCron: wf.intervalHours ? `every ${wf.intervalHours}h` : null,
           configuration: { intervalHours: wf.intervalHours ?? null, ...wf.configuration } as Prisma.InputJsonValue,
           nextRunAt: wf.intervalHours ? new Date() : null,

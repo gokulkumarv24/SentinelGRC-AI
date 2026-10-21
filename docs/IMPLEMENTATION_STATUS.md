@@ -1,14 +1,15 @@
 # Implementation status
 
 Only results that were actually run and observed are marked verified (spec §0.1 rule 4).
+Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet (owner to provide connection strings).
 
-| Milestone | Status | Verified evidence |
+| Milestone | Status | Verified evidence (latest run) |
 |---|---|---|
-| 0 — Repository audit and plan | In progress | Repo audited 2026-10-21; git initialized; decisions recorded |
-| 1 — Application skeleton | Not started | — |
-| 2 — Identity and tenant security | Not started | — |
-| 3 — Shared GRC core | Not started | — |
-| 4 — Compliance module | Not started | — |
+| 0 — Repository audit and plan | Done | Audit recorded below; architecture, decisions, design system docs |
+| 1 — Application skeleton | Done | API + web start; `/health`, `/ready` OK; migrations apply to empty DB; no Prisma drift; web proxy verified in browser |
+| 2 — Identity and tenant security | Done | 24 API tests: login/lockout, session idle + absolute expiry, CSRF + origin, logout, forced password change, invitations, self-role-change block, cross-tenant member/audit isolation, append-only audit trigger |
+| 3 — Shared GRC core | Done (API + UI) | 14 more API tests (38 total) + 23 unit tests; UI pages for risks, acceptance, findings, remediation, controls, SoA, evidence, members, settings, audit log, notifications; `tsc`, oxlint, eslint clean |
+| 4 — Compliance module | In progress | — |
 | 5 — Third-party risk | Not started | — |
 | 6 — AI governance | Not started | — |
 | 7 — Workflow engine and integrations | Not started | — |
@@ -17,11 +18,31 @@ Only results that were actually run and observed are marked verified (spec §0.1
 | 10 — Release hardening | Not started | — |
 | 11 — Deployment | Blocked: needs hosting target and owner authorization | — |
 
+## Verification commands (as run)
+```
+npm run typecheck -w services/api      # clean
+npm run lint -w services/api           # oxlint: 0 warnings
+npm test -w services/api               # 23 unit tests passed
+npm run test:api -w services/api       # 38 API tests passed (5 consecutive runs)
+npm run typecheck -w apps/web          # clean
+npx eslint . (apps/web)                # clean
+```
+
+## Fixed during verification
+- Login form posted credentials as a GET query string when client JavaScript failed to load (dev server blocked assets for 127.0.0.1). Fixed the cause (`allowedDevOrigins`) **and** forced `method="post"` on every form so a JS failure can never put secrets in a URL.
+- Authorization-denial audit events were written fire-and-forget, so a fast reader could miss them (intermittent test failure). Denials are now recorded before the 403 is returned.
+- Dev-mode error messages could echo Prisma error text; database errors are now never echoed.
+
 ## Repository audit (2026-10-21)
-- Contents before work: `SENTINELGRC_MASTER_SPEC.md`, two architecture PNGs. No existing code, so no risk of overwriting work.
+- Contents before work: `SENTINELGRC_MASTER_SPEC.md`, two architecture PNGs. No existing code.
 - Not previously a git repository; initialized on `main`.
 - Tooling: git 2.54, Node 24.15, npm 11.12, Python 3.12, uv 0.11, Docker CLI 29.7 (daemon not running).
-- Machine: Windows 11, 8 GB RAM, ~13 GB free disk.
+- Machine: Windows 11, 8 GB RAM, ~11 GB free disk after installs.
+
+## Known limitations / open items
+- `exceljs` depends on `uuid@8` (moderate advisory GHSA-w5hq-g745-h8pq). Not exploitable here: exceljs only calls `uuid.v4()` without a buffer; the advisory affects v3/v5/v6 with a caller-supplied buffer. Re-check when exceljs updates.
+- `eslint-config-next` pulls `braces` with a high advisory (deeply nested glob patterns → DoS). Development-only tooling; patterns come from our own config.
+- S3 storage adapter is implemented but not verified against a live bucket.
 
 ## Blockers
 - Neon database connection strings (dev + test branch) — owner to create account.

@@ -22,6 +22,7 @@ export interface TestContext {
 export async function startApp(): Promise<TestContext> {
   const app = await createApp({ logger: false });
   await app.init();
+  app.getHttpServer().setMaxListeners(0); // supertest attaches listeners per request
   const prisma = app.get(PrismaService);
   await syncRolesAndPermissions(prisma);
   return { app, prisma };
