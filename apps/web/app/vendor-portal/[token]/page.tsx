@@ -1,7 +1,8 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { CheckCircle2, Paperclip, ShieldHalf } from "lucide-react";
+import { CheckCircle2, Paperclip } from "lucide-react";
+import Image from "next/image";
 import { use, useMemo, useState } from "react";
 import { toast } from "sonner";
 import { humanize } from "@/components/common/badges";
@@ -89,7 +90,7 @@ export default function VendorPortal({ params }: PageProps<"/vendor-portal/[toke
     <div className="min-h-screen bg-background">
       <header className="border-b bg-card">
         <div className="mx-auto flex max-w-3xl items-center gap-2 px-4 py-3">
-          <ShieldHalf className="size-5 text-primary" aria-hidden />
+          <Image src="/brand/mark.png" alt="" width={24} height={24} className="size-6 rounded" />
           <span className="font-semibold">Security questionnaire</span>
         </div>
       </header>

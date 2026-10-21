@@ -41,7 +41,8 @@ export function AppShell({ children }: { children: ReactNode }) {
         Skip to content
       </a>
       <AppSidebar />
-      <SidebarInset>
+      {/* min-w-0 lets wide tables scroll inside their container instead of widening the whole page. */}
+      <SidebarInset className="min-w-0">
         <TopBar />
         <main id="main" className="mx-auto w-full max-w-[1400px] flex-1 px-4 py-6 md:px-6">
           {!me.data.activeOrganizationId && pathname !== "/account/password" && !(me.data.user.isPlatformAdmin && pathname.startsWith("/platform")) ? (

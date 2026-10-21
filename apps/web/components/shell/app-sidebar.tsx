@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldHalf } from "lucide-react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
@@ -36,9 +36,8 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton asChild size="lg" tooltip="SentinelGRC AI">
               <Link href="/dashboard">
-                <span className="flex size-8 items-center justify-center rounded-md bg-primary text-primary-foreground">
-                  <ShieldHalf className="size-4" aria-hidden />
-                </span>
+                {/* Decorative: the product name is in the text next to it. */}
+                <Image src="/brand/mark.png" alt="" width={32} height={32} priority className="size-8 shrink-0 rounded-md" />
                 <span className="grid text-left leading-tight">
                   <span className="truncate font-semibold">SentinelGRC AI</span>
                   <span className="truncate text-xs text-muted-foreground">{org?.name ?? "No organization"}</span>

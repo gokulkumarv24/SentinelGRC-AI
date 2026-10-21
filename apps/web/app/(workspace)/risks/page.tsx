@@ -43,7 +43,7 @@ function RiskRegister() {
         crumbs={[{ label: "Risk Management" }, { label: "Risk register" }]}
         actions={newRisk}
       />
-      <div className="grid gap-6 xl:grid-cols-[1fr_380px]">
+      <div className="grid gap-6 2xl:grid-cols-[1fr_380px]">
         <div className="min-w-0">
           <FilterBar
             params={params}

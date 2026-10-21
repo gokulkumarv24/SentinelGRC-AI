@@ -31,18 +31,20 @@ test.describe("Accessibility, responsive layout and search", () => {
     expect(problems).toEqual([]);
   });
 
-  test("pages fit a phone screen without horizontal scrolling", async ({ page }) => {
-    test.setTimeout(240_000);
-    await page.setViewportSize({ width: 390, height: 844 });
-    await signIn(page, "grc");
-    const overflowing: string[] = [];
-    for (const path of PAGES) {
-      await open(page, path);
-      const { scroll, width } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: document.documentElement.clientWidth }));
-      if (scroll > width + 1) overflowing.push(`${path}: ${scroll}px wide in a ${width}px viewport`);
-    }
-    expect(overflowing).toEqual([]);
-  });
+  for (const viewport of [{ name: "a phone", width: 390, height: 844 }, { name: "a 1440px desktop", width: 1440, height: 900 }]) {
+    test(`pages fit ${viewport.name} without horizontal page scrolling`, async ({ page }) => {
+      test.setTimeout(240_000);
+      await page.setViewportSize({ width: viewport.width, height: viewport.height });
+      await signIn(page, "grc");
+      const overflowing: string[] = [];
+      for (const path of PAGES) {
+        await open(page, path);
+        const { scroll, width } = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, width: document.documentElement.clientWidth }));
+        if (scroll > width + 1) overflowing.push(`${path}: ${scroll}px wide in a ${width}px viewport`);
+      }
+      expect(overflowing).toEqual([]);
+    });
+  }
 
   test("global search finds this organization's records and nothing from others", async ({ page, browser }) => {
     await signIn(page, "grc");

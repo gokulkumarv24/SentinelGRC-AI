@@ -1,14 +1,24 @@
-# SentinelGRC AI
+<p align="center">
+  <img src="docs/brand/logo-readme.png" alt="SentinelGRC AI logo" width="160" />
+</p>
 
-A multi-tenant governance, risk and compliance (GRC) platform covering compliance tracking, a shared risk register, third-party risk, AI governance, automated control testing and traceable reporting, with an optional, human-reviewed AI drafting assistant.
+<h1 align="center">SentinelGRC AI</h1>
 
-> **Disclaimer.** SentinelGRC supports governance workflows. It does **not** certify, attest, issue audit opinions or give legal advice. Framework content, mappings and legal applicability must be verified by qualified people. All demo data is fictional.
+<p align="center">
+  Multi-tenant governance, risk and compliance platform: compliance tracking, a shared risk register, third-party risk, AI governance, automated control testing and traceable reporting, with an optional, human-reviewed AI assistant.
+</p>
 
-![Executive dashboard (demo data)](docs/screenshots/dashboard.png)
+> **Disclaimer.** SentinelGRC supports governance workflows. It does **not** certify, attest, issue audit opinions or give legal advice. Framework content, mappings and legal applicability must be verified by qualified people. All demo data shown is fictional.
 
-| Findings | Vendors | AI-assisted evidence review |
+![Executive dashboard (fictional demo data)](docs/screenshots/dashboard.png)
+
+| Sign in | Risk register and heatmap | Vendors |
 |---|---|---|
-| ![Findings](docs/screenshots/findings.png) | ![Vendors](docs/screenshots/vendors.png) | ![AI draft on evidence](docs/screenshots/evidence-ai-draft.png) |
+| ![Sign in](docs/screenshots/login.png) | ![Risk register](docs/screenshots/risks.png) | ![Vendors](docs/screenshots/vendors.png) |
+
+| Findings | AI-assisted evidence review (draft, with sources and limitations) |
+|---|---|
+| ![Findings](docs/screenshots/findings.png) | ![AI draft on evidence](docs/screenshots/evidence-ai-draft.png) |
 
 ## Features
 
