@@ -5,9 +5,12 @@
 // scripts/add-column-maps.mjs so SQL columns are snake_case.
 
 generator client {
-  provider     = "prisma-client"
-  output       = "../src/generated/prisma"
-  moduleFormat = "esm"
+  provider            = "prisma-client"
+  output              = "../src/generated/prisma"
+  moduleFormat        = "esm"
+  // Explicit, so the generated imports end in .js even where no tsconfig.json is present
+  // (e.g. the Docker deps stage); otherwise Prisma infers ".ts" and the compiled app cannot start.
+  importFileExtension = "js"
 }
 
 datasource db {
