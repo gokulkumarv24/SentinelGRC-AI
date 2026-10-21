@@ -260,7 +260,7 @@ try {
     if (!row) {
       const created = await as(e.by).upload(
         { title: e.title, classification: e.classification, collectedAt: days(e.collected), ...(e.expires !== null ? { expiresAt: days(e.expires) } : {}), ownerId: id(e.by), linkEntityType: 'control', linkEntityId: control[e.control], linkPurpose: 'Operating effectiveness' },
-        { name: `${e.title.replace(/[^A-Za-z0-9]+/g, '-').toLowerCase()}.pdf`, content: await samplePdf(e.title, e.text), type: 'application/pdf' },
+        { name: `${e.title.replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase()}.pdf`, content: await samplePdf(e.title, e.text), type: 'application/pdf' },
       );
       row = await prisma.evidence.findUniqueOrThrow({ where: { id: created.id as string } });
     }

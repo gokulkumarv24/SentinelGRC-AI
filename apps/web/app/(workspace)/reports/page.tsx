@@ -218,12 +218,30 @@ function History({ types }: { types: ReportType[] }) {
   });
   const titleOf = (key: string) => types.find((t) => t.key === key)?.title ?? humanize(key);
   const columns: Column<ReportRun>[] = [
-    { id: "title", header: "Report", cell: (r) => <span>{r.title}<span className="block text-xs text-muted-foreground">{titleOf(r.reportType)}{r.scheduleId && " · scheduled"}</span></span> },
-    { id: "status", header: "Status", cell: (r) => <span className="flex flex-col gap-1"><StatusBadge status={RUN_STATUS[r.status]} label={humanize(r.status)} />{r.errorCode && <span className="font-mono text-[11px] text-sev-critical">{r.errorCode}</span>}</span> },
-    { id: "issue", header: "Draft / final", cell: (r) => <StatusBadge status={r.reportStatus === "final" ? "final" : "draft"} />, hideOnMobile: true },
-    { id: "format", header: "Format", cell: (r) => r.format.toUpperCase() },
-    { id: "by", header: "Requested by", cell: (r) => r.generatedByName ?? "—", hideOnMobile: true },
-    { id: "created", header: "Requested", sortKey: "createdAt", cell: (r) => <DateText value={r.createdAt} withTime /> },
+    {
+      id: "title",
+      header: "Report",
+      cell: (r) => (
+        <span>
+          {r.title}
+          <span className="block text-xs text-muted-foreground">
+            {[r.title !== titleOf(r.reportType) && titleOf(r.reportType), r.format.toUpperCase(), r.scheduleId && "scheduled"].filter(Boolean).join(" · ")}
+          </span>
+        </span>
+      ),
+    },
+    {
+      id: "status",
+      header: "Status",
+      cell: (r) => (
+        <span className="flex flex-wrap items-center gap-1">
+          <StatusBadge status={RUN_STATUS[r.status]} label={humanize(r.status)} />
+          <StatusBadge status={r.reportStatus === "final" ? "final" : "draft"} />
+          {r.errorCode && <span className="block w-full font-mono text-[11px] text-sev-critical">{r.errorCode}</span>}
+        </span>
+      ),
+    },
+    { id: "created", header: "Requested", sortKey: "createdAt", cell: (r) => <span className="text-xs"><DateText value={r.createdAt} withTime /><span className="block text-muted-foreground">{r.generatedByName ?? "—"}</span></span> },
     { id: "expires", header: "Expires", cell: (r) => <DateText value={r.expiresAt} />, hideOnMobile: true },
     {
       id: "actions",

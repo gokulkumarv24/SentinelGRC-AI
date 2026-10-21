@@ -77,12 +77,14 @@ export class ReportsService implements OnModuleInit {
     const def = this.def(input.reportType);
     for (const p of def.requires) if (!hasPermission(p)) throw forbidden(`This report needs the ${p} permission`);
     const filters = await this.validateFilters(organizationId, def, input.filters);
-    if (input.reportStatus === 'final' && def.key === 'vendor_assessment') {
-      const a = await this.prisma.vendorAssessment.findFirst({ where: { id: filters.assessmentId, organizationId }, select: { status: true } });
-      if (a && a.status !== 'approved' && a.status !== 'closed') throw conflict('A final vendor assessment report requires a decided assessment; generate a draft instead');
+    let title = input.title;
+    if (def.key === 'vendor_assessment') {
+      const a = await this.prisma.vendorAssessment.findFirst({ where: { id: filters.assessmentId, organizationId }, select: { status: true, assessmentVersion: true, vendor: { select: { name: true } } } });
+      if (input.reportStatus === 'final' && a && a.status !== 'approved' && a.status !== 'closed') throw conflict('A final vendor assessment report requires a decided assessment; generate a draft instead');
+      if (a && !title?.trim()) title = `Vendor assessment: ${a.vendor.name} v${a.assessmentVersion}`;
     }
     return this.prisma.tx(async (tx) => {
-      const run = await this.createRun(tx, organizationId, def, input.format, input.reportStatus, filters, actorId(), input.title);
+      const run = await this.createRun(tx, organizationId, def, input.format, input.reportStatus, filters, actorId(), title);
       await this.events.emit(tx, organizationId, 'report.requested', { reportRunId: run.id }, `report:${run.id}`);
       await this.audit.record({ action: 'report.requested', entityType: 'report_run', entityId: run.id, after: { reportType: def.key, format: input.format, reportStatus: input.reportStatus, filters } }, tx);
       return run;

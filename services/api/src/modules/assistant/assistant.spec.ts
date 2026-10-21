@@ -36,6 +36,26 @@ describe('grounding checks', () => {
     expect(checkGrounding(out, prepared)).toEqual([]);
   });
 
+  it('extractive summaries skip title banners and cite the page of each sentence', () => {
+    const task = TASKS_BY_TYPE.get('evidence_summary')!;
+    const out = task.mock({
+      target: { type: 'evidence', id: 'e', label: 'Access Policy' },
+      sources: [{ ref: 'S1', type: 'evidence', recordId: 'e', label: 'Access Policy', version: 'v', segments: [
+        { locator: 'metadata', text: 'Title: Access Policy' },
+        { locator: 'page 1', text: 'Access Policy (DEMO) for the whole company. Administrators must use multi-factor authentication for every login. The canteen opens at nine every morning.' },
+        { locator: 'page 2', text: 'Access reviews are performed quarterly by system owners.' },
+      ] }],
+      limitations: [],
+    });
+    expect(out.points.map((p) => p.text)).toEqual([
+      'Administrators must use multi-factor authentication for every login.',
+      'The canteen opens at nine every morning.',
+      'Access reviews are performed quarterly by system owners.',
+    ]);
+    expect(out.points[2].sourceRefs).toEqual([{ sourceId: 'S1', locator: 'page 2' }]);
+    expect(out.summary).toContain('Administrators must use multi-factor authentication');
+  });
+
   it('mock tasks produce schema-valid, grounded drafts and admit missing input', () => {
     const task = TASKS_BY_TYPE.get('evidence_summary')!;
     const empty = task.mock({ target: { type: 'evidence', id: 'e', label: 'E' }, sources: [{ ref: 'S1', type: 'evidence', recordId: 'e', label: 'Scan.png', version: 'v', segments: [{ locator: 'metadata', text: 'Title: Scan' }] }], limitations: ['Files of type image/png are not analysed.'] });

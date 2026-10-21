@@ -112,9 +112,14 @@ export const TASKS: TaskDef[] = [
       const s = p.sources[0];
       const body = s.segments.filter((x) => x.locator !== 'metadata');
       if (!body.length) return empty(`No document text was available for "${s.label}".`, p.limitations);
-      const points = body.flatMap((seg) => sentences(seg.text).slice(0, 1).map((t) => ({ text: t, sourceRefs: [{ sourceId: s.ref, locator: seg.locator }] }))).slice(0, 8);
-      const first = sentences(body[0].text).slice(0, 2).join(' ') || body[0].text.slice(0, 300);
-      return { summary: `Extractive summary of "${s.label}" (${body.length} section(s)): ${first}`, points, suggestions: [], limitations: [...p.limitations, 'Extractive summary produced without a language model; it repeats document sentences and does not interpret them.'], confidence: 'low' };
+      // Prefer substantive sentences (requirements, facts) over headings that only repeat the title.
+      const title = s.label.toLowerCase();
+      const all = body.flatMap((seg) => sentences(seg.text).map((t) => ({ t, locator: seg.locator }))).filter(({ t }) => !t.toLowerCase().includes(title));
+      const ranked = [...all.filter(({ t }) => KEYWORDS.test(t)), ...all.filter(({ t }) => !KEYWORDS.test(t))].slice(0, 6);
+      const chosen = all.filter((x) => ranked.includes(x)); // keep document order
+      const points = chosen.map(({ t, locator }) => ({ text: t, sourceRefs: [{ sourceId: s.ref, locator }] }));
+      const first = chosen.slice(0, 2).map((x) => x.t).join(' ') || body[0].text.slice(0, 300);
+      return { summary: `Extractive summary of "${s.label}" (${body.length} page(s)/section(s)): ${first}`, points, suggestions: [], limitations: [...p.limitations, 'Extractive summary produced without a language model; it repeats document sentences and does not interpret them.'], confidence: 'low' };
     },
   },
   {
