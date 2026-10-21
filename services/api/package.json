@@ -29,6 +29,8 @@
     "admin:create": "node dist/cli/create-admin.js",
     "openapi": "node dist/cli/export-openapi.js",
     "restore:verify": "node dist/cli/verify-restore.js",
+    "sessions:revoke": "node dist/cli/revoke-sessions.js",
+    "users:reset-password": "node dist/cli/reset-password.js",
     "postinstall": "prisma generate",
     "reference:sync": "node dist/cli/sync-reference.js"
   },

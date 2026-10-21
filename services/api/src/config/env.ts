@@ -79,7 +79,8 @@ let cached: Env | undefined;
 export function loadEnv(overrides: Partial<Record<string, string>> = {}): Env {
   if (cached && Object.keys(overrides).length === 0) return cached;
   const rootEnv = new URL('../../../../.env', import.meta.url);
-  if (!process.env.DATABASE_URL && existsSync(rootEnv)) process.loadEnvFile(rootEnv);
+  // Fills only variables that are not already set, so explicit overrides (e.g. DATABASE_URL for a restore) win.
+  if (existsSync(rootEnv)) process.loadEnvFile(rootEnv);
   const parsed = schema.safeParse({ ...process.env, ...overrides });
   if (!parsed.success) {
     // Report variable names and reasons only — never values (spec §0.1 rule 6).

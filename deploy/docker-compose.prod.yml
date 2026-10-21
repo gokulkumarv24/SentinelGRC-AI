@@ -38,6 +38,8 @@ services:
   release:
     <<: *app
     image: ${REGISTRY:?set REGISTRY}/sentinelgrc-release:${SENTINELGRC_VERSION:?set SENTINELGRC_VERSION}
+    # Migrations need the schema-owner role; the running app uses a data-only role (DATABASE_URL).
+    environment: { DATABASE_URL: "${MIGRATION_DATABASE_URL:?set MIGRATION_DATABASE_URL}" }
     read_only: false
     restart: "no"
     profiles: ["release"]
