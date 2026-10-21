@@ -51,7 +51,7 @@ docker compose config (local + prod)    # valid
 - S3 storage adapter is implemented but not verified against a live bucket.
 - SMTP delivery is implemented but not verified against a live mail server (no credentials configured); the suppression policy is unit-tested.
 - The API test run prints one `pg` deprecation warning ("client.query() when the client is already executing a query"). Traced with `--trace-deprecation` to Prisma's own driver-adapter query interpreter (nested queries in a transaction), not application code. Harmless on pg 8; `pg` is pinned until upstream fixes it (D-020).
-- One API integration run (out of 9 observed in this milestone) failed to start the `access-control` file, so its 12 tests were skipped, not failed. It did not reproduce in 5 isolated and 4 full runs; the likely cause is a transient connection to the long-running local database. CI will show whether it recurs. Retries were deliberately not added.
+- On the 8 GB development machine, an API integration run occasionally loses one test file: the Vitest worker process dies ("Worker exited unexpectedly") when free RAM drops to about 0.7 GB, so that file's tests are not run rather than failed. Re-runs pass, and the suite passes consistently on GitHub Actions. This is a resource limit of the local machine, not a test or product defect.
 - `eslint-config-next` pulls `braces` with a high advisory; it is development-only tooling and not in the production audit scope.
 
 ## Blockers and not yet verified
