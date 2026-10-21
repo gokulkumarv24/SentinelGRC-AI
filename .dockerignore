@@ -16,6 +16,6 @@ var
 !.env.example
 deploy/*.env
 *.log
-*.png
+/*.png
 docs
 SENTINELGRC_MASTER_SPEC.md
