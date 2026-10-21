@@ -1,4 +1,5 @@
 import request from 'supertest';
+import { WorkflowRunner } from '../src/modules/workflows/workflow-runner.service.js';
 import { Client, createOrg, loginAs, startApp, type TestContext } from './helpers.js';
 
 const PDF = Buffer.from('%PDF-1.4\n1 0 obj<<>>endobj\ntrailer<<>>\n%%EOF\n');
@@ -121,6 +122,17 @@ describe('Third-party risk: vendors, questionnaires, scoring, decisions and port
     expect(decision.body.findingsCreated).toBe(4);
     expect(decision.body.tier).toBe('high');
     expect(decision.body.riskId).toBeTruthy();
+
+    // The vendor assessment report shows this assessment's recorded scores, with effectiveness and residual kept apart.
+    const recorded = await ctx.prisma.vendorAssessment.findUniqueOrThrow({ where: { id: assessment.id } });
+    const report = await approver.post('/reports', { reportType: 'vendor_assessment', format: 'csv', reportStatus: 'final', filters: { assessmentId: assessment.id } });
+    expect(report.status).toBe(202);
+    await ctx.app.get(WorkflowRunner).drain({ organizationId: org.id });
+    const csv = (await approver.get(`/reports/${report.body.id}/download`)).text;
+    expect(csv).toContain(`Residual risk score,${recorded.residualRisk},`);
+    expect(csv).toContain(`Control effectiveness,${recorded.score}%,`);
+    expect(csv).toContain(`Risk tier,${recorded.riskTier},`);
+    expect(csv).toContain(`Report,Vendor assessment: ${vendor.name} v1`);
 
     const v = (await vm.get(`/vendors/${vendor.id}`)).body;
     expect(v).toMatchObject({ status: 'approved_with_conditions', riskTier: decision.body.tier, residualRiskScore: decision.body.residualScore });

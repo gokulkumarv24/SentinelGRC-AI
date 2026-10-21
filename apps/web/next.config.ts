@@ -18,6 +18,8 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   reactStrictMode: true,
   output: "standalone",
+  // The E2E suite builds into its own folder so it never clashes with a running dev server.
+  distDir: process.env.NEXT_DIST_DIR || ".next",
   // Development only: lets the dev server serve assets when opened via 127.0.0.1.
   allowedDevOrigins: ["127.0.0.1"],
   turbopack: {

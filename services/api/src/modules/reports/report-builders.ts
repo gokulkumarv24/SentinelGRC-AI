@@ -279,9 +279,11 @@ export class ReportBuilders {
       scope: `Vendor ${a.vendor.name}, assessment version ${a.assessmentVersion} using template "${a.templateRef.name}" v${a.templateRef.version}.`,
       draftOnlyReason: decided ? undefined : `The assessment is ${a.status.replace(/_/g, ' ')}; a final report requires a recorded decision.`,
       metrics: [
-        { label: 'Inherent risk score', value: a.vendor.inherentRiskScore, definition: 'Weighted inherent factors (0–100).' },
-        { label: 'Residual risk score', value: a.score ?? a.vendor.residualRiskScore, definition: 'Inherent × (1 − max reduction × control effectiveness).' },
-        { label: 'Risk tier', value: a.vendor.riskTier, definition: 'Tier thresholds from the vendor scoring policy.' },
+        // Values recorded on this assessment (not the vendor's current profile, which may have changed since).
+        { label: 'Inherent risk score', value: a.inherentRisk ?? a.vendor.inherentRiskScore, definition: 'Weighted inherent factors (0–100).' },
+        { label: 'Control effectiveness', value: a.score === null ? 'not scored' : `${a.score}%`, definition: 'Weighted credit from reviewed answers; unanswered questions earn none.' },
+        { label: 'Residual risk score', value: a.residualRisk ?? 'not scored', definition: 'Inherent × (1 − max reduction × control effectiveness).' },
+        { label: 'Risk tier', value: a.riskTier ?? 'not scored', definition: 'Tier thresholds from the vendor scoring policy.' },
         { label: 'Scoring policy version', value: a.scoringPolicyVersion, definition: 'Versioned, audited scoring configuration used.' },
         { label: 'Decision', value: a.decision ? `${a.decision}${a.decisionRationale ? ` — ${a.decisionRationale}` : ''}` : 'pending', definition: 'Recorded by an authorized approver.' },
       ],

@@ -9,7 +9,9 @@
     "lint": "eslint",
     "typecheck": "next typegen && tsc --noEmit",
     "test": "vitest run",
-    "test:e2e": "playwright test",
+    "test:e2e": "node e2e/prepare.mjs && playwright test",
+    "test:e2e:prepare": "node e2e/prepare.mjs",
+    "test:e2e:run": "playwright test",
     "api:types": "openapi-typescript http://localhost:4000/api/v1/openapi.json -o lib/openapi.d.ts"
   },
   "dependencies": {
@@ -48,6 +50,7 @@
     "eslint-config-next": "16.4.2",
     "jsdom": "30.1.3",
     "openapi-typescript": "7.13.0",
+    "pg": "8.23.1",
     "tailwindcss": "^4",
     "typescript": "^5",
     "vitest": "4.1.12"

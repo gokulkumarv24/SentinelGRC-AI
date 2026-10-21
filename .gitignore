@@ -8,6 +8,7 @@
 # Dependencies and builds
 node_modules/
 .next/
+.next-e2e/
 dist/
 build/
 coverage/

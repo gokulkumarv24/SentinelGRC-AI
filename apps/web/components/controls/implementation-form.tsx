@@ -1,5 +1,6 @@
 "use client";
 
+import { options } from "@/components/common/data-table";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { FormProvider, useForm, useWatch, type FieldValues, type UseFormReturn } from "react-hook-form";
 import { z } from "zod";
@@ -80,7 +81,7 @@ export function ImplementationForm({ control }: { control: ControlDetail }) {
         <fieldset disabled={readOnly || mutation.isPending}>
           <FieldGroup>
             <div className="grid gap-4 sm:grid-cols-2">
-              <SelectField<Values> name="status" label="Implementation status" options={IMPL.map((s) => ({ value: s, label: s.replace(/_/g, " ") }))} />
+              <SelectField<Values> name="status" label="Implementation status" options={options(IMPL)} />
               {canAssign ? (
                 <UserField<Values> name="ownerId" label="Control owner" />
               ) : (

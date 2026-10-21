@@ -1,7 +1,7 @@
 /**
  * Synthetic demo data (spec §19).
  *
- *   npm run seed:demo -w services/api [-- --no-force-change]
+ *   npm run seed:demo -w services/api [-- --no-force-change] [--credentials-file <path>]
  *
  * Boots the API in-process and creates every record through the real HTTP API as fictional demo
  * users, so scores, findings, notifications, workflow runs and audit events come from production
@@ -17,10 +17,12 @@ import argon2 from 'argon2';
 import { randomBytes } from 'node:crypto';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import type { AddressInfo } from 'node:net';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { parseArgs } from 'node:util';
 import PDFDocument from 'pdfkit';
 
-const { values: args } = parseArgs({ options: { 'no-force-change': { type: 'boolean', default: false } } });
+const { values: args } = parseArgs({ options: { 'no-force-change': { type: 'boolean', default: false }, 'credentials-file': { type: 'string' } } });
 
 // The seed makes a few hundred requests from one address; lift the in-memory limits for this process only.
 process.env.RATE_LIMIT_DEFAULT_PER_MINUTE = '100000';
@@ -164,7 +166,7 @@ try {
   const harbor = await ensureOrg(HARBOR);
   log('Organizations', `${northstar.name}, ${harbor.name}`);
 
-  const credentialsFile = new URL('../../../../var/demo-credentials.txt', import.meta.url);
+  const credentialsFile = args['credentials-file'] ? pathToFileURL(resolve(args['credentials-file'])) : new URL('../../../../var/demo-credentials.txt', import.meta.url);
   const previousCredentials = new Map<string, string>();
   if (existsSync(credentialsFile)) {
     for (const line of readFileSync(credentialsFile, 'utf8').split('\n')) {
@@ -386,7 +388,7 @@ try {
       { questionId: by('vuln.pentest_date'), answer: days(-120).slice(0, 10) }, // no report attached → evidence gap
       { questionId: by('vuln.critical_sla'), answer: 14 },
       { questionId: by('ir.plan'), answer: true },
-      { questionId: by('ir.notify_hours'), answer: 72 },
+      { questionId: by('ir.notify_hours'), answer: 96 }, // slower than the 72h expectation → second important gap
       { questionId: by('bc.backup_test'), answer: true },
       { questionId: by('priv.dpa'), answer: true },
       { questionId: by('sub.list'), answer: false },
@@ -412,9 +414,18 @@ try {
   if (cbAssessment.status === 'submitted' || cbAssessment.status === 'under_review') {
     const detail = await as('ciso').get<{ questions: Question[] }>(`/assessments/${cbAssessment.id}`);
     await as('ciso').post(`/assessments/${cbAssessment.id}/review`, { reviews: detail.questions.filter((q) => q.visible && q.response).map((q) => ({ questionId: q.id, reviewerStatus: 'accepted' })) });
-    const decision = await as('ciso').post(`/assessments/${cbAssessment.id}/decision`, { decision: 'approved_with_conditions', rationale: 'Approved on condition that MFA is enforced for all Cloudbase administrators within 30 days and a current penetration test report is provided.' });
-    // A vendor risk linked to the relevant control (scenario 5).
-    if (decision.riskId) await as('grc').put(`/risks/${decision.riskId as string}/controls`, { controlId: control['TPR-01'], relationship: 'mitigates', effectivenessRating: 'partially_effective', rationale: 'Assessment and conditions tracked through TPR-01 (demo).' });
+    await as('ciso').post(`/assessments/${cbAssessment.id}/decision`, { decision: 'approved_with_conditions', rationale: 'Approved on condition that MFA is enforced for all Cloudbase administrators within 30 days and a current penetration test report is provided.' });
+  }
+  // A vendor risk linked to the relevant control (scenario 5). High residual risk creates it on decision;
+  // if a scoring-policy change ever yields a lower tier, register it explicitly so the scenario still holds.
+  let vendorRisk = await prisma.riskLink.findFirst({ where: { organizationId: org, entityType: 'vendor', entityId: cloudbase } });
+  if (!vendorRisk) {
+    const r = await as('grc').post('/risks', { title: 'Cloudbase Hosting service and data exposure (DEMO)', description: 'Gaps found in the Cloudbase assessment (administrator MFA, breach notification time) could expose customer data hosted by the vendor.', category: 'Third party', likelihood: 3, impact: 4, riskOwnerId: id('vm'), treatment: 'mitigate', reviewDate: days(90) });
+    await as('grc').post(`/risks/${r.id as string}/links`, { entityType: 'vendor', entityId: cloudbase });
+    vendorRisk = await prisma.riskLink.findFirstOrThrow({ where: { organizationId: org, entityType: 'vendor', entityId: cloudbase } });
+  }
+  if (!(await prisma.riskControl.findFirst({ where: { organizationId: org, riskId: vendorRisk.riskId, controlId: control['TPR-01'] } }))) {
+    await as('grc').put(`/risks/${vendorRisk.riskId}/controls`, { controlId: control['TPR-01'], relationship: 'mitigates', effectivenessRating: 'partially_effective', rationale: 'Assessment and conditions tracked through TPR-01 (demo).' });
   }
   // Mailstream: an assessment in progress with answers still missing.
   const mailstream = vendor[VENDORS[1].name];
@@ -536,7 +547,7 @@ try {
     ].join('\n'),
     { mode: 0o600 },
   );
-  console.log(`\nDone. Demo sign-in details: var/demo-credentials.txt (gitignored). Walkthrough: docs/DEMO_SCENARIO.md`);
+  console.log(`\nDone. Demo sign-in details: ${args['credentials-file'] ?? 'var/demo-credentials.txt'} (keep it out of version control). Walkthrough: docs/DEMO_SCENARIO.md`);
 } catch (error) {
   console.error('\nDemo seed failed:', error instanceof Error ? error.message : error);
   process.exitCode = 1;
