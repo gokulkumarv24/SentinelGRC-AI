@@ -1,8 +1,14 @@
-# Secret-scan configuration (CI: gitleaks). Default rules, plus one allowlisted test file whose
-# credentials are deliberately fake fixtures for the AI redaction tests.
+# Secret-scan configuration (CI: gitleaks). Default rules, plus narrowly allowlisted false positives.
 [extend]
 useDefault = true
 
 [allowlist]
-description = "Fake credentials used to test redaction"
+description = "Known non-secrets"
+# Deliberately fake credentials used to test the AI redaction filter.
 paths = ['''services/api/src/modules/assistant/assistant\.spec\.ts''']
+regexes = [
+  # Names of environment variables: S3_*_REF settings hold a variable NAME, never a key.
+  '''^SENTINELGRC_S3_(KEY_ID|SECRET)$''',
+  # Example badge token from the original NestJS starter README (since removed; still in history).
+  '''^abc123def456$''',
+]
