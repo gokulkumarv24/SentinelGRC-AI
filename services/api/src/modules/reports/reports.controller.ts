@@ -2,7 +2,7 @@ import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseUUIDPipe, 
 import { ApiTags } from '@nestjs/swagger';
 import type { Response } from 'express';
 import { z } from 'zod';
-import { RateLimit, RequirePermission } from '../../common/decorators.js';
+import { Idempotent, RateLimit, RequirePermission } from '../../common/decorators.js';
 import { contentDisposition } from '../evidence/file-inspection.js';
 import { listQuery } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, isoDate, uuid, zod } from '../../common/validation.js';
@@ -56,6 +56,7 @@ export class ReportsController {
   }
 
   @Post('reports')
+  @Idempotent('reports.request')
   @HttpCode(202)
   @RequirePermission('report.generate')
   @RateLimit('expensive')

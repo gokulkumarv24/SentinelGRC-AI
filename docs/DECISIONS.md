@@ -101,3 +101,24 @@ Email goes through an outbox, delivered by the worker over SMTP (nodemailer ≥ 
 - The PDF shows Draft or Final, the generation time with the organization's time zone, page numbers and a Draft watermark, and states that the report is not an audit opinion or attestation.
 - A vendor assessment report can be Final only once the assessment is decided.
 - Generated files are derived data: they are deleted at the end of the organization's report retention period and the run is marked expired.
+
+## D-018 — HTTP idempotency keys
+- Create/trigger routes marked `@Idempotent(scope)` accept an optional `Idempotency-Key` header (8–128 of `A–Z a–z 0–9 - _`): reports, workflow runs, integration syncs, control-test runs, AI drafts, invitations, and creating findings, risks and remediation tasks.
+- Keys are stored in `idempotency_keys`, scoped per organization, user and route, for 24 hours. Per-user scoping means a stored response can never be served to another user.
+- A retry with the same body replays the stored status and body, with the `Idempotent-Replayed: true` header.
+- Reusing a key with a different body returns 409 `idempotency_key_reused`. A concurrent duplicate returns 409 `idempotency_in_progress`.
+- A failed request releases its key, so a corrected retry works.
+- The web client keeps one key per user action while the payload is unchanged (`useIdempotencyKey`).
+- Business-level deduplication still applies on top: findings are keyed by source, and workflow runs have their own idempotency keys.
+
+## D-019 — Release and runtime layout
+- One API image runs both the API (`node dist/main.js`) and the worker (`node dist/worker.js`).
+- A separate **release** image runs `prisma migrate deploy` and then the idempotent reference-data sync, once per deploy, before new API/worker containers start (spec §22.2).
+- The web image is the Next.js standalone server. `API_BASE_URL` is compiled into the `/api/v1` rewrite at **build** time, so the web image is built per environment.
+- In production, Caddy sends `/api/v1/*` straight to the API and everything else to the web app.
+- Production containers run as non-root, with read-only root filesystems, all capabilities dropped and `no-new-privileges`. The web container receives no API secrets.
+
+## D-020 — Logging and dependency pins
+- `createLogger` (Nest `ConsoleLogger`) writes one JSON object per line in production and readable text in development, honouring `LOG_LEVEL`. The unused `pino` packages were removed.
+- `pg` is pinned to 8.x. Prisma's driver-adapter query interpreter issues some queries concurrently on a transaction's connection, which pg 8 only warns about ("client.query() when the client is already executing a query") and pg 9 will reject. Do not upgrade `pg` to 9 until `@prisma/adapter-pg` serializes those queries.
+- `shadcn` is a development-time CLI (dev dependency). `exceljs` depends on a `uuid` version with a moderate advisory that affects only v3/v5/v6 with a caller buffer; `exceljs` calls only `v4`, so this is accepted, and `npm audit --audit-level=high` gates CI.

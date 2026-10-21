@@ -47,9 +47,9 @@ export function toQueryString(query?: Query): string {
   return s ? `?${s}` : "";
 }
 
-async function request<T>(method: string, path: string, body?: unknown, init?: RequestInit): Promise<T> {
+async function request<T>(method: string, path: string, body?: unknown, init?: RequestInit, extraHeaders?: Record<string, string>): Promise<T> {
   const isForm = typeof FormData !== "undefined" && body instanceof FormData;
-  const headers: Record<string, string> = { Accept: "application/json" };
+  const headers: Record<string, string> = { Accept: "application/json", ...extraHeaders };
   if (method !== "GET") headers["X-CSRF-Token"] = csrfToken();
   if (body !== undefined && !isForm) headers["Content-Type"] = "application/json";
 
@@ -88,7 +88,9 @@ function safeJson(text: string): unknown {
 
 export const api = {
   get: <T>(path: string, query?: Query) => request<T>("GET", `${path}${toQueryString(query)}`),
-  post: <T>(path: string, body?: unknown) => request<T>("POST", path, body ?? {}),
+  /** `idempotencyKey`: reuse the same key when retrying one user action so the API acts only once. */
+  post: <T>(path: string, body?: unknown, options?: { idempotencyKey?: string }) =>
+    request<T>("POST", path, body ?? {}, undefined, options?.idempotencyKey ? { "Idempotency-Key": options.idempotencyKey } : undefined),
   patch: <T>(path: string, body: unknown) => request<T>("PATCH", path, body),
   put: <T>(path: string, body: unknown) => request<T>("PUT", path, body),
   delete: <T = void>(path: string) => request<T>("DELETE", path),
@@ -99,4 +101,10 @@ export function errorMessage(error: unknown): string {
   if (error instanceof ApiError) return error.message;
   if (error instanceof Error) return error.message;
   return "Something went wrong";
+}
+
+/** A fresh Idempotency-Key for one user action (letters, digits and "-" only). */
+export function newIdempotencyKey(): string {
+  if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") return crypto.randomUUID();
+  return `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 12)}-${Math.random().toString(36).slice(2, 12)}`;
 }

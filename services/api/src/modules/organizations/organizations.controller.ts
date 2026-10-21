@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { AuthenticatedOnly, PlatformAdmin, RequirePermission } from '../../common/decorators.js';
+import { AuthenticatedOnly, Idempotent, PlatformAdmin, RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, requiredText, text, zod } from '../../common/validation.js';
 import { ROLE_KEYS, type RoleKey } from '../../permissions/catalog.js';
@@ -102,6 +102,7 @@ export class OrganizationsController {
   }
 
   @Post('members/invitations')
+  @Idempotent('members.invite')
   @RequirePermission('member.manage')
   @ApiZodBody(inviteSchema)
   invite(@Body(zod(inviteSchema)) body: z.infer<typeof inviteSchema>) {

@@ -1,5 +1,6 @@
 import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { IdempotencyInterceptor } from './common/idempotency.interceptor.js';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { HttpExceptionFilter } from './common/http-exception.filter.js';
 import { RequestContextMiddleware } from './common/request-context.middleware.js';
 import { SecurityGuard } from './common/security.guard.js';
@@ -140,6 +141,7 @@ export class DomainModule {}
   providers: [
     { provide: APP_GUARD, useClass: SecurityGuard },
     { provide: APP_FILTER, useClass: HttpExceptionFilter },
+    { provide: APP_INTERCEPTOR, useClass: IdempotencyInterceptor },
   ],
 })
 export class AppModule implements NestModule {

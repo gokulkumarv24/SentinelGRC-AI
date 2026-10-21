@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { RequirePermission } from '../../common/decorators.js';
+import { Idempotent, RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, isoDate, requiredText, text, uuid, zod } from '../../common/validation.js';
 import { RemediationService } from './remediation.service.js';
@@ -50,6 +50,7 @@ export class RemediationController {
   }
 
   @Post()
+  @Idempotent('remediation.create')
   @RequirePermission('remediation.create')
   @ApiZodBody(createBody)
   create(@Body(zod(createBody)) body: z.infer<typeof createBody>) {

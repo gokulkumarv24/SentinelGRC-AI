@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { RateLimit, RequirePermission } from '../../common/decorators.js';
+import { Idempotent, RateLimit, RequirePermission } from '../../common/decorators.js';
 import { listQuery } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, uuid, zod } from '../../common/validation.js';
 import { AssistantService } from './assistant.service.js';
@@ -29,6 +29,7 @@ export class AssistantController {
   }
 
   @Post('drafts')
+  @Idempotent('ai.drafts.generate')
   @RequirePermission('assistant.use')
   @RateLimit('expensive')
   @ApiZodBody(generateBody)

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Header, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { RateLimit, RequirePermission } from '../../common/decorators.js';
+import { Idempotent, RateLimit, RequirePermission } from '../../common/decorators.js';
 import { assertPermission } from '../../common/request-context.js';
 import { listQuery, multi } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, requiredText, text, uuid, zod } from '../../common/validation.js';
@@ -169,6 +169,7 @@ export class ComplianceController {
 
   /** mode=automated needs control_test.run; mode=manual needs control_test.manual (checked here). */
   @Post('controls/:id/tests')
+  @Idempotent('controls.tests.run')
   @RequirePermission('control_test.read')
   @RateLimit('expensive')
   @HttpCode(200)

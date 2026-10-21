@@ -1,5 +1,6 @@
 "use client";
 
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
 import { useQuery } from "@tanstack/react-query";
 import { Play, Settings2 } from "lucide-react";
 import Link from "next/link";
@@ -91,7 +92,13 @@ export default function WorkflowsPage() {
   const can = useCan();
   const query = useQuery({ queryKey: KEY, queryFn: () => api.get<Definition[]>("/workflows"), refetchInterval: 15_000 });
   const toggle = useApiMutation({ mutationFn: (d: Definition) => api.patch(`/workflows/${d.id}`, { enabled: !d.enabled, version: d.version }), success: "Workflow updated", invalidate: [KEY] });
-  const run = useApiMutation({ mutationFn: (d: Definition) => api.post<{ workflowRunId: string }>(`/workflows/${d.id}/run`), success: "Queued — the worker will run it shortly", invalidate: [KEY, ["workflow-runs"]] });
+  const idempotency = useIdempotencyKey();
+  const run = useApiMutation({
+    mutationFn: (d: Definition) => api.post<{ workflowRunId: string }>(`/workflows/${d.id}/run`, {}, { idempotencyKey: idempotency.keyFor(d.id) }),
+    success: "Queued — the worker will run it shortly",
+    invalidate: [KEY, ["workflow-runs"]],
+    onSuccess: () => idempotency.reset(),
+  });
   return (
     <>
       <PageHeader

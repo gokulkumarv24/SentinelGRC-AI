@@ -1,7 +1,7 @@
 import { Body, Controller, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { RequirePermission } from '../../common/decorators.js';
+import { Idempotent, RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, uuid, zod } from '../../common/validation.js';
 import { IntegrationsService } from '../integrations/integrations.service.js';
@@ -53,6 +53,7 @@ export class WorkflowsController {
   }
 
   @Post('workflows/:id/run')
+  @Idempotent('workflows.run')
   @HttpCode(202)
   @RequirePermission('workflow.run')
   run(@Param('id', ParseUUIDPipe) id: string) {
@@ -125,6 +126,7 @@ export class IntegrationsController {
   }
 
   @Post(':id/sync')
+  @Idempotent('integrations.sync')
   @HttpCode(202)
   @RequirePermission('integration.sync')
   sync(@Param('id', ParseUUIDPipe) id: string) {

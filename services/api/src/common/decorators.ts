@@ -25,3 +25,10 @@ export const CsrfExempt = () => SetMetadata(CSRF_EXEMPT_KEY, true);
 
 /** Rate-limit bucket for sensitive or costly endpoints. */
 export const RateLimit = (bucket: 'login' | 'expensive') => SetMetadata(RATE_LIMIT_KEY, bucket);
+
+export const IDEMPOTENT_KEY = 'sg:idempotent';
+/**
+ * Create/trigger route that honours an optional `Idempotency-Key` header (spec §13.2): a retry with
+ * the same key and body replays the first response instead of acting twice.
+ */
+export const Idempotent = (scope: string) => SetMetadata(IDEMPOTENT_KEY, scope);

@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, HttpCode, Param, ParseUUIDPipe, Patch, Post, Put, Query } from '@nestjs/common';
 import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
-import { RequirePermission } from '../../common/decorators.js';
+import { Idempotent, RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
 import { ApiZodBody, ApiZodQuery, isoDate, requiredText, score1to5, text, uuid, zod } from '../../common/validation.js';
 import { LINKABLE_TYPES } from '../shared/entity-resolver.service.js';
@@ -79,6 +79,7 @@ export class RisksController {
   }
 
   @Post('risks')
+  @Idempotent('risks.create')
   @RequirePermission('risk.create')
   @ApiZodBody(riskBody)
   create(@Body(zod(riskBody)) body: z.infer<typeof riskBody>) {

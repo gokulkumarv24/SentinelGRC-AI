@@ -1,5 +1,6 @@
 "use client";
 
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarClock, Download, FileBarChart, Plus, Sparkles, Trash2 } from "lucide-react";
 import { Suspense, useState } from "react";
@@ -145,11 +146,18 @@ function GenerateForm({ types }: { types: ReportType[] }) {
   const [title, setTitle] = useState("");
   const [filters, setFilters] = useState<Record<string, PickerOption | string | null>>({});
   const type = allowed.find((t) => t.key === typeKey);
+  const idempotency = useIdempotencyKey();
   const generate = useApiMutation({
-    mutationFn: () => api.post<ReportRun>("/reports", { reportType: typeKey, format, reportStatus: status, title: title || undefined, filters: type ? toFilters(type, filters) : {} }),
+    mutationFn: () => {
+      const body = { reportType: typeKey, format, reportStatus: status, title: title || undefined, filters: type ? toFilters(type, filters) : {} };
+      return api.post<ReportRun>("/reports", body, { idempotencyKey: idempotency.keyFor(body) });
+    },
     success: "Report queued — it will appear below when ready",
     invalidate: [["reports", "runs"]],
-    onSuccess: () => setTitle(""),
+    onSuccess: () => {
+      idempotency.reset();
+      setTitle("");
+    },
   });
   if (!type) return <p className="text-sm text-muted-foreground">Your role cannot generate any report type.</p>;
   const missing = (type.requiredFilters ?? []).some((k) => !filters[k]);

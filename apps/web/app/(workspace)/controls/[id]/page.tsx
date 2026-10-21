@@ -1,5 +1,6 @@
 "use client";
 
+import { useIdempotencyKey } from "@/hooks/use-idempotency-key";
 import { AiAssist } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
 import { FlaskConical, Link2, Play, Plus, Upload } from "lucide-react";
@@ -32,10 +33,12 @@ export default function ControlDetailPage({ params }: PageProps<"/controls/[id]"
   const query = useQuery({ queryKey: ["controls", id], queryFn: () => api.get<ControlDetail>(`/controls/${id}`) });
   const [manualResult, setManualResult] = useState("pass");
   const invalidate = [["controls"], ["findings"], ["dashboard"]];
+  const testRun = useIdempotencyKey();
   const runTests = useApiMutation({
-    mutationFn: () => api.post<{ results: Array<{ result: string }> }>(`/controls/${id}/tests`, { mode: "automated" }),
+    mutationFn: () => api.post<{ results: Array<{ result: string }> }>(`/controls/${id}/tests`, { mode: "automated" }, { idempotencyKey: testRun.keyFor(id) }),
     success: (r) => `Test run complete: ${r.results.map((x) => x.result).join(", ") || "no rules configured"}`,
     invalidate,
+    onSuccess: () => testRun.reset(),
   });
   const manualTest = useApiMutation({
     mutationFn: (rationale: string) => api.post(`/controls/${id}/tests`, { mode: "manual", result: manualResult, summary: `Manual assessment: ${manualResult}`, rationale }),
