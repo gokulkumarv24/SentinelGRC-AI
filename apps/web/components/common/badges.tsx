@@ -19,7 +19,7 @@ export function SeverityBadge({ severity, score, className }: { severity: Severi
     <span className={cn(chip, s.className, className)}>
       <s.icon className="size-3.5" aria-hidden />
       {s.label}
-      {score != null && <span className="font-mono opacity-80">· {score}</span>}
+      {score != null && <span className="font-mono">· {score}</span>}
     </span>
   );
 }

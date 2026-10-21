@@ -93,8 +93,10 @@ function OrganizationSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="max-w-60 gap-2" aria-label="Switch organization">
+        <Button variant="ghost" size="sm" className="max-w-60 gap-2">
           <Building2 aria-hidden />
+          {/* The accessible name contains the visible text (WCAG 2.5.3 Label in Name). */}
+          <span className="sr-only">Switch organization: </span>
           <span className="truncate">{active?.name ?? "Select organization"}</span>
           <ChevronsUpDown className="opacity-50" aria-hidden />
         </Button>
@@ -205,7 +207,8 @@ function ProfileMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" aria-label="Account menu" className="rounded-full">
+        {/* The name starts with the visible initials (WCAG 2.5.3 Label in Name). */}
+        <Button variant="ghost" size="icon" aria-label={`${initials}, account menu for ${me?.user.displayName ?? "your account"}`} className="rounded-full">
           <span className="flex size-7 items-center justify-center rounded-full bg-primary text-xs font-semibold text-primary-foreground">{initials}</span>
         </Button>
       </DropdownMenuTrigger>

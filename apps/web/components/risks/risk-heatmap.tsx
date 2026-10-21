@@ -63,11 +63,13 @@ export function RiskHeatmap() {
                       <td key={i} className="p-0">
                         <Link
                           href={`/risks?${basis === "inherent" ? "likelihood" : "residualLikelihood"}=${l}&${basis === "inherent" ? "impact" : "residualImpact"}=${i}`}
-                          className={cn("flex h-12 flex-col items-center justify-center rounded-md text-sm font-semibold transition-opacity hover:opacity-80", TIER_CLASS[t], n === 0 && "opacity-40")}
-                          aria-label={`Likelihood ${l}, impact ${i}, ${t}: ${n} risk${n === 1 ? "" : "s"}`}
+                          // Empty cells are subdued with muted colours rather than opacity, so their text keeps AA contrast.
+                          className={cn("flex h-12 flex-col items-center justify-center rounded-md text-sm font-semibold hover:ring-2 hover:ring-ring", n === 0 ? "bg-muted text-muted-foreground" : TIER_CLASS[t])}
                         >
                           {n}
                           <span className="text-[10px] font-normal capitalize">{t}</span>
+                          {/* The accessible name comes from the visible content plus this context (WCAG 2.5.3). */}
+                          <span className="sr-only">: likelihood {l}, impact {i}, {n} risk{n === 1 ? "" : "s"}</span>
                         </Link>
                       </td>
                     );
