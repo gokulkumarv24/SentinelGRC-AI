@@ -1,0 +1,219 @@
+{
+  "key": "eu-ai-act",
+  "name": "EU Artificial Intelligence Act",
+  "publisher": "European Union",
+  "version": "Regulation (EU) 2024/1689 as amended by Regulation (EU) 2026/1744",
+  "releaseDate": "2024-07-12",
+  "sourceUrl": "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+  "retrievedAt": "2026-10-21",
+  "isIllustrative": false,
+  "licenseNotes": "EU legal text; reuse permitted under Commission Decision 2011/833/EU. Selected provisions for applicability tracking.",
+  "description": "Applicability and obligation tracking. Results are preliminary until reviewed by a qualified legal or compliance professional.",
+  "obligationSchedule": {
+    "checkedAt": "2026-10-21",
+    "sources": [
+      "https://eur-lex.europa.eu/eli/reg/2024/1689/oj",
+      "https://artificialintelligenceact.eu/ai-act-explorer/digital-omnibus/"
+    ],
+    "verifyBeforeRelying": true,
+    "items": [
+      {
+        "key": "prohibitions",
+        "label": "Prohibited practices (Art. 5) and AI literacy (Art. 4)",
+        "appliesFrom": "2025-02-02",
+        "provision": "Art. 113(a)"
+      },
+      {
+        "key": "gpai",
+        "label": "General-purpose AI model obligations (Chapter V)",
+        "appliesFrom": "2025-08-02",
+        "provision": "Art. 113(b)"
+      },
+      {
+        "key": "transparency",
+        "label": "Transparency obligations (Art. 50)",
+        "appliesFrom": "2026-08-02",
+        "provision": "Art. 113"
+      },
+      {
+        "key": "omnibus_prohibitions",
+        "label": "Prohibitions added by the Digital Omnibus (Art. 5(1)(ba)-(bb))",
+        "appliesFrom": "2026-12-02",
+        "provision": "Art. 113(a) as amended by Reg. (EU) 2026/1744"
+      },
+      {
+        "key": "marking_legacy",
+        "label": "Art. 50(2) marking for generative systems on the market before 2 Aug 2026",
+        "appliesFrom": "2026-12-02",
+        "provision": "Art. 111(4) as amended"
+      },
+      {
+        "key": "high_risk_annex_iii",
+        "label": "High-risk systems listed in Annex III",
+        "appliesFrom": "2027-12-02",
+        "provision": "Art. 113(c)(i) as amended by Reg. (EU) 2026/1744"
+      },
+      {
+        "key": "high_risk_annex_i",
+        "label": "High-risk systems covered by Annex I product legislation",
+        "appliesFrom": "2028-08-02",
+        "provision": "Art. 113(c)(ii) as amended by Reg. (EU) 2026/1744"
+      }
+    ]
+  },
+  "requirements": [
+    {
+      "code": "Art. 4",
+      "title": "AI literacy",
+      "summary": null,
+      "group": "General provisions",
+      "parent": null,
+      "official": true,
+      "sortOrder": 1
+    },
+    {
+      "code": "Art. 5",
+      "title": "Prohibited AI practices",
+      "summary": null,
+      "group": "Prohibited practices",
+      "parent": null,
+      "official": true,
+      "sortOrder": 2
+    },
+    {
+      "code": "Art. 6",
+      "title": "Classification rules for high-risk AI systems",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 3
+    },
+    {
+      "code": "Art. 9",
+      "title": "Risk management system",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 4
+    },
+    {
+      "code": "Art. 10",
+      "title": "Data and data governance",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 5
+    },
+    {
+      "code": "Art. 11",
+      "title": "Technical documentation",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 6
+    },
+    {
+      "code": "Art. 12",
+      "title": "Record-keeping",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 7
+    },
+    {
+      "code": "Art. 13",
+      "title": "Transparency and provision of information to deployers",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 8
+    },
+    {
+      "code": "Art. 14",
+      "title": "Human oversight",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 9
+    },
+    {
+      "code": "Art. 15",
+      "title": "Accuracy, robustness and cybersecurity",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 10
+    },
+    {
+      "code": "Art. 17",
+      "title": "Quality management system",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 11
+    },
+    {
+      "code": "Art. 26",
+      "title": "Obligations of deployers of high-risk AI systems",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 12
+    },
+    {
+      "code": "Art. 27",
+      "title": "Fundamental rights impact assessment for high-risk AI systems",
+      "summary": null,
+      "group": "High-risk AI systems",
+      "parent": null,
+      "official": true,
+      "sortOrder": 13
+    },
+    {
+      "code": "Art. 50",
+      "title": "Transparency obligations for providers and deployers of certain AI systems",
+      "summary": null,
+      "group": "Transparency",
+      "parent": null,
+      "official": true,
+      "sortOrder": 14
+    },
+    {
+      "code": "Art. 72",
+      "title": "Post-market monitoring by providers and post-market monitoring plan for high-risk AI systems",
+      "summary": null,
+      "group": "Post-market",
+      "parent": null,
+      "official": true,
+      "sortOrder": 15
+    },
+    {
+      "code": "Art. 73",
+      "title": "Reporting of serious incidents",
+      "summary": null,
+      "group": "Post-market",
+      "parent": null,
+      "official": true,
+      "sortOrder": 16
+    },
+    {
+      "code": "Annex III",
+      "title": "High-risk AI systems referred to in Article 6(2)",
+      "summary": null,
+      "group": "Annex III areas",
+      "parent": null,
+      "official": true,
+      "sortOrder": 17
+    }
+  ]
+}

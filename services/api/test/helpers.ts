@@ -4,7 +4,7 @@ import { randomUUID } from 'node:crypto';
 import request from 'supertest';
 import type TestAgent from 'supertest/lib/agent.js';
 import { createApp } from '../src/bootstrap-app.js';
-import { syncRolesAndPermissions } from '../src/cli/reference-data.js';
+import { loadReferenceData, syncRolesAndPermissions } from '../src/cli/reference-data.js';
 import type { RoleKey } from '../src/permissions/catalog.js';
 import { OrganizationBootstrapService } from '../src/modules/organizations/organization-bootstrap.service.js';
 import { DEFAULT_SETTINGS } from '../src/modules/organizations/organizations.service.js';
@@ -25,6 +25,7 @@ export async function startApp(): Promise<TestContext> {
   app.getHttpServer().setMaxListeners(0); // supertest attaches listeners per request
   const prisma = app.get(PrismaService);
   await syncRolesAndPermissions(prisma);
+  await loadReferenceData(prisma);
   return { app, prisma };
 }
 

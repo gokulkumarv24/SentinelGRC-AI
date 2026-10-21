@@ -365,6 +365,9 @@ model Organization {
   aiArtifactRows             AiArtifact[]
   idempotencyKeyRows         IdempotencyKey[]
 
+  // generated back-relations
+  frameworkRows Framework[]
+
   @@map("organizations")
 }
 
@@ -519,6 +522,7 @@ model Invitation {
 
 model Framework {
   id               String          @id @default(uuid()) @db.Uuid
+  organizationId   String?         @map("organization_id") @db.Uuid // null = platform reference framework
   key              String // e.g. nist-csf
   name             String
   publisher        String
@@ -539,7 +543,10 @@ model Framework {
   // generated back-relations
   aiAssessment_frameworkId AiAssessment[] @relation("AiAssessment_frameworkId")
 
-  @@unique([key, version])
+  // generated relations (scripts/add-column-maps.mjs)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([organizationId, key, version])
   @@map("frameworks")
 }
 
@@ -573,6 +580,7 @@ model Control {
   title               String
   description         String
   category            String
+  templateConfig      Json?    @map("template_config") // platform templates only: suggested test rules and requirement refs
   isIllustrative      Boolean  @default(true) @map("is_illustrative")
   reviewFrequencyDays Int      @default(90) @map("review_frequency_days")
   active              Boolean  @default(true)

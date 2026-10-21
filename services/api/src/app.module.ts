@@ -9,6 +9,13 @@ import { AuthController } from './modules/auth/auth.controller.js';
 import { AuthService } from './modules/auth/auth.service.js';
 import { PasswordService } from './modules/auth/password.service.js';
 import { SessionService } from './modules/auth/session.service.js';
+import { ComplianceController } from './modules/compliance/compliance.controller.js';
+import { ComplianceService } from './modules/compliance/compliance.service.js';
+import { ControlTestsService } from './modules/control-tests/control-tests.service.js';
+import { ControlImportService } from './modules/controls/control-import.service.js';
+import { DashboardService } from './modules/dashboard/dashboard.service.js';
+import { FrameworksService } from './modules/frameworks/frameworks.service.js';
+import { MappingsService } from './modules/frameworks/mappings.service.js';
 import { ControlsController } from './modules/controls/controls.controller.js';
 import { ControlsService } from './modules/controls/controls.service.js';
 import { EvidenceController } from './modules/evidence/evidence.controller.js';
@@ -61,6 +68,12 @@ export const DOMAIN_SERVICES = [
   RemediationService,
   ControlsService,
   EvidenceService,
+  FrameworksService,
+  MappingsService,
+  ControlTestsService,
+  ComplianceService,
+  DashboardService,
+  ControlImportService,
 ];
 
 @Global()
@@ -78,6 +91,8 @@ export class DomainModule {}
     RisksController,
     FindingsController,
     RemediationController,
+    // Before ControlsController: its literal routes (controls/export.csv, controls/import) must win over controls/:id.
+    ComplianceController,
     ControlsController,
     EvidenceController,
     SearchController,

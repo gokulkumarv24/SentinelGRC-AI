@@ -1,0 +1,158 @@
+{
+  "key": "iso-42001",
+  "name": "ISO/IEC 42001",
+  "publisher": "ISO/IEC",
+  "version": "2023",
+  "releaseDate": "2023-12-18",
+  "sourceUrl": "https://www.iso.org/standard/81230.html",
+  "retrievedAt": "2026-10-21",
+  "isIllustrative": false,
+  "licenseNotes": "Copyrighted by ISO/IEC. Clause numbers and Annex A objective headings only; requirement and control text is not reproduced.",
+  "description": "AI management system (AIMS) requirements. Treated as a management-system framework; supports, but does not establish, certification.",
+  "requirements": [
+    {
+      "code": "4",
+      "title": "Context of the organization",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 1
+    },
+    {
+      "code": "5",
+      "title": "Leadership",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 2
+    },
+    {
+      "code": "6",
+      "title": "Planning",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 3
+    },
+    {
+      "code": "7",
+      "title": "Support",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 4
+    },
+    {
+      "code": "8",
+      "title": "Operation",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 5
+    },
+    {
+      "code": "9",
+      "title": "Performance evaluation",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 6
+    },
+    {
+      "code": "10",
+      "title": "Improvement",
+      "summary": null,
+      "group": "AIMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 7
+    },
+    {
+      "code": "A.2",
+      "title": "Policies related to AI",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 8
+    },
+    {
+      "code": "A.3",
+      "title": "Internal organization",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 9
+    },
+    {
+      "code": "A.4",
+      "title": "Resources for AI systems",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 10
+    },
+    {
+      "code": "A.5",
+      "title": "Assessing impacts of AI systems",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 11
+    },
+    {
+      "code": "A.6",
+      "title": "AI system life cycle",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 12
+    },
+    {
+      "code": "A.7",
+      "title": "Data for AI systems",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 13
+    },
+    {
+      "code": "A.8",
+      "title": "Information for interested parties of AI systems",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 14
+    },
+    {
+      "code": "A.9",
+      "title": "Use of AI systems",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 15
+    },
+    {
+      "code": "A.10",
+      "title": "Third-party and customer relationships",
+      "summary": null,
+      "group": "Annex A control objectives",
+      "parent": null,
+      "official": false,
+      "sortOrder": 16
+    }
+  ]
+}

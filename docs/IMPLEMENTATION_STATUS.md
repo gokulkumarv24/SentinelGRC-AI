@@ -9,7 +9,7 @@ Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet
 | 1 — Application skeleton | Done | API + web start; `/health`, `/ready` OK; migrations apply to empty DB; no Prisma drift; web proxy verified in browser |
 | 2 — Identity and tenant security | Done | 24 API tests: login/lockout, session idle + absolute expiry, CSRF + origin, logout, forced password change, invitations, self-role-change block, cross-tenant member/audit isolation, append-only audit trigger |
 | 3 — Shared GRC core | Done (API + UI) | 14 more API tests (38 total) + 23 unit tests; UI pages for risks, acceptance, findings, remediation, controls, SoA, evidence, members, settings, audit log, notifications; `tsc`, oxlint, eslint clean |
-| 4 — Compliance module | In progress | — |
+| 4 — Compliance module | Done (API + UI) | 9 more API tests (47 total) + 17 more unit tests (40 total): framework import/preview/immutable versions, tenant-private frameworks, mapping SoD + version-change re-review, control-check flow (unknown → evidence request; expired → fail → single finding + remediation; re-runs dedup; pass recorded, closes only by a person), manual tests, compliance math, bulk import + CSV injection, template adoption, dashboard tenant isolation. Reference data: NIST CSF 2.0 (6/22/106) and AI RMF 1.0 (19/72) from official NIST sources |
 | 5 — Third-party risk | Not started | — |
 | 6 — AI governance | Not started | — |
 | 7 — Workflow engine and integrations | Not started | — |
@@ -22,8 +22,8 @@ Test database: embedded PostgreSQL 18.4 (local). Neon has not been connected yet
 ```
 npm run typecheck -w services/api      # clean
 npm run lint -w services/api           # oxlint: 0 warnings
-npm test -w services/api               # 23 unit tests passed
-npm run test:api -w services/api       # 38 API tests passed (5 consecutive runs)
+npm test -w services/api               # 40 unit tests passed
+npm run test:api -w services/api       # 47 API tests passed
 npm run typecheck -w apps/web          # clean
 npx eslint . (apps/web)                # clean
 ```

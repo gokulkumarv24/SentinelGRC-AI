@@ -295,9 +295,13 @@ export class ControlsService {
     return this.prisma.control.findMany({ where: { organizationId: null, active: true }, orderBy: { controlCode: 'asc' } });
   }
 
-  /** Copies a platform template into the organization's register. */
+  /**
+   * Copies a platform template into the organization's register, together with its requirement
+   * mappings (as proposals pending review) and its suggested automated test rules.
+   */
   async adoptTemplate(templateId: string) {
-    const template = await this.prisma.control.findFirst({ where: { id: templateId, organizationId: null } });
+    const organizationId = requireOrgId();
+    const template = await this.prisma.control.findFirst({ where: { id: templateId, organizationId: null }, include: { mappings: { where: { organizationId: null } } } });
     if (!template) throw notFound('Control template');
     const control = await this.create({
       controlCode: template.controlCode,
@@ -306,6 +310,32 @@ export class ControlsService {
       category: template.category,
       reviewFrequencyDays: template.reviewFrequencyDays,
       isIllustrative: template.isIllustrative,
+    });
+    const config = (template.templateConfig ?? {}) as { rules?: Array<{ ruleKey: string; parameters: Record<string, unknown> }> };
+    await this.prisma.tx(async (tx) => {
+      for (const m of template.mappings) {
+        await tx.controlMapping.create({
+          data: {
+            organizationId,
+            sourceRequirementId: m.sourceRequirementId,
+            controlId: control.id,
+            mappingType: m.mappingType,
+            rationale: m.rationale,
+            confidence: m.confidence,
+            reviewStatus: 'pending_review',
+            isIllustrative: true,
+            frameworkVersion: m.frameworkVersion,
+            sourceReference: `Adopted from template ${template.controlCode}`,
+            createdBy: actorId(),
+          },
+        });
+      }
+      for (const rule of config.rules ?? []) {
+        await tx.controlTestConfig.create({
+          data: { organizationId, controlId: control.id, ruleKey: rule.ruleKey, parameters: rule.parameters as Prisma.InputJsonValue, frequencyHours: 24, enabled: true, nextRunAt: new Date(), createdBy: actorId() },
+        });
+      }
+      await this.audit.record({ action: 'control.template_adopted', entityType: 'control', entityId: control.id, after: { template: template.controlCode, mappings: template.mappings.length, rules: (config.rules ?? []).map((r) => r.ruleKey) } }, tx);
     });
     return control;
   }

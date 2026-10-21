@@ -273,3 +273,21 @@ export interface RoleInfo {
   description: string;
   permissions: string[];
 }
+
+export interface FrameworkRow {
+  id: string;
+  key: string;
+  name: string;
+  publisher: string;
+  version: string;
+  sourceUrl: string | null;
+  retrievedAt: string | null;
+  licenseNotes: string | null;
+  description: string | null;
+  isIllustrative: boolean;
+  status: string;
+  scope: "platform" | "organization";
+  inScope: boolean;
+  requirementCount: number;
+  importedAt: string;
+}

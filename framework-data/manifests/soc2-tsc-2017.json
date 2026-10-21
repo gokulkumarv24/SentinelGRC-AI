@@ -1,0 +1,743 @@
+{
+  "key": "soc2-tsc",
+  "name": "SOC 2 Trust Services Criteria",
+  "publisher": "AICPA",
+  "version": "2017 (revised points of focus 2022)",
+  "releaseDate": "2017-04-01",
+  "sourceUrl": "https://www.aicpa-cima.com/resources/download/2017-trust-services-criteria-with-revised-points-of-focus-2022",
+  "retrievedAt": "2026-10-21",
+  "isIllustrative": false,
+  "licenseNotes": "Copyrighted by AICPA. Criterion identifiers with internal summaries only; criterion text and points of focus are not reproduced.",
+  "description": "Readiness tracking against the Trust Services Criteria. Software tracking does not constitute a SOC 2 examination or attestation.",
+  "requirements": [
+    {
+      "code": "CC1",
+      "title": "Control environment",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 1
+    },
+    {
+      "code": "CC1.1",
+      "title": "Commitment to integrity and ethical values",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC1",
+      "official": false,
+      "sortOrder": 2
+    },
+    {
+      "code": "CC1.2",
+      "title": "Board independence and oversight",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC1",
+      "official": false,
+      "sortOrder": 3
+    },
+    {
+      "code": "CC1.3",
+      "title": "Structures, reporting lines, authorities and responsibilities",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC1",
+      "official": false,
+      "sortOrder": 4
+    },
+    {
+      "code": "CC1.4",
+      "title": "Commitment to competence",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC1",
+      "official": false,
+      "sortOrder": 5
+    },
+    {
+      "code": "CC1.5",
+      "title": "Accountability for internal control",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC1",
+      "official": false,
+      "sortOrder": 6
+    },
+    {
+      "code": "CC2",
+      "title": "Communication and information",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 7
+    },
+    {
+      "code": "CC2.1",
+      "title": "Use of relevant, quality information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC2",
+      "official": false,
+      "sortOrder": 8
+    },
+    {
+      "code": "CC2.2",
+      "title": "Internal communication of control information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC2",
+      "official": false,
+      "sortOrder": 9
+    },
+    {
+      "code": "CC2.3",
+      "title": "Communication with external parties",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC2",
+      "official": false,
+      "sortOrder": 10
+    },
+    {
+      "code": "CC3",
+      "title": "Risk assessment",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 11
+    },
+    {
+      "code": "CC3.1",
+      "title": "Objectives specified to identify risks",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC3",
+      "official": false,
+      "sortOrder": 12
+    },
+    {
+      "code": "CC3.2",
+      "title": "Risk identification and analysis",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC3",
+      "official": false,
+      "sortOrder": 13
+    },
+    {
+      "code": "CC3.3",
+      "title": "Fraud risk considered",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC3",
+      "official": false,
+      "sortOrder": 14
+    },
+    {
+      "code": "CC3.4",
+      "title": "Changes that could impact internal control",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC3",
+      "official": false,
+      "sortOrder": 15
+    },
+    {
+      "code": "CC4",
+      "title": "Monitoring activities",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 16
+    },
+    {
+      "code": "CC4.1",
+      "title": "Ongoing and separate evaluations",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC4",
+      "official": false,
+      "sortOrder": 17
+    },
+    {
+      "code": "CC4.2",
+      "title": "Communication of deficiencies",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC4",
+      "official": false,
+      "sortOrder": 18
+    },
+    {
+      "code": "CC5",
+      "title": "Control activities",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 19
+    },
+    {
+      "code": "CC5.1",
+      "title": "Control activities to mitigate risks",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC5",
+      "official": false,
+      "sortOrder": 20
+    },
+    {
+      "code": "CC5.2",
+      "title": "General controls over technology",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC5",
+      "official": false,
+      "sortOrder": 21
+    },
+    {
+      "code": "CC5.3",
+      "title": "Policies and procedures deployed",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC5",
+      "official": false,
+      "sortOrder": 22
+    },
+    {
+      "code": "CC6",
+      "title": "Logical and physical access controls",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 23
+    },
+    {
+      "code": "CC6.1",
+      "title": "Logical access security over protected assets",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 24
+    },
+    {
+      "code": "CC6.2",
+      "title": "User registration and authorization",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 25
+    },
+    {
+      "code": "CC6.3",
+      "title": "Role-based access and modification of access",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 26
+    },
+    {
+      "code": "CC6.4",
+      "title": "Physical access restriction",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 27
+    },
+    {
+      "code": "CC6.5",
+      "title": "Disposal of assets and data",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 28
+    },
+    {
+      "code": "CC6.6",
+      "title": "Protection against threats from outside system boundaries",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 29
+    },
+    {
+      "code": "CC6.7",
+      "title": "Restriction of data transmission and movement",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 30
+    },
+    {
+      "code": "CC6.8",
+      "title": "Prevention or detection of unauthorized or malicious software",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC6",
+      "official": false,
+      "sortOrder": 31
+    },
+    {
+      "code": "CC7",
+      "title": "System operations",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 32
+    },
+    {
+      "code": "CC7.1",
+      "title": "Detection of configuration changes and vulnerabilities",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC7",
+      "official": false,
+      "sortOrder": 33
+    },
+    {
+      "code": "CC7.2",
+      "title": "Monitoring for anomalies",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC7",
+      "official": false,
+      "sortOrder": 34
+    },
+    {
+      "code": "CC7.3",
+      "title": "Evaluation of security events",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC7",
+      "official": false,
+      "sortOrder": 35
+    },
+    {
+      "code": "CC7.4",
+      "title": "Incident response",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC7",
+      "official": false,
+      "sortOrder": 36
+    },
+    {
+      "code": "CC7.5",
+      "title": "Recovery from identified incidents",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC7",
+      "official": false,
+      "sortOrder": 37
+    },
+    {
+      "code": "CC8",
+      "title": "Change management",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 38
+    },
+    {
+      "code": "CC8.1",
+      "title": "Authorization, design, testing and implementation of changes",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC8",
+      "official": false,
+      "sortOrder": 39
+    },
+    {
+      "code": "CC9",
+      "title": "Risk mitigation",
+      "summary": null,
+      "group": "Common criteria (security)",
+      "parent": null,
+      "official": false,
+      "sortOrder": 40
+    },
+    {
+      "code": "CC9.1",
+      "title": "Business disruption risk mitigation",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC9",
+      "official": false,
+      "sortOrder": 41
+    },
+    {
+      "code": "CC9.2",
+      "title": "Vendor and business partner risk management",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Common criteria (security)",
+      "parent": "CC9",
+      "official": false,
+      "sortOrder": 42
+    },
+    {
+      "code": "A1",
+      "title": "Additional criteria for availability",
+      "summary": null,
+      "group": "Additional criteria for availability",
+      "parent": null,
+      "official": false,
+      "sortOrder": 43
+    },
+    {
+      "code": "A1.1",
+      "title": "Capacity management",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for availability",
+      "parent": "A1",
+      "official": false,
+      "sortOrder": 44
+    },
+    {
+      "code": "A1.2",
+      "title": "Environmental protections, backup and recovery infrastructure",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for availability",
+      "parent": "A1",
+      "official": false,
+      "sortOrder": 45
+    },
+    {
+      "code": "A1.3",
+      "title": "Recovery plan testing",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for availability",
+      "parent": "A1",
+      "official": false,
+      "sortOrder": 46
+    },
+    {
+      "code": "C1",
+      "title": "Additional criteria for confidentiality",
+      "summary": null,
+      "group": "Additional criteria for confidentiality",
+      "parent": null,
+      "official": false,
+      "sortOrder": 47
+    },
+    {
+      "code": "C1.1",
+      "title": "Identification and maintenance of confidential information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for confidentiality",
+      "parent": "C1",
+      "official": false,
+      "sortOrder": 48
+    },
+    {
+      "code": "C1.2",
+      "title": "Disposal of confidential information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for confidentiality",
+      "parent": "C1",
+      "official": false,
+      "sortOrder": 49
+    },
+    {
+      "code": "PI1",
+      "title": "Additional criteria for processing integrity",
+      "summary": null,
+      "group": "Additional criteria for processing integrity",
+      "parent": null,
+      "official": false,
+      "sortOrder": 50
+    },
+    {
+      "code": "PI1.1",
+      "title": "Information about processing objectives",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for processing integrity",
+      "parent": "PI1",
+      "official": false,
+      "sortOrder": 51
+    },
+    {
+      "code": "PI1.2",
+      "title": "System inputs",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for processing integrity",
+      "parent": "PI1",
+      "official": false,
+      "sortOrder": 52
+    },
+    {
+      "code": "PI1.3",
+      "title": "System processing",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for processing integrity",
+      "parent": "PI1",
+      "official": false,
+      "sortOrder": 53
+    },
+    {
+      "code": "PI1.4",
+      "title": "System outputs",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for processing integrity",
+      "parent": "PI1",
+      "official": false,
+      "sortOrder": 54
+    },
+    {
+      "code": "PI1.5",
+      "title": "Stored data",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Additional criteria for processing integrity",
+      "parent": "PI1",
+      "official": false,
+      "sortOrder": 55
+    },
+    {
+      "code": "P1",
+      "title": "Privacy: notice",
+      "summary": null,
+      "group": "Privacy: notice",
+      "parent": null,
+      "official": false,
+      "sortOrder": 56
+    },
+    {
+      "code": "P1.1",
+      "title": "Notice of privacy practices",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: notice",
+      "parent": "P1",
+      "official": false,
+      "sortOrder": 57
+    },
+    {
+      "code": "P2",
+      "title": "Privacy: choice and consent",
+      "summary": null,
+      "group": "Privacy: choice and consent",
+      "parent": null,
+      "official": false,
+      "sortOrder": 58
+    },
+    {
+      "code": "P2.1",
+      "title": "Choice and consent",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: choice and consent",
+      "parent": "P2",
+      "official": false,
+      "sortOrder": 59
+    },
+    {
+      "code": "P3",
+      "title": "Privacy: collection",
+      "summary": null,
+      "group": "Privacy: collection",
+      "parent": null,
+      "official": false,
+      "sortOrder": 60
+    },
+    {
+      "code": "P3.1",
+      "title": "Collection consistent with objectives",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: collection",
+      "parent": "P3",
+      "official": false,
+      "sortOrder": 61
+    },
+    {
+      "code": "P3.2",
+      "title": "Explicit consent for sensitive information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: collection",
+      "parent": "P3",
+      "official": false,
+      "sortOrder": 62
+    },
+    {
+      "code": "P4",
+      "title": "Privacy: use, retention and disposal",
+      "summary": null,
+      "group": "Privacy: use, retention and disposal",
+      "parent": null,
+      "official": false,
+      "sortOrder": 63
+    },
+    {
+      "code": "P4.1",
+      "title": "Use limited to objectives",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: use, retention and disposal",
+      "parent": "P4",
+      "official": false,
+      "sortOrder": 64
+    },
+    {
+      "code": "P4.2",
+      "title": "Retention",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: use, retention and disposal",
+      "parent": "P4",
+      "official": false,
+      "sortOrder": 65
+    },
+    {
+      "code": "P4.3",
+      "title": "Secure disposal",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: use, retention and disposal",
+      "parent": "P4",
+      "official": false,
+      "sortOrder": 66
+    },
+    {
+      "code": "P5",
+      "title": "Privacy: access",
+      "summary": null,
+      "group": "Privacy: access",
+      "parent": null,
+      "official": false,
+      "sortOrder": 67
+    },
+    {
+      "code": "P5.1",
+      "title": "Data subject access",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: access",
+      "parent": "P5",
+      "official": false,
+      "sortOrder": 68
+    },
+    {
+      "code": "P5.2",
+      "title": "Correction of personal information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: access",
+      "parent": "P5",
+      "official": false,
+      "sortOrder": 69
+    },
+    {
+      "code": "P6",
+      "title": "Privacy: disclosure and notification",
+      "summary": null,
+      "group": "Privacy: disclosure and notification",
+      "parent": null,
+      "official": false,
+      "sortOrder": 70
+    },
+    {
+      "code": "P6.1",
+      "title": "Disclosure to third parties with consent",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 71
+    },
+    {
+      "code": "P6.2",
+      "title": "Records of authorized disclosures",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 72
+    },
+    {
+      "code": "P6.3",
+      "title": "Records of unauthorized disclosures",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 73
+    },
+    {
+      "code": "P6.4",
+      "title": "Third-party commitments",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 74
+    },
+    {
+      "code": "P6.5",
+      "title": "Third-party notification of unauthorized disclosures",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 75
+    },
+    {
+      "code": "P6.6",
+      "title": "Notification of breaches and incidents",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 76
+    },
+    {
+      "code": "P6.7",
+      "title": "Accounting of disclosures to data subjects",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: disclosure and notification",
+      "parent": "P6",
+      "official": false,
+      "sortOrder": 77
+    },
+    {
+      "code": "P7",
+      "title": "Privacy: quality",
+      "summary": null,
+      "group": "Privacy: quality",
+      "parent": null,
+      "official": false,
+      "sortOrder": 78
+    },
+    {
+      "code": "P7.1",
+      "title": "Accurate, complete and relevant personal information",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: quality",
+      "parent": "P7",
+      "official": false,
+      "sortOrder": 79
+    },
+    {
+      "code": "P8",
+      "title": "Privacy: monitoring and enforcement",
+      "summary": null,
+      "group": "Privacy: monitoring and enforcement",
+      "parent": null,
+      "official": false,
+      "sortOrder": 80
+    },
+    {
+      "code": "P8.1",
+      "title": "Inquiries, complaints and disputes",
+      "summary": "Internal summary — see AICPA TSC for the criterion text.",
+      "group": "Privacy: monitoring and enforcement",
+      "parent": "P8",
+      "official": false,
+      "sortOrder": 81
+    }
+  ]
+}

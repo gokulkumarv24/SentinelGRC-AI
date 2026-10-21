@@ -1,0 +1,1176 @@
+{
+  "key": "iso-27001",
+  "name": "ISO/IEC 27001",
+  "publisher": "ISO/IEC",
+  "version": "2022",
+  "releaseDate": "2022-10-25",
+  "sourceUrl": "https://www.iso.org/standard/27001",
+  "retrievedAt": "2026-10-21",
+  "isIllustrative": false,
+  "licenseNotes": "Copyrighted by ISO/IEC. Only clause/control identifiers and short titles are stored; requirement text is not reproduced. Purchase the standard from ISO for the authoritative text.",
+  "description": "Information security management system requirements (clauses 4–10) and Annex A reference controls. Supports ISMS operation and Statement of Applicability; does not certify.",
+  "verification": "Annex A list (93 controls: 37/8/14/34) checked against a published Annex A index on 2026-10-21",
+  "requirements": [
+    {
+      "code": "4",
+      "title": "Context of the organization",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 1
+    },
+    {
+      "code": "4.1",
+      "title": "Understanding the organization and its context",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "4",
+      "official": false,
+      "sortOrder": 2
+    },
+    {
+      "code": "4.2",
+      "title": "Understanding the needs and expectations of interested parties",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "4",
+      "official": false,
+      "sortOrder": 3
+    },
+    {
+      "code": "4.3",
+      "title": "Determining the scope of the ISMS",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "4",
+      "official": false,
+      "sortOrder": 4
+    },
+    {
+      "code": "4.4",
+      "title": "Information security management system",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "4",
+      "official": false,
+      "sortOrder": 5
+    },
+    {
+      "code": "5",
+      "title": "Leadership",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 6
+    },
+    {
+      "code": "5.1",
+      "title": "Leadership and commitment",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "5",
+      "official": false,
+      "sortOrder": 7
+    },
+    {
+      "code": "5.2",
+      "title": "Policy",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "5",
+      "official": false,
+      "sortOrder": 8
+    },
+    {
+      "code": "5.3",
+      "title": "Organizational roles, responsibilities and authorities",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "5",
+      "official": false,
+      "sortOrder": 9
+    },
+    {
+      "code": "6",
+      "title": "Planning",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 10
+    },
+    {
+      "code": "6.1",
+      "title": "Actions to address risks and opportunities",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "6",
+      "official": false,
+      "sortOrder": 11
+    },
+    {
+      "code": "6.1.2",
+      "title": "Information security risk assessment",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "6.1",
+      "official": false,
+      "sortOrder": 12
+    },
+    {
+      "code": "6.1.3",
+      "title": "Information security risk treatment",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "6.1",
+      "official": false,
+      "sortOrder": 13
+    },
+    {
+      "code": "6.2",
+      "title": "Information security objectives and planning to achieve them",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "6",
+      "official": false,
+      "sortOrder": 14
+    },
+    {
+      "code": "6.3",
+      "title": "Planning of changes",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "6",
+      "official": false,
+      "sortOrder": 15
+    },
+    {
+      "code": "7",
+      "title": "Support",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 16
+    },
+    {
+      "code": "7.1",
+      "title": "Resources",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "7",
+      "official": false,
+      "sortOrder": 17
+    },
+    {
+      "code": "7.2",
+      "title": "Competence",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "7",
+      "official": false,
+      "sortOrder": 18
+    },
+    {
+      "code": "7.3",
+      "title": "Awareness",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "7",
+      "official": false,
+      "sortOrder": 19
+    },
+    {
+      "code": "7.4",
+      "title": "Communication",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "7",
+      "official": false,
+      "sortOrder": 20
+    },
+    {
+      "code": "7.5",
+      "title": "Documented information",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "7",
+      "official": false,
+      "sortOrder": 21
+    },
+    {
+      "code": "8",
+      "title": "Operation",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 22
+    },
+    {
+      "code": "8.1",
+      "title": "Operational planning and control",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "8",
+      "official": false,
+      "sortOrder": 23
+    },
+    {
+      "code": "8.2",
+      "title": "Information security risk assessment",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "8",
+      "official": false,
+      "sortOrder": 24
+    },
+    {
+      "code": "8.3",
+      "title": "Information security risk treatment",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "8",
+      "official": false,
+      "sortOrder": 25
+    },
+    {
+      "code": "9",
+      "title": "Performance evaluation",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 26
+    },
+    {
+      "code": "9.1",
+      "title": "Monitoring, measurement, analysis and evaluation",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "9",
+      "official": false,
+      "sortOrder": 27
+    },
+    {
+      "code": "9.2",
+      "title": "Internal audit",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "9",
+      "official": false,
+      "sortOrder": 28
+    },
+    {
+      "code": "9.3",
+      "title": "Management review",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "9",
+      "official": false,
+      "sortOrder": 29
+    },
+    {
+      "code": "10",
+      "title": "Improvement",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": null,
+      "official": false,
+      "sortOrder": 30
+    },
+    {
+      "code": "10.1",
+      "title": "Continual improvement",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "10",
+      "official": false,
+      "sortOrder": 31
+    },
+    {
+      "code": "10.2",
+      "title": "Nonconformity and corrective action",
+      "summary": null,
+      "group": "ISMS requirements",
+      "parent": "10",
+      "official": false,
+      "sortOrder": 32
+    },
+    {
+      "code": "A.5",
+      "title": "Organizational controls",
+      "summary": null,
+      "group": "Annex A",
+      "parent": null,
+      "official": false,
+      "sortOrder": 33
+    },
+    {
+      "code": "A.5.1",
+      "title": "Policies for information security",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 34
+    },
+    {
+      "code": "A.5.2",
+      "title": "Information security roles and responsibilities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 35
+    },
+    {
+      "code": "A.5.3",
+      "title": "Segregation of duties",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 36
+    },
+    {
+      "code": "A.5.4",
+      "title": "Management responsibilities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 37
+    },
+    {
+      "code": "A.5.5",
+      "title": "Contact with authorities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 38
+    },
+    {
+      "code": "A.5.6",
+      "title": "Contact with special interest groups",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 39
+    },
+    {
+      "code": "A.5.7",
+      "title": "Threat intelligence",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 40
+    },
+    {
+      "code": "A.5.8",
+      "title": "Information security in project management",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 41
+    },
+    {
+      "code": "A.5.9",
+      "title": "Inventory of information and other associated assets",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 42
+    },
+    {
+      "code": "A.5.10",
+      "title": "Acceptable use of information and other associated assets",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 43
+    },
+    {
+      "code": "A.5.11",
+      "title": "Return of assets",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 44
+    },
+    {
+      "code": "A.5.12",
+      "title": "Classification of information",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 45
+    },
+    {
+      "code": "A.5.13",
+      "title": "Labelling of information",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 46
+    },
+    {
+      "code": "A.5.14",
+      "title": "Information transfer",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 47
+    },
+    {
+      "code": "A.5.15",
+      "title": "Access control",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 48
+    },
+    {
+      "code": "A.5.16",
+      "title": "Identity management",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 49
+    },
+    {
+      "code": "A.5.17",
+      "title": "Authentication information",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 50
+    },
+    {
+      "code": "A.5.18",
+      "title": "Access rights",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 51
+    },
+    {
+      "code": "A.5.19",
+      "title": "Information security in supplier relationships",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 52
+    },
+    {
+      "code": "A.5.20",
+      "title": "Addressing information security within supplier agreements",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 53
+    },
+    {
+      "code": "A.5.21",
+      "title": "Managing information security in the ICT supply chain",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 54
+    },
+    {
+      "code": "A.5.22",
+      "title": "Monitoring, review and change management of supplier services",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 55
+    },
+    {
+      "code": "A.5.23",
+      "title": "Information security for use of cloud services",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 56
+    },
+    {
+      "code": "A.5.24",
+      "title": "Information security incident management planning and preparation",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 57
+    },
+    {
+      "code": "A.5.25",
+      "title": "Assessment and decision on information security events",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 58
+    },
+    {
+      "code": "A.5.26",
+      "title": "Response to information security incidents",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 59
+    },
+    {
+      "code": "A.5.27",
+      "title": "Learning from information security incidents",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 60
+    },
+    {
+      "code": "A.5.28",
+      "title": "Collection of evidence",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 61
+    },
+    {
+      "code": "A.5.29",
+      "title": "Information security during disruption",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 62
+    },
+    {
+      "code": "A.5.30",
+      "title": "ICT readiness for business continuity",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 63
+    },
+    {
+      "code": "A.5.31",
+      "title": "Legal, statutory, regulatory and contractual requirements",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 64
+    },
+    {
+      "code": "A.5.32",
+      "title": "Intellectual property rights",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 65
+    },
+    {
+      "code": "A.5.33",
+      "title": "Protection of records",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 66
+    },
+    {
+      "code": "A.5.34",
+      "title": "Privacy and protection of PII",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 67
+    },
+    {
+      "code": "A.5.35",
+      "title": "Independent review of information security",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 68
+    },
+    {
+      "code": "A.5.36",
+      "title": "Compliance with policies, rules and standards for information security",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 69
+    },
+    {
+      "code": "A.5.37",
+      "title": "Documented operating procedures",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.5",
+      "official": false,
+      "sortOrder": 70
+    },
+    {
+      "code": "A.6",
+      "title": "People controls",
+      "summary": null,
+      "group": "Annex A",
+      "parent": null,
+      "official": false,
+      "sortOrder": 71
+    },
+    {
+      "code": "A.6.1",
+      "title": "Screening",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 72
+    },
+    {
+      "code": "A.6.2",
+      "title": "Terms and conditions of employment",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 73
+    },
+    {
+      "code": "A.6.3",
+      "title": "Information security awareness, education and training",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 74
+    },
+    {
+      "code": "A.6.4",
+      "title": "Disciplinary process",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 75
+    },
+    {
+      "code": "A.6.5",
+      "title": "Responsibilities after termination or change of employment",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 76
+    },
+    {
+      "code": "A.6.6",
+      "title": "Confidentiality or non-disclosure agreements",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 77
+    },
+    {
+      "code": "A.6.7",
+      "title": "Remote working",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 78
+    },
+    {
+      "code": "A.6.8",
+      "title": "Information security event reporting",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.6",
+      "official": false,
+      "sortOrder": 79
+    },
+    {
+      "code": "A.7",
+      "title": "Physical controls",
+      "summary": null,
+      "group": "Annex A",
+      "parent": null,
+      "official": false,
+      "sortOrder": 80
+    },
+    {
+      "code": "A.7.1",
+      "title": "Physical security perimeters",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 81
+    },
+    {
+      "code": "A.7.2",
+      "title": "Physical entry",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 82
+    },
+    {
+      "code": "A.7.3",
+      "title": "Securing offices, rooms and facilities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 83
+    },
+    {
+      "code": "A.7.4",
+      "title": "Physical security monitoring",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 84
+    },
+    {
+      "code": "A.7.5",
+      "title": "Protecting against physical and environmental threats",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 85
+    },
+    {
+      "code": "A.7.6",
+      "title": "Working in secure areas",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 86
+    },
+    {
+      "code": "A.7.7",
+      "title": "Clear desk and clear screen",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 87
+    },
+    {
+      "code": "A.7.8",
+      "title": "Equipment siting and protection",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 88
+    },
+    {
+      "code": "A.7.9",
+      "title": "Security of assets off-premises",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 89
+    },
+    {
+      "code": "A.7.10",
+      "title": "Storage media",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 90
+    },
+    {
+      "code": "A.7.11",
+      "title": "Supporting utilities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 91
+    },
+    {
+      "code": "A.7.12",
+      "title": "Cabling security",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 92
+    },
+    {
+      "code": "A.7.13",
+      "title": "Equipment maintenance",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 93
+    },
+    {
+      "code": "A.7.14",
+      "title": "Secure disposal or re-use of equipment",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.7",
+      "official": false,
+      "sortOrder": 94
+    },
+    {
+      "code": "A.8",
+      "title": "Technological controls",
+      "summary": null,
+      "group": "Annex A",
+      "parent": null,
+      "official": false,
+      "sortOrder": 95
+    },
+    {
+      "code": "A.8.1",
+      "title": "User endpoint devices",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 96
+    },
+    {
+      "code": "A.8.2",
+      "title": "Privileged access rights",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 97
+    },
+    {
+      "code": "A.8.3",
+      "title": "Information access restriction",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 98
+    },
+    {
+      "code": "A.8.4",
+      "title": "Access to source code",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 99
+    },
+    {
+      "code": "A.8.5",
+      "title": "Secure authentication",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 100
+    },
+    {
+      "code": "A.8.6",
+      "title": "Capacity management",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 101
+    },
+    {
+      "code": "A.8.7",
+      "title": "Protection against malware",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 102
+    },
+    {
+      "code": "A.8.8",
+      "title": "Management of technical vulnerabilities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 103
+    },
+    {
+      "code": "A.8.9",
+      "title": "Configuration management",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 104
+    },
+    {
+      "code": "A.8.10",
+      "title": "Information deletion",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 105
+    },
+    {
+      "code": "A.8.11",
+      "title": "Data masking",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 106
+    },
+    {
+      "code": "A.8.12",
+      "title": "Data leakage prevention",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 107
+    },
+    {
+      "code": "A.8.13",
+      "title": "Information backup",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 108
+    },
+    {
+      "code": "A.8.14",
+      "title": "Redundancy of information processing facilities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 109
+    },
+    {
+      "code": "A.8.15",
+      "title": "Logging",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 110
+    },
+    {
+      "code": "A.8.16",
+      "title": "Monitoring activities",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 111
+    },
+    {
+      "code": "A.8.17",
+      "title": "Clock synchronization",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 112
+    },
+    {
+      "code": "A.8.18",
+      "title": "Use of privileged utility programs",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 113
+    },
+    {
+      "code": "A.8.19",
+      "title": "Installation of software on operational systems",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 114
+    },
+    {
+      "code": "A.8.20",
+      "title": "Networks security",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 115
+    },
+    {
+      "code": "A.8.21",
+      "title": "Security of network services",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 116
+    },
+    {
+      "code": "A.8.22",
+      "title": "Segregation of networks",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 117
+    },
+    {
+      "code": "A.8.23",
+      "title": "Web filtering",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 118
+    },
+    {
+      "code": "A.8.24",
+      "title": "Use of cryptography",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 119
+    },
+    {
+      "code": "A.8.25",
+      "title": "Secure development life cycle",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 120
+    },
+    {
+      "code": "A.8.26",
+      "title": "Application security requirements",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 121
+    },
+    {
+      "code": "A.8.27",
+      "title": "Secure system architecture and engineering principles",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 122
+    },
+    {
+      "code": "A.8.28",
+      "title": "Secure coding",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 123
+    },
+    {
+      "code": "A.8.29",
+      "title": "Security testing in development and acceptance",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 124
+    },
+    {
+      "code": "A.8.30",
+      "title": "Outsourced development",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 125
+    },
+    {
+      "code": "A.8.31",
+      "title": "Separation of development, test and production environments",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 126
+    },
+    {
+      "code": "A.8.32",
+      "title": "Change management",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 127
+    },
+    {
+      "code": "A.8.33",
+      "title": "Test information",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 128
+    },
+    {
+      "code": "A.8.34",
+      "title": "Protection of information systems during audit testing",
+      "summary": null,
+      "group": "Annex A",
+      "parent": "A.8",
+      "official": false,
+      "sortOrder": 129
+    }
+  ]
+}

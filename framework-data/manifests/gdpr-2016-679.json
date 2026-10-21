@@ -1,0 +1,230 @@
+{
+  "key": "gdpr",
+  "name": "General Data Protection Regulation (GDPR)",
+  "publisher": "European Union",
+  "version": "Regulation (EU) 2016/679",
+  "releaseDate": "2016-04-27",
+  "sourceUrl": "https://eur-lex.europa.eu/eli/reg/2016/679/oj",
+  "retrievedAt": "2026-10-21",
+  "isIllustrative": false,
+  "licenseNotes": "EU legal text; reuse permitted under Commission Decision 2011/833/EU. Selected articles relevant to security and processing obligations; not the full regulation.",
+  "description": "Selected GDPR obligations for tracking applicability, processing and privacy risks. Interpretation requires legal review; this is not legal advice.",
+  "requirements": [
+    {
+      "code": "Art. 5",
+      "title": "Principles relating to processing of personal data",
+      "summary": null,
+      "group": "Principles",
+      "parent": null,
+      "official": true,
+      "sortOrder": 1
+    },
+    {
+      "code": "Art. 6",
+      "title": "Lawfulness of processing",
+      "summary": null,
+      "group": "Principles",
+      "parent": null,
+      "official": true,
+      "sortOrder": 2
+    },
+    {
+      "code": "Art. 7",
+      "title": "Conditions for consent",
+      "summary": null,
+      "group": "Principles",
+      "parent": null,
+      "official": true,
+      "sortOrder": 3
+    },
+    {
+      "code": "Art. 9",
+      "title": "Processing of special categories of personal data",
+      "summary": null,
+      "group": "Principles",
+      "parent": null,
+      "official": true,
+      "sortOrder": 4
+    },
+    {
+      "code": "Art. 12",
+      "title": "Transparent information, communication and modalities for the exercise of the rights of the data subject",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 5
+    },
+    {
+      "code": "Art. 13",
+      "title": "Information to be provided where personal data are collected from the data subject",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 6
+    },
+    {
+      "code": "Art. 15",
+      "title": "Right of access by the data subject",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 7
+    },
+    {
+      "code": "Art. 16",
+      "title": "Right to rectification",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 8
+    },
+    {
+      "code": "Art. 17",
+      "title": "Right to erasure ('right to be forgotten')",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 9
+    },
+    {
+      "code": "Art. 20",
+      "title": "Right to data portability",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 10
+    },
+    {
+      "code": "Art. 21",
+      "title": "Right to object",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 11
+    },
+    {
+      "code": "Art. 22",
+      "title": "Automated individual decision-making, including profiling",
+      "summary": null,
+      "group": "Data subject rights",
+      "parent": null,
+      "official": true,
+      "sortOrder": 12
+    },
+    {
+      "code": "Art. 24",
+      "title": "Responsibility of the controller",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 13
+    },
+    {
+      "code": "Art. 25",
+      "title": "Data protection by design and by default",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 14
+    },
+    {
+      "code": "Art. 28",
+      "title": "Processor",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 15
+    },
+    {
+      "code": "Art. 30",
+      "title": "Records of processing activities",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 16
+    },
+    {
+      "code": "Art. 32",
+      "title": "Security of processing",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 17
+    },
+    {
+      "code": "Art. 33",
+      "title": "Notification of a personal data breach to the supervisory authority",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 18
+    },
+    {
+      "code": "Art. 34",
+      "title": "Communication of a personal data breach to the data subject",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 19
+    },
+    {
+      "code": "Art. 35",
+      "title": "Data protection impact assessment",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 20
+    },
+    {
+      "code": "Art. 37",
+      "title": "Designation of the data protection officer",
+      "summary": null,
+      "group": "Controller and processor",
+      "parent": null,
+      "official": true,
+      "sortOrder": 21
+    },
+    {
+      "code": "Art. 44",
+      "title": "General principle for transfers",
+      "summary": null,
+      "group": "International transfers",
+      "parent": null,
+      "official": true,
+      "sortOrder": 22
+    },
+    {
+      "code": "Art. 45",
+      "title": "Transfers on the basis of an adequacy decision",
+      "summary": null,
+      "group": "International transfers",
+      "parent": null,
+      "official": true,
+      "sortOrder": 23
+    },
+    {
+      "code": "Art. 46",
+      "title": "Transfers subject to appropriate safeguards",
+      "summary": null,
+      "group": "International transfers",
+      "parent": null,
+      "official": true,
+      "sortOrder": 24
+    }
+  ]
+}

@@ -13,6 +13,7 @@ import { DetailList, PageHeader, Section } from "@/components/common/page-header
 import { evidenceOption } from "@/components/common/record-picker";
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { ImplementationForm } from "@/components/controls/implementation-form";
+import { RuleConfigDialog } from "@/components/controls/rule-config-dialog";
 import { EvidenceUploadDialog } from "@/components/evidence/upload-dialog";
 import { FindingFormDialog } from "@/components/findings/finding-form";
 import { Button } from "@/components/ui/button";
@@ -124,12 +125,17 @@ export default function ControlDetailPage({ params }: PageProps<"/controls/[id]"
         </TabsContent>
 
         <TabsContent value="tests">
-          <Section title="Test history" description="Pass, fail, unknown and error are kept distinct. Missing evidence produces unknown, not fail.">
+          <Section
+            title="Test history"
+            description="Pass, fail, unknown and error are kept distinct. Missing evidence produces unknown, not fail."
+            actions={can("control.update") && <RuleConfigDialog controlId={c.id} trigger={<Button size="sm" variant="outline"><Plus aria-hidden /> Add rule</Button>} />}
+          >
             {c.testConfigs.length > 0 && (
               <div className="mb-3 flex flex-wrap gap-2 text-xs">
                 {c.testConfigs.map((t) => (
-                  <span key={t.id} className="rounded-md border px-2 py-1">
+                  <span key={t.id} className="inline-flex items-center gap-1 rounded-md border px-2 py-1">
                     Rule <span className="font-mono">{t.ruleKey}</span> · every {t.frequencyHours}h · next <DateText value={t.nextRunAt} withTime /> {!t.enabled && "(disabled)"}
+                    {can("control.update") && <RuleConfigDialog controlId={c.id} initial={t} trigger={<Button size="xs" variant="ghost">Edit</Button>} />}
                   </span>
                 ))}
               </div>

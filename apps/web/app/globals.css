@@ -84,11 +84,11 @@
   --border: oklch(0.929 0.013 255.508); /* slate-200 */
   --input: oklch(0.869 0.022 252.894); /* slate-300 */
   --ring: oklch(0.488 0.243 264.376);
-  --chart-1: oklch(0.488 0.243 264.376); /* blue-700 */
-  --chart-2: oklch(0.6 0.118 184.704); /* teal-600 */
-  --chart-3: oklch(0.541 0.281 293.009); /* violet-600 */
-  --chart-4: oklch(0.666 0.179 58.318); /* amber-600 */
-  --chart-5: oklch(0.554 0.046 257.417); /* slate-500 */
+  --chart-1: #1d4ed8; /* validated categorical palette (dataviz validate_palette.js, light vs #fff): all checks pass */
+  --chart-2: #0d9488;
+  --chart-3: #7c3aed;
+  --chart-4: #d97706;
+  --chart-5: #db2777;
   --sev-low: oklch(0.448 0.119 151.328); /* green-800 */
   --sev-low-bg: oklch(0.962 0.044 156.743);
   --sev-medium: oklch(0.473 0.137 46.201); /* amber-800 */
@@ -132,11 +132,11 @@
   --border: oklch(1 0 0 / 12%);
   --input: oklch(1 0 0 / 18%);
   --ring: oklch(0.623 0.214 259.815);
-  --chart-1: oklch(0.707 0.165 254.624);
-  --chart-2: oklch(0.777 0.152 181.912);
-  --chart-3: oklch(0.702 0.183 293.541);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.704 0.04 256.788);
+  --chart-1: #3b82f6; /* validated against dark surface #0f172a: all checks pass */
+  --chart-2: #0d9488;
+  --chart-3: #8b5cf6;
+  --chart-4: #d97706;
+  --chart-5: #ec4899;
   --sev-low: oklch(0.871 0.15 154.449);
   --sev-low-bg: oklch(0.266 0.065 152.934);
   --sev-medium: oklch(0.879 0.169 91.605);
