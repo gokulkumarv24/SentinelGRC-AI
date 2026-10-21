@@ -104,8 +104,8 @@ describe('Authentication and sessions', () => {
     expect(expired.status).toBe(401);
     // The stale cookies are removed so the web app cannot loop between /login and the workspace.
     const cleared = ([] as string[]).concat(expired.headers['set-cookie'] ?? []);
-    expect(cleared.some((c) => /^sg_session=;/.test(c) && /Expires=Thu, 01 Jan 1970/.test(c))).toBe(true);
-    expect(cleared.some((c) => /^sg_csrf=;/.test(c))).toBe(true);
+    expect(cleared.some((c) => c.startsWith('sg_session=;') && /Expires=Thu, 01 Jan 1970/.test(c))).toBe(true);
+    expect(cleared.some((c) => c.startsWith('sg_csrf=;'))).toBe(true);
 
     const absolute = await loginAs(ctx, org.id, ['auditor']);
     await ctx.prisma.session.updateMany({
