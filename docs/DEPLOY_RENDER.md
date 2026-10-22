@@ -73,7 +73,7 @@ Then either:
 
 - `https://<api>.onrender.com/api/v1/health` returns `{"status":"ok"}`.
 - Open the website, sign in, upload a small PDF as evidence and download it again (this proves the storage), then generate a report (this proves the background jobs).
-- **Audit Log:** the `auth.login_succeeded` event should show **your** IP address. If it shows a Render address (`10.x.x.x`) instead, check that `TRUST_PROXY` on the API is `private` and redeploy; login rate limiting is per visitor IP.
+- **Audit Log:** the `auth.login_succeeded` event should show **your** IP address. If it shows a Render (`10.x.x.x`) or Cloudflare (`172.64–172.71.x.x`, `104.16–104.31.x.x`, …) address instead, check that `TRUST_PROXY` on the API is `cloudflare` and redeploy; login rate limiting is per visitor IP.
 - If uploads or report generation fail, check the API logs for `Object storage upload failed (403 AccessDenied)` or similar: the B2 application key must have **Read and Write** access to the bucket.
 
 ## Optional: AI assistant with Groq (free)

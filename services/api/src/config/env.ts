@@ -1,5 +1,6 @@
 import { existsSync } from 'node:fs';
 import { z } from 'zod';
+import { CLOUDFLARE_RANGES, PRIVATE_HOPS } from './trusted-proxies.js';
 
 const bool = z
   .enum(['true', 'false', '1', '0'])
@@ -28,12 +29,17 @@ const schema = z
     SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(72).default(12),
     CORS_ORIGINS: csv,
     // false | true (one proxy hop) | number of trusted proxy hops in front of the API |
-    // private: trust every loopback/private-network hop (platforms whose internal routers and the web app's
-    // rewrite add a varying number of 10.x hops). The client IP is then the first public address added by the edge.
+    // private: trust every loopback/private-network hop (internal routers and the web app's rewrite) |
+    // cloudflare: private hops plus Cloudflare's edge ranges (Render and other hosts behind Cloudflare).
+    // The client IP is then the first address, from the right, that is not a trusted hop.
     TRUST_PROXY: z
-      .enum(['true', 'false', '1', '0', '2', '3', 'private'])
+      .enum(['true', 'false', '1', '0', '2', '3', 'private', 'cloudflare'])
       .default('false')
-      .transform((v): number | string[] => (v === 'private' ? ['loopback', 'linklocal', 'uniquelocal'] : v === 'true' ? 1 : v === 'false' ? 0 : Number(v))),
+      .transform((v): number | string[] => {
+        if (v === 'private') return PRIVATE_HOPS;
+        if (v === 'cloudflare') return [...PRIVATE_HOPS, ...CLOUDFLARE_RANGES];
+        return v === 'true' ? 1 : v === 'false' ? 0 : Number(v);
+      }),
     RATE_LIMIT_LOGIN_PER_MINUTE: z.coerce.number().int().positive().default(10),
     RATE_LIMIT_DEFAULT_PER_MINUTE: z.coerce.number().int().positive().default(300),
     RATE_LIMIT_EXPENSIVE_PER_MINUTE: z.coerce.number().int().positive().default(20),
