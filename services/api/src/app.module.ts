@@ -56,6 +56,10 @@ import { EmailDeliveryService } from './modules/notifications/email-delivery.ser
 import { ReportBuilders } from './modules/reports/report-builders.js';
 import { AssistantController } from './modules/assistant/assistant.controller.js';
 import { AssistantService } from './modules/assistant/assistant.service.js';
+import { AgentController } from './modules/agent/agent.controller.js';
+import { AgentService } from './modules/agent/agent.service.js';
+import { TrustController } from './modules/trust/trust.controller.js';
+import { TrustService } from './modules/trust/trust.service.js';
 import { ReportsController } from './modules/reports/reports.controller.js';
 import { ReportsService } from './modules/reports/reports.service.js';
 import { PrismaService } from './prisma/prisma.service.js';
@@ -108,6 +112,8 @@ export const DOMAIN_SERVICES = [
   ReportBuilders,
   ReportsService,
   AssistantService,
+  TrustService,
+  AgentService,
 ];
 
 @Global()
@@ -137,6 +143,8 @@ export class DomainModule {}
     IntegrationsController,
     ReportsController,
     AssistantController,
+    AgentController,
+    TrustController,
   ],
   providers: [
     { provide: APP_GUARD, useClass: SecurityGuard },

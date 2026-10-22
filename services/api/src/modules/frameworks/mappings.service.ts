@@ -135,6 +135,23 @@ export class MappingsService {
     });
   }
 
+  /**
+   * Reviews several proposed mappings at once (e.g. the AI agent's suggestions for a new framework).
+   * Each one goes through the normal review rules; ones the reviewer may not decide are reported, not skipped silently.
+   */
+  async bulkReview(ids: string[], decision: 'approved' | 'rejected', notes: string) {
+    const results: Array<{ id: string; ok: boolean; error?: string }> = [];
+    for (const id of ids) {
+      try {
+        await this.review(id, decision, notes);
+        results.push({ id, ok: true });
+      } catch (error) {
+        results.push({ id, ok: false, error: error instanceof Error ? error.message : 'failed' });
+      }
+    }
+    return { reviewed: results.filter((r) => r.ok).length, failed: results.filter((r) => !r.ok) };
+  }
+
   /** Copies a platform illustrative mapping into the organization as a proposal awaiting review. */
   async adopt(platformMappingId: string) {
     const platform = await this.prisma.controlMapping.findFirst({ where: { id: platformMappingId, organizationId: null } });

@@ -6,6 +6,7 @@ import type { AccessLevel, Criticality, EvidenceClassification, Prisma, Severity
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AuditService } from '../audit/audit.service.js';
 import { ScoringPolicyService } from '../risks/scoring-policy.service.js';
+import { EventQueue } from '../workflows/event-queue.service.js';
 import { EntityResolver } from '../shared/entity-resolver.service.js';
 import { inherentVendorRisk } from './vendor-scoring.js';
 
@@ -53,6 +54,7 @@ export class VendorsService {
     private readonly audit: AuditService,
     private readonly entities: EntityResolver,
     private readonly policies: ScoringPolicyService,
+    private readonly events: EventQueue,
   ) {}
 
   async list(query: { page: number; pageSize: number; sort: string; order: 'asc' | 'desc'; q?: string; status?: VendorStatus[]; criticality?: Criticality[]; tier?: string[]; reassessmentDue?: boolean }) {
@@ -118,6 +120,7 @@ export class VendorsService {
       });
       await tx.vendorRiskHistory.create({ data: { organizationId, vendorId: vendor.id, inherentScore: inherent.score, policyVersion } });
       await this.audit.record({ action: 'vendor.created', entityType: 'vendor', entityId: vendor.id, after: { name: vendor.name, criticality: vendor.criticality, inherentRiskScore: inherent.score } }, tx);
+      await this.events.emit(tx, organizationId, 'vendor.created', { vendorId: vendor.id }, `vendor-created:${vendor.id}`);
       return vendor;
     });
   }

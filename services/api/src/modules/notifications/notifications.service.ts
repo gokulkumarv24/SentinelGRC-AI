@@ -37,6 +37,7 @@ export const NOTIFICATION_EVENT_TYPES = [
   'integration.failed',
   'report.ready',
   'approval.requested',
+  'ai.agent_ready',
 ] as const;
 
 @Injectable()

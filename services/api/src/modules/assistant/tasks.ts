@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { notFound } from '../../common/errors.js';
 import type { Permission } from '../../permissions/catalog.js';
 import type { PrismaService } from '../../prisma/prisma.service.js';
+import type { ScoringPolicyService } from '../risks/scoring-policy.service.js';
 import { RULES_BY_KEY } from '../control-tests/rules.js';
 import type { StorageService } from '../evidence/storage.js';
 import type { ReportsService } from '../reports/reports.service.js';
@@ -18,6 +19,22 @@ export const ARTIFACT_TYPES = [
   'report_draft',
   'mapping_suggestions',
   'control_failure_explanation',
+  // AI agent tasks (agent-tasks.ts)
+  'evidence_review',
+  'vendor_document_analysis',
+  'vendor_response_review',
+  'vendor_decision_memo',
+  'vendor_profile_review',
+  'vendor_followup',
+  'vendor_portfolio_digest',
+  'finding_triage',
+  'evidence_request',
+  'risk_proposals',
+  'ai_system_prefill',
+  'ai_change_impact',
+  'policy_draft',
+  'platform_answer',
+  'questionnaire_answers',
 ] as const;
 export type ArtifactType = (typeof ARTIFACT_TYPES)[number];
 
@@ -25,8 +42,8 @@ const sourceRef = z.object({ sourceId: z.string().max(20), locator: z.string().m
 /** Strict output schema shared by every task (spec §11.2 "strict request/response schemas"). */
 export const draftOutput = z.object({
   summary: z.string().max(4000),
-  points: z.array(z.object({ text: z.string().max(2000), sourceRefs: z.array(sourceRef).max(10) })).max(30),
-  suggestions: z.array(z.object({ label: z.string().max(200), value: z.string().max(500), rationale: z.string().max(2000), sourceRefs: z.array(sourceRef).max(10).default([]) })).max(20).default([]),
+  points: z.array(z.object({ text: z.string().max(2000), sourceRefs: z.array(sourceRef).max(10) })).max(40),
+  suggestions: z.array(z.object({ label: z.string().max(200), value: z.string().max(500), rationale: z.string().max(2000), sourceRefs: z.array(sourceRef).max(10).default([]) })).max(60).default([]),
   limitations: z.array(z.string().max(1000)).max(20).default([]),
   confidence: z.enum(['low', 'medium', 'high']),
 });
@@ -58,7 +75,23 @@ export interface TaskDeps {
   prisma: PrismaService;
   storage: StorageService;
   reports: ReportsService;
+  policies: ScoringPolicyService;
   organizationId: string;
+  /** Permission check for the requester (always true for the agent's system context). */
+  can: (permission: Permission) => boolean;
+}
+
+/** Extra inputs some tasks take besides the target record. */
+export interface TaskOptions {
+  controlId?: string;
+  /** policy_draft: the policy topic. */
+  topic?: string;
+  /** policy_draft: controls the policy should cover. */
+  controlIds?: string[];
+  /** platform_answer: the user's question. */
+  question?: string;
+  /** questionnaire_answers: the batch of questionnaire items to answer. */
+  itemIds?: string[];
 }
 
 export interface TaskDef {
@@ -67,17 +100,21 @@ export interface TaskDef {
   targetType: string;
   permissions: Permission[];
   instructions: string;
-  load(deps: TaskDeps, targetId: string, options: { controlId?: string }): Promise<Prepared>;
+  load(deps: TaskDeps, targetId: string, options: TaskOptions): Promise<Prepared>;
   /** Deterministic, extractive output used by the mock provider and as the non-AI fallback. */
   mock(p: Prepared): DraftOutput;
+  /** Task-specific checks of structured suggestion values (in addition to checkGrounding). */
+  validate?(out: DraftOutput, p: Prepared): string[];
+  /** Larger outputs (policies, questionnaire batches) need a bigger completion budget. */
+  maxOutputTokens?: number;
 }
 
-const SEVERITIES = ['low', 'medium', 'high', 'critical'];
-const KEYWORDS = /\b(shall|must|required|enforced|enabled|encrypt\w*|review\w*|approv\w*|policy|backup\w*|access|mfa|multi-factor|log(ged|ging)?|monitor\w*|retain\w*|test(ed|ing)?|annual\w*|quarterl\w*)\b/i;
+export const SEVERITIES = ['low', 'medium', 'high', 'critical'];
+export const KEYWORDS = /\b(shall|must|required|enforced|enabled|encrypt\w*|review\w*|approv\w*|policy|backup\w*|access|mfa|multi-factor|log(ged|ging)?|monitor\w*|retain\w*|test(ed|ing)?|annual\w*|quarterl\w*)\b/i;
 
-const words = (s: string) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
+export const words = (s: string) => new Set(s.toLowerCase().match(/[a-z]{4,}/g) ?? []);
 
-async function evidenceSource(deps: TaskDeps, evidenceId: string): Promise<{ source: Source; limitations: string[]; title: string }> {
+export async function evidenceSource(deps: TaskDeps, evidenceId: string): Promise<{ source: Source; limitations: string[]; title: string }> {
   const e = await deps.prisma.evidence.findFirst({ where: { id: evidenceId, organizationId: deps.organizationId } });
   if (!e) throw notFound('Evidence');
   const limitations: string[] = [];
@@ -95,7 +132,7 @@ async function evidenceSource(deps: TaskDeps, evidenceId: string): Promise<{ sou
   return { source: { ref: 'S1', type: 'evidence', recordId: e.id, label: e.title, version: e.sha256Checksum ?? e.updatedAt.toISOString(), classification: e.classification, segments }, limitations, title: e.title };
 }
 
-const empty = (summary: string, limitations: string[]): DraftOutput => ({ summary, points: [], suggestions: [], limitations, confidence: 'low' });
+export const empty = (summary: string, limitations: string[]): DraftOutput => ({ summary, points: [], suggestions: [], limitations, confidence: 'low' });
 
 export const TASKS: TaskDef[] = [
   {
@@ -416,7 +453,7 @@ export function checkGrounding(out: DraftOutput, p: Prepared): string[] {
   return [...new Set(errors)].slice(0, 20);
 }
 
-const CATEGORY_HINTS: Record<string, RegExp> = {
+export const CATEGORY_HINTS: Record<string, RegExp> = {
   access_control: /\b(access|privileged|mfa|multi-factor|password|account|permission)/,
   encryption: /\b(encrypt|tls|cipher|key management)/,
   vulnerability_management: /\b(vulnerab|patch|cve|scan)/,
@@ -427,7 +464,7 @@ const CATEGORY_HINTS: Record<string, RegExp> = {
   business_continuity: /\b(backup|recovery|continuity|disaster)/,
 };
 
-const REMEDIATION_LIBRARY: Record<string, Array<[string, string]>> = {
+export const REMEDIATION_LIBRARY: Record<string, Array<[string, string]>> = {
   access_control: [['Enforce MFA and remove standing privileged access', 'Strongest reduction; may need break-glass procedures and user communication.'], ['Run an immediate access review and revoke unneeded accounts', 'Fast; needs owners to attest and repeat on a schedule.'], ['Introduce just-in-time elevation', 'Durable; requires tooling and process change.']],
   encryption: [['Enable encryption at rest and in transit for the affected systems', 'Direct fix; check performance and key management.'], ['Document a compensating control with an expiry', 'Quick; residual risk must be accepted formally.']],
   vulnerability_management: [['Patch or upgrade the affected components', 'Removes the issue; schedule a maintenance window.'], ['Apply a configuration mitigation until patching', 'Temporary; track as an exception with a due date.']],

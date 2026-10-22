@@ -7,7 +7,10 @@ import { ApiZodBody, ApiZodQuery, uuid, zod } from '../../common/validation.js';
 import { AssistantService } from './assistant.service.js';
 import { ARTIFACT_TYPES, draftOutput } from './tasks.js';
 
-const generateBody = z.object({ artifactType: z.enum(ARTIFACT_TYPES), targetId: uuid, controlId: uuid.optional() });
+const taskOptions = z.object({ topic: z.string().trim().max(200).optional(), controlIds: z.array(uuid).max(40).optional() });
+
+const generateBody = z.object({ artifactType: z.enum(ARTIFACT_TYPES), targetId: uuid, controlId: uuid.optional(), options: taskOptions.optional() });
+const askBody = z.object({ question: z.string().trim().min(3).max(500) });
 const reviewBody = z.object({ decision: z.enum(['accepted', 'edited_and_accepted', 'rejected']), edits: draftOutput.optional(), rationale: z.string().trim().max(2000).optional() });
 const useBody = z.object({ recordType: z.string().max(60), recordId: uuid });
 const artifactList = listQuery(['createdAt'], {
@@ -15,6 +18,8 @@ const artifactList = listQuery(['createdAt'], {
   decision: z.enum(['pending', 'accepted', 'edited_and_accepted', 'rejected']).optional(),
   recordId: uuid.optional(),
   mine: z.enum(['true', 'false']).transform((v) => v === 'true').optional(),
+  origin: z.enum(['user', 'agent']).optional(),
+  status: z.enum(['draft', 'failed']).optional(),
 });
 
 @ApiTags('ai-assistant')
@@ -56,6 +61,23 @@ export class AssistantController {
   @ApiZodBody(reviewBody)
   review(@Param('id', ParseUUIDPipe) id: string, @Body(zod(reviewBody)) b: z.infer<typeof reviewBody>) {
     return this.assistant.review(id, b);
+  }
+
+  /** "Ask the platform": answers from records the asker may read, with citations. */
+  @Post('ask')
+  @RequirePermission('assistant.use')
+  @RateLimit('expensive')
+  @ApiZodBody(askBody)
+  ask(@Body(zod(askBody)) b: z.infer<typeof askBody>) {
+    return this.assistant.ask(b.question);
+  }
+
+  /** Saves an accepted policy draft as a policy document in the evidence library (pending review). */
+  @Post('drafts/:id/save-policy')
+  @HttpCode(201)
+  @RequirePermission('evidence.upload')
+  savePolicy(@Param('id', ParseUUIDPipe) id: string) {
+    return this.assistant.savePolicyAsEvidence(id);
   }
 
   @Post('drafts/:id/use')

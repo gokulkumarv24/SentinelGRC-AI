@@ -192,6 +192,7 @@ export class ReportsService implements OnModuleInit {
           },
         });
         await this.audit.record({ action: 'report.generated', entityType: 'report_run', entityId: id, organizationId, actorUserId: run.generatedBy, after: { reportType: run.reportType, format: run.format, reportStatus, sources: model.sources.length } }, tx);
+        await this.events.emit(tx, organizationId, 'report.generated', { reportRunId: id }, `report-generated:${id}`);
         await this.notifications.notify({
           organizationId,
           recipientUserIds: [run.generatedBy],

@@ -5,6 +5,7 @@ import { actorId, requireOrgId, requireUserId } from '../../common/request-conte
 import type { AiLifecycleStatus, AiRiskTier, LegalReviewStatus, Prisma } from '../../generated/prisma/client.js';
 import { PrismaService } from '../../prisma/prisma.service.js';
 import { AuditService } from '../audit/audit.service.js';
+import { EventQueue } from '../workflows/event-queue.service.js';
 import { EntityResolver } from '../shared/entity-resolver.service.js';
 
 export interface AiSystemInput {
@@ -68,6 +69,7 @@ export class AiSystemsService {
     private readonly prisma: PrismaService,
     private readonly audit: AuditService,
     private readonly entities: EntityResolver,
+    private readonly events: EventQueue,
   ) {}
 
   async list(query: { page: number; pageSize: number; sort: string; order: 'asc' | 'desc'; q?: string; lifecycleStatus?: AiLifecycleStatus[]; riskTier?: AiRiskTier[]; reviewDue?: boolean }) {
@@ -137,6 +139,7 @@ export class AiSystemsService {
       if (await tx.aiSystem.findFirst({ where: { organizationId, name: { equals: input.name, mode: 'insensitive' } } })) throw conflict('An AI system with this name already exists.');
       const system = await tx.aiSystem.create({ data: { organizationId, ...input, lifecycleStatus: 'proposed', createdBy: actorId() } });
       await this.audit.record({ action: 'ai_system.created', entityType: 'ai_system', entityId: system.id, after: { name: system.name, deploymentType: system.deploymentType, providerVendorId: system.providerVendorId } }, tx);
+      await this.events.emit(tx, organizationId, 'ai_system.created', { aiSystemId: system.id }, `ai-system-created:${system.id}`);
       return system;
     });
   }

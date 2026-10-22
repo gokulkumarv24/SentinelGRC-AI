@@ -79,6 +79,9 @@ export const PERMISSIONS = {
   // AI assistant
   'assistant.use': 'Request AI drafts',
   'assistant.review': 'Accept or reject AI drafts',
+  // Trust desk (customer security questionnaires)
+  'trust.read': 'View customer security questionnaires and the answer library',
+  'trust.manage': 'Create customer questionnaires and approve their answers',
   // Reports & audit
   'report.read': 'View report history',
   'report.generate': 'Generate reports',
@@ -125,7 +128,7 @@ export const ROLES = {
       'finding.update', 'finding.close', 'remediation.create', 'remediation.update',
       'vendor_assessment.review', 'ai_assessment.manage', 'workflow.run', 'workflow.retry',
       'assistant.use', 'assistant.review', 'report.generate', 'report.download', 'report.schedule',
-      'questionnaire.manage', 'risk_policy.manage',
+      'questionnaire.manage', 'risk_policy.manage', 'trust.manage',
     ],
   },
   security_analyst: {
@@ -137,7 +140,7 @@ export const ROLES = {
       'evidence.link', 'evidence.review', 'evidence.download', 'risk.create', 'risk.update',
       'risk.acceptance.request', 'finding.create', 'finding.update', 'remediation.create',
       'remediation.update', 'vendor_assessment.review', 'assistant.use', 'assistant.review',
-      'workflow.run', 'integration.sync', 'report.generate', 'report.download',
+      'workflow.run', 'integration.sync', 'report.generate', 'report.download', 'trust.manage',
     ],
   },
   risk_owner: {

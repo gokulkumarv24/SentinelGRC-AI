@@ -1,6 +1,6 @@
 import { createServer, type Server } from 'node:http';
 import type { AddressInfo } from 'node:net';
-import { LlmError, OpenAiCompatibleProvider, createProvider } from './llm-provider.js';
+import { FallbackProvider, LlmError, OpenAiCompatibleProvider, createProvider } from './llm-provider.js';
 import { looksLikeInjection, redact } from './redaction.js';
 import { checkGrounding, draftOutput, TASKS_BY_TYPE, type Prepared } from './tasks.js';
 
@@ -94,7 +94,7 @@ describe('OpenAI-compatible provider', () => {
     replies.push({ status: 200, body: { choices: [{ message: { content: '{"summary":"ok"}' } }], usage: { prompt_tokens: 12, completion_tokens: 3 } } });
     const p = new OpenAiCompatibleProvider(url, 'test-model', 'test-key', 2000);
     const res = await p.complete({ system: 'sys', user: 'usr', maxOutputTokens: 100 });
-    expect(res).toEqual({ text: '{"summary":"ok"}', inputTokens: 12, outputTokens: 3 });
+    expect(res).toEqual({ text: '{"summary":"ok"}', model: 'test-model', inputTokens: 12, outputTokens: 3 });
     expect(received[0].headers.authorization).toBe('Bearer test-key');
     expect(received[0].body.response_format).toEqual({ type: 'json_object' });
     expect(received[0].body.messages.map((m) => m.role)).toEqual(['system', 'user']);
@@ -115,6 +115,17 @@ describe('OpenAI-compatible provider', () => {
     replies.push({ status: 200, body: {}, delayMs: 1500 }, { status: 200, body: {}, delayMs: 1500 });
     const slow = new OpenAiCompatibleProvider(url, 'm', 'k', 200);
     await expect(slow.complete({ system: 's', user: 'u', maxOutputTokens: 10 })).rejects.toBeInstanceOf(LlmError);
+  });
+
+  it('falls back to the second provider when the first is rate limited, but not on bad credentials', async () => {
+    replies.push({ status: 429, body: {} }, { status: 200, body: { choices: [{ message: { content: '{"summary":"backup"}' } }] } });
+    const fallback = new FallbackProvider(new OpenAiCompatibleProvider(url, 'primary', 'k', 2000, 1), new OpenAiCompatibleProvider(url, 'backup', 'k2', 2000, 1));
+    await expect(fallback.complete({ system: 's', user: 'u', maxOutputTokens: 10 })).resolves.toMatchObject({ text: '{"summary":"backup"}', model: 'backup' });
+    expect(received.map((r) => r.headers.authorization)).toEqual(['Bearer k', 'Bearer k2']);
+
+    replies.push({ status: 401, body: {} });
+    await expect(fallback.complete({ system: 's', user: 'u', maxOutputTokens: 10 })).rejects.toMatchObject({ code: 'auth_failed' });
+    expect(received).toHaveLength(3);
   });
 
   it('refuses a non-https provider URL outside localhost', () => {

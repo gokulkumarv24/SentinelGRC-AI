@@ -57,6 +57,12 @@ const schema = z
     AI_MODEL: z.string().default('openai/gpt-oss-120b'),
     AI_API_KEY: z.string().optional(),
     AI_DATA_SHARING_APPROVED: bool,
+    // Optional second OpenAI-compatible provider, used when the primary is rate limited or unavailable.
+    AI_FALLBACK_BASE_URL: z.preprocess((v) => (v === '' ? undefined : v), z.url().optional()),
+    AI_FALLBACK_MODEL: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    AI_FALLBACK_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().optional()),
+    // Platform-wide cap on tokens the background AI agent may use per rolling 24 hours (free-tier friendly).
+    AI_AGENT_DAILY_TOKEN_BUDGET: z.coerce.number().int().min(0).default(150_000),
     AI_TIMEOUT_MS: z.coerce.number().int().min(1000).max(120000).default(30000),
     AI_MAX_INPUT_CHARS: z.coerce.number().int().min(1000).max(200000).default(24000),
     EMAIL_PROVIDER: z.enum(['none', 'smtp']).default('none'),
@@ -82,6 +88,7 @@ const schema = z
     if (env.DEMO_MODE) fail('DEMO_MODE', 'must be false in production');
     if (env.STORAGE_BACKEND === 's3' && (!env.S3_BUCKET || !env.S3_ENDPOINT)) fail('S3_BUCKET', 'S3 settings required');
     if (env.AI_PROVIDER !== 'mock' && !env.AI_API_KEY) fail('AI_API_KEY', 'required for external AI provider');
+    if (env.AI_FALLBACK_BASE_URL && (!env.AI_FALLBACK_MODEL || !env.AI_FALLBACK_API_KEY)) fail('AI_FALLBACK_API_KEY', 'fallback provider needs a model and key');
   });
 
 export type Env = z.infer<typeof schema>;

@@ -11,6 +11,7 @@ import { API_PREFIX } from '../../bootstrap-app.js';
 import { AuditService } from '../audit/audit.service.js';
 import { EXPIRING_SOON_DAYS, evidenceState } from '../controls/controls.service.js';
 import { EntityResolver, LINKABLE_TYPES } from '../shared/entity-resolver.service.js';
+import { EventQueue } from '../workflows/event-queue.service.js';
 import { inspectFile, PREVIEWABLE } from './file-inspection.js';
 import { StorageService, type StoredObject } from './storage.js';
 
@@ -56,6 +57,7 @@ export class EvidenceService {
     private readonly audit: AuditService,
     private readonly storage: StorageService,
     private readonly entities: EntityResolver,
+    private readonly events: EventQueue,
   ) {}
 
   async list(query: EvidenceListQuery) {
@@ -148,6 +150,7 @@ export class EvidenceService {
         });
         await this.audit.record({ action: 'evidence.uploaded', entityType: 'evidence', entityId: evidence.id, after: { title: evidence.title, mediaType, sizeBytes: file.size, sha256, classification: evidence.classification } }, tx);
         if (link) await this.createLink(tx, evidence.id, link);
+        await this.events.emit(tx, organizationId, 'evidence.uploaded', { evidenceId: evidence.id }, `evidence-uploaded:${evidence.id}`);
         return this.present(evidence, new Date());
       });
     } catch (error) {

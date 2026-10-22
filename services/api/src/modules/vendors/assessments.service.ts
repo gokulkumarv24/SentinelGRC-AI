@@ -232,6 +232,10 @@ export class AssessmentsService {
       }
       if (a.status === 'submitted') await tx.vendorAssessment.update({ where: { id }, data: { status: 'under_review', reviewedBy: requireUserId(), reviewedAt: new Date(), version: { increment: 1 } } });
       await this.audit.record({ action: 'vendor_assessment.reviewed', entityType: 'vendor_assessment', entityId: id, after: { reviewed: reviews.length } }, tx);
+      const answers = new Map(a.responses.map((r) => [r.questionId, r.notApplicable ? undefined : r.answer]));
+      const visible = new Set(visibleQuestions(a.templateRef.questions, answers).map((q) => q.id));
+      const pending = await tx.questionResponse.count({ where: { assessmentId: id, organizationId, reviewerStatus: 'pending', questionId: { in: [...visible] } } });
+      if (!pending) await this.events.emit(tx, organizationId, 'vendor_assessment.review_completed', { assessmentId: id, vendorId: a.vendorId }, `vendor-review-completed:${id}:${a.version}`);
       return { reviewed: reviews.length };
     });
   }

@@ -8,6 +8,8 @@ export interface LlmRequest {
 
 export interface LlmResponse {
   text: string;
+  /** Model that actually answered (differs from the configured one when a fallback was used). */
+  model?: string;
   inputTokens: number | null;
   outputTokens: number | null;
 }
@@ -99,17 +101,51 @@ export class OpenAiCompatibleProvider implements LlmProvider {
     const body = (await res.json().catch(() => null)) as { choices?: Array<{ message?: { content?: string } }>; usage?: { prompt_tokens?: number; completion_tokens?: number } } | null;
     const text = body?.choices?.[0]?.message?.content;
     if (typeof text !== 'string') throw new LlmError('invalid_response', 'The AI provider returned no content');
-    return { text, inputTokens: body?.usage?.prompt_tokens ?? null, outputTokens: body?.usage?.completion_tokens ?? null };
+    return { text, model: this.model, inputTokens: body?.usage?.prompt_tokens ?? null, outputTokens: body?.usage?.completion_tokens ?? null };
   }
+}
+
+/**
+ * Primary provider with a fallback for when it is rate limited or unavailable (e.g. a free tier's daily cap).
+ * Credential and response-format errors are not retried elsewhere: they need fixing, not hiding.
+ */
+export class FallbackProvider implements LlmProvider {
+  readonly name: string;
+  readonly model: string;
+  readonly local = false;
+
+  constructor(
+    private readonly primary: LlmProvider,
+    private readonly secondary: LlmProvider,
+  ) {
+    this.name = primary.name;
+    this.model = primary.model;
+  }
+
+  async complete(req: LlmRequest): Promise<LlmResponse> {
+    try {
+      return await this.primary.complete(req);
+    } catch (error) {
+      if (!(error instanceof LlmError) || !['rate_limited', 'provider_error', 'timeout'].includes(error.code)) throw error;
+      return this.secondary.complete(req);
+    }
+  }
+}
+
+function assertSafeBaseUrl(name: string, value: string) {
+  const url = new URL(value);
+  // The base URL comes only from server configuration; plain HTTP is allowed only for a local endpoint.
+  if (url.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) throw new Error(`${name} must use https`);
 }
 
 export function createProvider(env: Env = loadEnv()): LlmProvider {
   if (env.AI_PROVIDER === 'openai-compatible') {
     if (!env.AI_API_KEY) throw new Error('AI_API_KEY is required for the openai-compatible provider');
-    const url = new URL(env.AI_BASE_URL);
-    // The base URL comes only from server configuration; plain HTTP is allowed only for a local endpoint.
-    if (url.protocol !== 'https:' && !['localhost', '127.0.0.1', '[::1]'].includes(url.hostname)) throw new Error('AI_BASE_URL must use https');
-    return new OpenAiCompatibleProvider(env.AI_BASE_URL, env.AI_MODEL, env.AI_API_KEY, env.AI_TIMEOUT_MS);
+    assertSafeBaseUrl('AI_BASE_URL', env.AI_BASE_URL);
+    const primary = new OpenAiCompatibleProvider(env.AI_BASE_URL, env.AI_MODEL, env.AI_API_KEY, env.AI_TIMEOUT_MS);
+    if (!env.AI_FALLBACK_BASE_URL || !env.AI_FALLBACK_MODEL || !env.AI_FALLBACK_API_KEY) return primary;
+    assertSafeBaseUrl('AI_FALLBACK_BASE_URL', env.AI_FALLBACK_BASE_URL);
+    return new FallbackProvider(primary, new OpenAiCompatibleProvider(env.AI_FALLBACK_BASE_URL, env.AI_FALLBACK_MODEL, env.AI_FALLBACK_API_KEY, env.AI_TIMEOUT_MS));
   }
   return new MockProvider();
 }

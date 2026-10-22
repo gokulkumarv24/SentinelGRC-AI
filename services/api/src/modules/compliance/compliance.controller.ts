@@ -27,6 +27,7 @@ const mappingBody = z.object({
 });
 const mappingUpdate = z.object({ version: z.number().int().positive(), mappingType: z.enum(MAPPING_TYPES).optional(), rationale: requiredText(5000).optional(), confidence: z.number().int().min(0).max(100).optional(), sourceReference: text(1000).nullable().optional(), changeRationale: text(2000).optional() });
 const reviewBody = z.object({ decision: z.enum(['approved', 'rejected']), notes: requiredText(5000) });
+const bulkReviewBody = reviewBody.extend({ ids: z.array(uuid).min(1).max(200) });
 const mappingQuery = listQuery(['createdAt', 'updatedAt', 'confidence'], {
   reviewStatus: multi(REVIEW),
   frameworkId: uuid.optional(),
@@ -131,6 +132,14 @@ export class ComplianceController {
   updateMapping(@Param('id', ParseUUIDPipe) id: string, @Body(zod(mappingUpdate)) body: z.infer<typeof mappingUpdate>) {
     const { version, changeRationale, ...input } = body;
     return this.mappings.update(id, version, input, changeRationale);
+  }
+
+  @Post('control-mappings/bulk-review')
+  @RequirePermission('mapping.review')
+  @HttpCode(200)
+  @ApiZodBody(bulkReviewBody)
+  bulkReviewMappings(@Body(zod(bulkReviewBody)) body: z.infer<typeof bulkReviewBody>) {
+    return this.mappings.bulkReview(body.ids, body.decision, body.notes);
   }
 
   @Post('control-mappings/:id/review')

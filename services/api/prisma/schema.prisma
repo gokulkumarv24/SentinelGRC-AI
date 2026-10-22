@@ -371,6 +371,11 @@ model Organization {
   // generated back-relations
   frameworkRows Framework[]
 
+  // generated back-relations
+  trustQuestionnaireRows TrustQuestionnaire[]
+  trustQuestionnaireItemRows TrustQuestionnaireItem[]
+  trustAnswerRows TrustAnswer[]
+
   @@map("organizations")
 }
 
@@ -1880,8 +1885,12 @@ model ReportSchedule {
 model AiArtifact {
   id               String        @id @default(uuid()) @db.Uuid
   organizationId   String        @map("organization_id") @db.Uuid
-  requestedBy      String        @map("requested_by") @db.Uuid
-  artifactType     String        @map("artifact_type") // evidence_summary | finding_draft | report_draft | vendor_observations | remediation_options | mapping_suggestions | risk_summary | control_failure_explanation
+  requestedBy      String?       @map("requested_by") @db.Uuid // null when the AI agent produced the draft
+  origin           String        @default("user") // user | agent
+  agentJob         String?       @map("agent_job") // workflow key of the agent job that produced it
+  targetType       String?       @map("target_type")
+  targetId         String?       @map("target_id") @db.Uuid
+  artifactType     String        @map("artifact_type") // see ARTIFACT_TYPES in modules/assistant/tasks.ts
   sourceRecords    Json          @map("source_records") // [{type,id,checksum|version}]
   provider         String
   model            String
@@ -1909,7 +1918,86 @@ model AiArtifact {
 
   @@index([organizationId, createdAt])
   @@index([organizationId, artifactType])
+  @@index([organizationId, targetId, artifactType])
+  @@index([origin, createdAt])
   @@map("ai_artifacts")
+}
+
+/// A security questionnaire received from a customer, answered with help from the AI agent (trust desk).
+model TrustQuestionnaire {
+  id             String    @id @default(uuid()) @db.Uuid
+  organizationId String    @db.Uuid @map("organization_id")
+  title          String
+  customerName   String @map("customer_name")
+  status         String    @default("draft") // draft | answering | in_review | completed
+  dueDate        DateTime? @db.Timestamptz(6) @map("due_date")
+  notes          String?
+  createdBy      String?   @db.Uuid @map("created_by")
+  completedAt    DateTime? @db.Timestamptz(6) @map("completed_at")
+  version        Int       @default(1)
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt      DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  items TrustQuestionnaireItem[]
+
+  // generated relations (scripts/add-column-maps.mjs)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, status])
+  @@map("trust_questionnaires")
+}
+
+/// One question and its answer. The agent drafts; a person approves before it counts as final.
+model TrustQuestionnaireItem {
+  id              String    @id @default(uuid()) @db.Uuid
+  organizationId  String    @db.Uuid @map("organization_id")
+  questionnaireId String    @db.Uuid @map("questionnaire_id")
+  sortOrder       Int @map("sort_order")
+  section         String?
+  questionText    String @map("question_text")
+  answerStatus    String    @default("pending") @map("answer_status") // pending | drafted | needs_input | approved
+  shortAnswer     String? @map("short_answer") // yes | no | partial | not_applicable | unknown
+  draftAnswer     String? @map("draft_answer")
+  finalAnswer     String? @map("final_answer")
+  confidence      String? // low | medium | high
+  sources         Json? // [{type, recordId, label}]
+  answerSource    String? @map("answer_source") // library | agent | manual
+  libraryAnswerId String?   @db.Uuid @map("library_answer_id")
+  aiArtifactId    String?   @db.Uuid @map("ai_artifact_id")
+  reviewedBy      String?   @db.Uuid @map("reviewed_by")
+  reviewedAt      DateTime? @db.Timestamptz(6) @map("reviewed_at")
+  createdAt       DateTime  @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt       DateTime  @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  questionnaire TrustQuestionnaire @relation(fields: [questionnaireId], references: [id], onDelete: Cascade)
+
+  // generated relations (scripts/add-column-maps.mjs)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@unique([questionnaireId, sortOrder])
+  @@index([organizationId, answerStatus])
+  @@map("trust_questionnaire_items")
+}
+
+/// Approved answers reused for future questionnaires before the AI is asked (answer library).
+model TrustAnswer {
+  id             String   @id @default(uuid()) @db.Uuid
+  organizationId String   @db.Uuid @map("organization_id")
+  questionText   String @map("question_text")
+  shortAnswer    String? @map("short_answer")
+  answer         String
+  sources        Json?
+  approvedBy     String?  @db.Uuid @map("approved_by")
+  usageCount     Int      @default(0) @map("usage_count")
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now()) @db.Timestamptz(6) @map("created_at")
+  updatedAt      DateTime @updatedAt @db.Timestamptz(6) @map("updated_at")
+
+  // generated relations (scripts/add-column-maps.mjs)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict)
+
+  @@index([organizationId, active])
+  @@map("trust_answers")
 }
 
 model IdempotencyKey {
