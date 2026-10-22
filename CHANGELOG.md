@@ -4,6 +4,14 @@ All notable changes are listed here. Versions follow [Semantic Versioning](https
 
 ## [1.0.0] — unreleased (release candidate)
 
+### Fixed after the first hosted QA pass (2026-10-22)
+- Object storage: uploads to S3-compatible providers that do not support conditional writes (e.g. Backblaze B2) failed, and a failing bucket hung requests through ten retries. Writes are now unconditional, with two retries and a 30-second timeout, and log the provider's error code. A missing stored file returns 404 `file_not_found` instead of 500.
+- Evidence previews load through the same-origin API instead of a presigned bucket URL, so the web app's CSP no longer blocks them.
+- `TRUST_PROXY=private` trusts every private-network hop, so rate limits and the audit log see the visitor's IP on platforms such as Render.
+- Risk owners can change only the risks assigned to them. Residual scores cannot exceed the inherent score and need a rationale.
+- Validation: NUL characters, oversized bodies, malformed JSON and non-numeric scores now return 4xx with a request ID instead of 500 or silent coercion. Link fields accept only http(s) URLs.
+- Vendor contacts need `vendor.update` to add or remove. Unknown parent records return 404 for control test configs and vendor assessments. List pagination has a stable tiebreaker. The web app sends HSTS in production.
+
 First complete release of SentinelGRC AI, built from the master specification in ten milestones.
 
 ### Platform

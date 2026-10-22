@@ -30,7 +30,8 @@ export function pageArgs(query: { page: number; pageSize: number; sort: string; 
   return {
     skip: (query.page - 1) * query.pageSize,
     take: query.pageSize,
-    orderBy: { [query.sort]: query.order },
+    // `id` breaks ties, so rows with equal sort values keep a stable order and are never repeated or skipped across pages.
+    orderBy: query.sort === 'id' ? [{ id: query.order }] : [{ [query.sort]: query.order }, { id: query.order }],
   };
 }
 

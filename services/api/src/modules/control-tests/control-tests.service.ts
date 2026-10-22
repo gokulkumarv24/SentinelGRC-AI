@@ -47,7 +47,7 @@ export class ControlTestsService {
     await this.mustGetControl(this.prisma, organizationId, controlId);
     const where = { organizationId, controlId };
     const [items, total] = await Promise.all([
-      this.prisma.controlTest.findMany({ where, orderBy: { startedAt: 'desc' }, skip: (query.page - 1) * query.pageSize, take: query.pageSize }),
+      this.prisma.controlTest.findMany({ where, orderBy: [{ startedAt: 'desc' }, { id: 'desc' }], skip: (query.page - 1) * query.pageSize, take: query.pageSize }),
       this.prisma.controlTest.count({ where }),
     ]);
     return { items, total, page: query.page, pageSize: query.pageSize };
@@ -57,14 +57,17 @@ export class ControlTestsService {
   async listAll(query: { page: number; pageSize: number; result?: TestResult[]; testType?: 'automated' | 'manual' }) {
     const where: Prisma.ControlTestWhereInput = { organizationId: requireOrgId(), ...(query.result ? { result: { in: query.result } } : {}), ...(query.testType ? { testType: query.testType } : {}) };
     const [items, total] = await Promise.all([
-      this.prisma.controlTest.findMany({ where, orderBy: { startedAt: 'desc' }, skip: (query.page - 1) * query.pageSize, take: query.pageSize, include: { control: { select: { id: true, controlCode: true, title: true } } } }),
+      this.prisma.controlTest.findMany({ where, orderBy: [{ startedAt: 'desc' }, { id: 'desc' }], skip: (query.page - 1) * query.pageSize, take: query.pageSize, include: { control: { select: { id: true, controlCode: true, title: true } } } }),
       this.prisma.controlTest.count({ where }),
     ]);
     return { items, total, page: query.page, pageSize: query.pageSize };
   }
 
-  configs(controlId: string) {
-    return this.prisma.controlTestConfig.findMany({ where: { organizationId: requireOrgId(), controlId } });
+  async configs(controlId: string) {
+    const organizationId = requireOrgId();
+    // 404 for an unknown or other-tenant control (retired controls stay readable).
+    if (!(await this.prisma.control.count({ where: { id: controlId, organizationId } }))) throw notFound('Control');
+    return this.prisma.controlTestConfig.findMany({ where: { organizationId, controlId } });
   }
 
   async upsertConfig(controlId: string, input: { ruleKey: string; parameters: Record<string, unknown>; frequencyHours: number; enabled: boolean }) {

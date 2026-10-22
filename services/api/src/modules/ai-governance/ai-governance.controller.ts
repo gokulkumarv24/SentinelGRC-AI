@@ -3,7 +3,7 @@ import { ApiTags } from '@nestjs/swagger';
 import { z } from 'zod';
 import { RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
-import { ApiZodBody, ApiZodQuery, isoDate, requiredText, text, uuid, zod } from '../../common/validation.js';
+import { ApiZodBody, ApiZodQuery, httpUrl, isoDate, requiredText, text, uuid, zod } from '../../common/validation.js';
 import { AiAssessmentsService } from './ai-assessments.service.js';
 import { AiRecordsService } from './ai-records.service.js';
 import { AiSystemsService } from './ai-systems.service.js';
@@ -46,7 +46,7 @@ const systemBody = z.object({
   deploymentDate: isoDate.nullable().optional(),
   retirementDate: isoDate.nullable().optional(),
   nextReviewAt: isoDate.nullable().optional(),
-  documentationUri: z.url().max(1000).nullable().optional(),
+  documentationUri: httpUrl().nullable().optional(),
 });
 const systemUpdate = systemBody.partial().extend({ version: z.number().int().positive(), rationale: text(2000).optional() });
 const systemList = listQuery(['name', 'updatedAt', 'createdAt', 'nextReviewAt'], { lifecycleStatus: multi(LIFECYCLE), riskTier: multi(TIERS), reviewDue: z.enum(['true', 'false']).transform((v) => v === 'true').optional() }, 'name');
@@ -66,7 +66,7 @@ const euBody = z.object({
   rationale: text(5000).nullable().optional(),
   evidenceIds: z.array(uuid).max(20).optional(),
   legalReviewStatus: z.enum(['not_started', 'preliminary', 'under_legal_review', 'reviewed']),
-  sourceUrl: z.url().max(1000).nullable().optional(),
+  sourceUrl: httpUrl().nullable().optional(),
   sourceCheckedAt: isoDate.nullable().optional(),
 });
 const assessmentBody = z.object({ templateId: uuid, frameworkId: uuid.nullable().optional(), assessorId: uuid.nullable().optional() });

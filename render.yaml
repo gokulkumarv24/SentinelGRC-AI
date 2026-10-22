@@ -26,8 +26,8 @@ services:
         sync: false
       - key: CORS_ORIGINS            # same value as PUBLIC_APP_URL
         sync: false
-      - key: TRUST_PROXY
-        value: "1"
+      - key: TRUST_PROXY             # Render's router and the web app's rewrite add several 10.x hops
+        value: private
       - key: RUN_WORKER_IN_API       # free plan has no separate worker service
         value: "true"
       - key: WORKER_POLL_SECONDS

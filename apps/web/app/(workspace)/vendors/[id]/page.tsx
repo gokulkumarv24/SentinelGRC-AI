@@ -289,19 +289,23 @@ export default function VendorDetailPage({ params }: PageProps<"/vendors/[id]">)
                         {c.name} <span className="text-xs text-muted-foreground">({c.contactType})</span>
                         <span className="block text-xs">{c.email}</span>
                       </span>
-                      <Button size="icon-sm" variant="ghost" aria-label={`Remove ${c.name}`} onClick={() => removeContact.mutate(c.id)}>
-                        <Trash2 aria-hidden />
-                      </Button>
+                      {can("vendor.update") && (
+                        <Button size="icon-sm" variant="ghost" aria-label={`Remove ${c.name}`} onClick={() => removeContact.mutate(c.id)}>
+                          <Trash2 aria-hidden />
+                        </Button>
+                      )}
                     </li>
                   ))}
                 </ul>
-                <form method="post" className="mt-3 space-y-2" onSubmit={(e) => { e.preventDefault(); addContact.mutate(); }}>
-                  <Input placeholder="Name" aria-label="Contact name" value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} />
-                  <Input placeholder="Email" type="email" aria-label="Contact email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} />
-                  <Button size="sm" type="submit" variant="outline" disabled={!contact.name || !contact.email || addContact.isPending}>
-                    <Plus aria-hidden /> Add contact
-                  </Button>
-                </form>
+                {can("vendor.update") && (
+                  <form method="post" className="mt-3 space-y-2" onSubmit={(e) => { e.preventDefault(); addContact.mutate(); }}>
+                    <Input placeholder="Name" aria-label="Contact name" value={contact.name} onChange={(e) => setContact({ ...contact, name: e.target.value })} />
+                    <Input placeholder="Email" type="email" aria-label="Contact email" value={contact.email} onChange={(e) => setContact({ ...contact, email: e.target.value })} />
+                    <Button size="sm" type="submit" variant="outline" disabled={!contact.name || !contact.email || addContact.isPending}>
+                      <Plus aria-hidden /> Add contact
+                    </Button>
+                  </form>
+                )}
               </>
             )}
           </Section>

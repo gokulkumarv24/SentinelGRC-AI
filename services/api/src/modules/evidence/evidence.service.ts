@@ -246,8 +246,9 @@ export class EvidenceService {
 
   /**
    * Issues a short-lived download URL bound to this user, organization and evidence (spec §8.4, §20.3).
-   * Local storage: an API URL with an HMAC token that also requires the same session user.
-   * S3: a presigned object URL with the same short expiry.
+   * Local storage, and inline previews on any backend: an API URL with an HMAC token that also requires the
+   * same session user. It is same-origin, so the web app's CSP can frame/load it without allowing the bucket host.
+   * S3 attachments: a presigned object URL with the same short expiry.
    */
   async downloadUrl(id: string, disposition: 'inline' | 'attachment' = 'attachment') {
     const organizationId = requireOrgId();
@@ -259,7 +260,7 @@ export class EvidenceService {
     const expiresAt = new Date(Date.now() + ttl * 1000);
     await this.logAccess(evidence.id, 'download_url_issued');
     await this.audit.record({ action: 'evidence.download_url_issued', entityType: 'evidence', entityId: id, after: { disposition: mode, classification: evidence.classification } });
-    if (this.storage.adapter.presignedUrl) {
+    if (this.storage.adapter.presignedUrl && mode === 'attachment') {
       return { url: await this.storage.adapter.presignedUrl(evidence.storageKey, ttl, evidence.originalFilename ?? 'evidence', mode), expiresAt, disposition: mode };
     }
     const token = signToken('evidence-download', { e: evidence.id, o: organizationId, u: requireUserId(), d: mode === 'inline' ? 1 : 0, exp: Math.floor(expiresAt.getTime() / 1000) });

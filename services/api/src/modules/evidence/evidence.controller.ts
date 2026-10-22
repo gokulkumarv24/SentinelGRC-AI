@@ -6,7 +6,7 @@ import { memoryStorage } from 'multer';
 import { z } from 'zod';
 import { RateLimit, RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
-import { ApiZodBody, ApiZodQuery, isoDate, requiredText, text, uuid, zod } from '../../common/validation.js';
+import { ApiZodBody, ApiZodQuery, httpUrl, isoDate, requiredText, text, uuid, zod } from '../../common/validation.js';
 import { loadEnv } from '../../config/env.js';
 import { LINKABLE_TYPES } from '../shared/entity-resolver.service.js';
 import { EvidenceService } from './evidence.service.js';
@@ -19,7 +19,7 @@ const metadata = z.object({
   title: requiredText(200),
   description: text(5000).nullable().optional(),
   classification: z.enum(CLASSIFICATIONS).optional(),
-  sourceUri: z.url().max(2000).refine((u) => u.startsWith('https://') || u.startsWith('http://'), 'Only http(s) URLs').nullable().optional(),
+  sourceUri: httpUrl(2000).nullable().optional(),
   collectedAt: z.preprocess(emptyToUndefined, isoDate.nullable().optional()),
   validFrom: z.preprocess(emptyToUndefined, isoDate.nullable().optional()),
   expiresAt: z.preprocess(emptyToUndefined, isoDate.nullable().optional()),

@@ -16,7 +16,7 @@ describe('Shared GRC core: risks, findings, remediation, controls, evidence', ()
     it('scores risks with the versioned policy and records history', async () => {
       const org = await createOrg(ctx.prisma);
       const { client } = await loginAs(ctx, org.id, ['grc_manager']);
-      const res = await client.post('/risks', { title: 'Unpatched VPN', description: 'Edge VPN lacks patches', category: 'Vulnerability', likelihood: 4, impact: 5, residualLikelihood: 2, residualImpact: 5 });
+      const res = await client.post('/risks', { title: 'Unpatched VPN', description: 'Edge VPN lacks patches', category: 'Vulnerability', likelihood: 4, impact: 5, residualLikelihood: 2, residualImpact: 5, residualRationale: 'VPN only reachable through the patched bastion' });
       expect(res.status).toBe(201);
       expect(res.body).toMatchObject({ riskKey: 'RSK-0001', inherentScore: 20, inherentRating: 'critical', residualScore: 10, residualRating: 'high', scoringPolicyVersion: 1 });
 
@@ -40,6 +40,44 @@ describe('Shared GRC core: risks, findings, remediation, controls, evidence', ()
       const direct = await client.patch(`/risks/${risk.body.id}`, { version: 1, status: 'accepted' });
       expect(direct.status).toBe(400);
       expect(direct.body.error.code).toBe('use_acceptance_workflow');
+    });
+
+    it('keeps residual scores consistent: never above inherent, always explained', async () => {
+      const org = await createOrg(ctx.prisma);
+      const { client } = await loginAs(ctx, org.id, ['grc_manager']);
+      const above = await client.post('/risks', { title: 't', description: 'd', category: 'c', likelihood: 2, impact: 2, residualLikelihood: 4, residualImpact: 4, residualRationale: 'x' });
+      expect(above.status).toBe(400);
+      expect(above.body.error.code).toBe('residual_exceeds_inherent');
+      const unexplained = await client.post('/risks', { title: 't', description: 'd', category: 'c', likelihood: 4, impact: 4, residualLikelihood: 2, residualImpact: 2 });
+      expect(unexplained.body.error.code).toBe('residual_rationale_required');
+
+      const risk = await client.post('/risks', { title: 't', description: 'd', category: 'c', likelihood: 4, impact: 4, residualLikelihood: 3, residualImpact: 3, residualRationale: 'MFA enforced' });
+      expect(risk.status).toBe(201);
+      // Lowering inherent below the existing residual is refused; editing other fields keeps working.
+      expect((await client.patch(`/risks/${risk.body.id}`, { version: 1, likelihood: 2, impact: 2 })).body.error.code).toBe('residual_exceeds_inherent');
+      expect((await client.patch(`/risks/${risk.body.id}`, { version: 1, title: 'Renamed' })).status).toBe(200);
+    });
+
+    it('rejects scores that are not real numbers', async () => {
+      const org = await createOrg(ctx.prisma);
+      const { client } = await loginAs(ctx, org.id, ['grc_manager']);
+      expect((await client.post('/risks', { title: 't', description: 'd', category: 'c', likelihood: '3', impact: 2 })).status).toBe(422);
+      expect((await client.post('/risks', { title: 't', description: 'd', category: 'c', likelihood: 3, impact: true })).status).toBe(422);
+    });
+
+    it('lets a risk owner change only the risks assigned to them', async () => {
+      const org = await createOrg(ctx.prisma);
+      const { client: manager } = await loginAs(ctx, org.id, ['grc_manager']);
+      const { client: owner, user: ownerUser } = await loginAs(ctx, org.id, ['risk_owner']);
+      const mine = await manager.post('/risks', { title: 'Mine', description: 'd', category: 'c', likelihood: 3, impact: 3, riskOwnerId: ownerUser.id });
+      const other = await manager.post('/risks', { title: 'Other', description: 'd', category: 'c', likelihood: 3, impact: 3 });
+
+      expect((await owner.patch(`/risks/${mine.body.id}`, { version: 1, treatmentPlan: 'Patch in Q3' })).status).toBe(200);
+      const denied = await owner.patch(`/risks/${other.body.id}`, { version: 1, title: 'Hijacked' });
+      expect(denied.status).toBe(403);
+      expect((await owner.post(`/risks/${other.body.id}/acceptance-requests`, { rationale: 'r', expiryDate: future(30) })).status).toBe(403);
+      // Broader roles still manage every risk.
+      expect((await manager.patch(`/risks/${other.body.id}`, { version: 1, title: 'Renamed by manager' })).status).toBe(200);
     });
 
     it('enforces separation of duties and single decision for risk acceptance', async () => {
@@ -256,6 +294,35 @@ describe('Shared GRC core: risks, findings, remediation, controls, evidence', ()
       const foreignRisk = await otherClient.post('/risks', { title: 'r', description: 'd', category: 'c', likelihood: 1, impact: 1 });
       const link = await client.post(`/evidence/${ev.body.id}/links`, { entityType: 'risk', entityId: foreignRisk.body.id });
       expect(link.status).toBe(404);
+    });
+  });
+
+  describe('input hardening', () => {
+    it('answers bad input with 4xx errors, never 500', async () => {
+      const org = await createOrg(ctx.prisma);
+      const { client } = await loginAs(ctx, org.id, ['grc_manager', 'vendor_manager']);
+      const nul = await client.post('/risks', { title: 'QA \u0000 nul', description: 'd', category: 'c', likelihood: 1, impact: 1 });
+      expect(nul.status).toBe(422);
+      expect(nul.body.error.details.fields[0].path).toBe('title');
+
+      const huge = await client.post('/risks', { title: 't', description: 'x'.repeat(2_000_000), category: 'c', likelihood: 1, impact: 1 });
+      expect(huge.status).toBe(413);
+      expect(huge.body.error.code).toBe('payload_too_large');
+      expect(huge.body.requestId).toEqual(expect.any(String));
+
+      const vendor = { name: 'Script vendor', serviceDescription: 'd', criticality: 'low', dataClassification: 'internal', accessLevel: 'none' };
+      const script = await client.post('/vendors', { ...vendor, website: 'javascript:alert(1)' });
+      expect(script.status).toBe(422);
+      expect(script.body.error.details.fields.map((f: { path: string }) => f.path)).toEqual(['website']);
+      expect((await client.post('/vendors', { ...vendor, website: 'https://example.com' })).status).toBe(201);
+    });
+
+    it('returns 404, not an empty list, for sub-resources of unknown records', async () => {
+      const org = await createOrg(ctx.prisma);
+      const { client } = await loginAs(ctx, org.id, ['grc_manager', 'vendor_manager']);
+      const unknown = '00000000-0000-4000-8000-000000000000';
+      expect((await client.get(`/controls/${unknown}/test-configs`)).status).toBe(404);
+      expect((await client.get(`/vendors/${unknown}/assessments`)).status).toBe(404);
     });
   });
 

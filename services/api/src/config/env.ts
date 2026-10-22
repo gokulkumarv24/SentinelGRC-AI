@@ -27,8 +27,13 @@ const schema = z
     SESSION_IDLE_MINUTES: z.coerce.number().int().min(5).max(24 * 60).default(30),
     SESSION_ABSOLUTE_HOURS: z.coerce.number().int().min(1).max(72).default(12),
     CORS_ORIGINS: csv,
-    // false | true (one proxy hop) | number of trusted proxy hops in front of the API.
-    TRUST_PROXY: z.enum(['true', 'false', '1', '0', '2', '3']).default('false').transform((v) => (v === 'true' ? 1 : v === 'false' ? 0 : Number(v))),
+    // false | true (one proxy hop) | number of trusted proxy hops in front of the API |
+    // private: trust every loopback/private-network hop (platforms whose internal routers and the web app's
+    // rewrite add a varying number of 10.x hops). The client IP is then the first public address added by the edge.
+    TRUST_PROXY: z
+      .enum(['true', 'false', '1', '0', '2', '3', 'private'])
+      .default('false')
+      .transform((v): number | string[] => (v === 'private' ? ['loopback', 'linklocal', 'uniquelocal'] : v === 'true' ? 1 : v === 'false' ? 0 : Number(v))),
     RATE_LIMIT_LOGIN_PER_MINUTE: z.coerce.number().int().positive().default(10),
     RATE_LIMIT_DEFAULT_PER_MINUTE: z.coerce.number().int().positive().default(300),
     RATE_LIMIT_EXPENSIVE_PER_MINUTE: z.coerce.number().int().positive().default(20),

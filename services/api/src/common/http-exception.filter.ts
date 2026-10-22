@@ -1,5 +1,6 @@
 import { ArgumentsHost, Catch, ExceptionFilter, HttpException, Logger } from '@nestjs/common';
 import type { Response } from 'express';
+import { randomUUID } from 'node:crypto';
 import { loadEnv } from '../config/env.js';
 import { Prisma } from '../generated/prisma/client.js';
 import { AppError } from './errors.js';
@@ -23,6 +24,16 @@ const STATUS_CODES: Record<number, string> = {
   429: 'rate_limited',
 };
 
+/** body-parser (express.json/urlencoded) errors carry a 4xx `status` and a `type` such as entity.too.large. */
+function bodyParserError(exception: unknown): [number, ErrorBody] | null {
+  if (!(exception instanceof Error) || !('type' in exception) || !('status' in exception)) return null;
+  const status = Number(exception.status);
+  if (!(status >= 400 && status < 500)) return null;
+  if (exception.type === 'entity.too.large') return [413, { error: { code: 'payload_too_large', message: 'The request body is too large' } }];
+  if (exception.type === 'entity.parse.failed') return [400, { error: { code: 'invalid_json', message: 'The request body is not valid JSON' } }];
+  return [status, { error: { code: STATUS_CODES[status] ?? 'bad_request', message: 'The request body could not be read' } }];
+}
+
 /** Maps every error to `{ error: { code, message, details? }, requestId }` (spec §13.2). */
 @Catch()
 export class HttpExceptionFilter implements ExceptionFilter {
@@ -30,7 +41,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
   catch(exception: unknown, host: ArgumentsHost): void {
     const res = host.switchToHttp().getResponse<Response>();
-    const requestId = maybeContext()?.requestId;
+    // Body-parser errors happen before the request-context middleware, so give them their own id.
+    let requestId = maybeContext()?.requestId;
+    if (!requestId) {
+      requestId = randomUUID();
+      if (!res.headersSent) res.setHeader('X-Request-Id', requestId);
+    }
     const [status, body] = this.toBody(exception);
     if (status >= 500) {
       // Full detail goes to the server log only — never to the client.
@@ -57,6 +73,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
           : exception.message;
       return [status, { error: { code: STATUS_CODES[status] ?? 'error', message } }];
     }
+    const parserError = bodyParserError(exception);
+    if (parserError) return parserError;
     // Database and library errors can contain SQL, table names or values: never echo them, even in development.
     const isDbError = exception instanceof Error && exception.constructor.name.startsWith('PrismaClient');
     const dev = loadEnv().APP_ENV === 'development';

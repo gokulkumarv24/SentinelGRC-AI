@@ -53,7 +53,7 @@ export class SecurityGuard implements CanActivate {
     if (!resolved) {
       // A stale cookie would make the web app believe the user is still signed in (redirect loop), so drop it.
       if (token) clearSessionCookies(context.switchToHttp().getResponse<Response>());
-      throw new AppError(401, 'unauthenticated', 'Your session has expired. Please sign in again.');
+      throw new AppError(401, 'unauthenticated', token ? 'Your session has expired. Please sign in again.' : 'Please sign in to continue.');
     }
     ctx.user = resolved.user;
     ctx.sessionId = resolved.sessionId;

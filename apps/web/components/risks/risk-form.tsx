@@ -30,7 +30,11 @@ const schema = z
     rationale: z.string().max(2000).optional(),
   })
   .refine((v) => (v.residualLikelihood == null) === (v.residualImpact == null), { message: "Set both residual factors or neither", path: ["residualImpact"] })
-  .refine((v) => v.residualLikelihood == null || !!v.residualRationale?.trim(), { message: "Explain the verified mitigations behind the residual score", path: ["residualRationale"] });
+  .refine((v) => v.residualLikelihood == null || !!v.residualRationale?.trim(), { message: "Explain the verified mitigations behind the residual score", path: ["residualRationale"] })
+  .refine((v) => v.residualLikelihood == null || v.residualImpact == null || v.residualLikelihood * v.residualImpact <= v.likelihood * v.impact, {
+    message: "Residual score cannot be higher than the inherent score",
+    path: ["residualImpact"],
+  });
 
 type Values = z.infer<typeof schema>;
 

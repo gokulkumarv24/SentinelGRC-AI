@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { httpUrl } from '../../common/validation.js';
 
 /** Framework manifest format (framework-data/manifests/*.json and the import API). */
 export const requirementSchema = z.object({
@@ -18,7 +19,7 @@ export const manifestSchema = z.object({
   publisher: z.string().trim().min(1).max(200),
   version: z.string().trim().min(1).max(120),
   releaseDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
-  sourceUrl: z.url().max(1000).nullable().optional(),
+  sourceUrl: httpUrl().nullable().optional(),
   retrievedAt: z.string().regex(/^\d{4}-\d{2}-\d{2}$/).nullable().optional(),
   licenseNotes: z.string().max(2000).nullable().optional(),
   description: z.string().max(2000).nullable().optional(),

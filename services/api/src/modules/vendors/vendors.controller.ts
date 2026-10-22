@@ -5,7 +5,7 @@ import { memoryStorage } from 'multer';
 import { z } from 'zod';
 import { CsrfExempt, Public, RateLimit, RequirePermission } from '../../common/decorators.js';
 import { listQuery, multi } from '../../common/pagination.js';
-import { ApiZodBody, ApiZodQuery, isoDate, requiredText, text, uuid, zod } from '../../common/validation.js';
+import { ApiZodBody, ApiZodQuery, httpUrl, isoDate, requiredText, score1to5, text, uuid, zod } from '../../common/validation.js';
 import { loadEnv } from '../../config/env.js';
 import { AssessmentsService } from './assessments.service.js';
 import { PortalService } from './portal.service.js';
@@ -15,14 +15,14 @@ const STATUSES = ['draft', 'onboarding', 'assessment_required', 'under_review', 
 const LEVELS = ['low', 'medium', 'high', 'critical'] as const;
 const CLASSIFICATIONS = ['public', 'internal', 'confidential', 'restricted'] as const;
 const ASSESSMENT_STATUSES = ['draft', 'submitted', 'under_review', 'returned_for_clarification', 'approved', 'closed'] as const;
-const level1to5 = z.coerce.number().int().min(1).max(5);
+const level1to5 = score1to5;
 
 const vendorBody = z.object({
   name: requiredText(200),
   legalName: text(200).nullable().optional(),
   externalReference: text(100).nullable().optional(),
   serviceDescription: requiredText(2000),
-  website: z.url().max(500).nullable().optional(),
+  website: httpUrl(500).nullable().optional(),
   businessOwnerId: uuid.nullable().optional(),
   criticality: z.enum(LEVELS),
   dataClassification: z.enum(CLASSIFICATIONS),
@@ -116,15 +116,16 @@ export class VendorsController {
     return this.vendors.transition(id, body.to, body.rationale);
   }
 
+  // Changing contacts is an edit of the vendor record; reading them is the separate, narrower permission.
   @Post('vendors/:id/contacts')
-  @RequirePermission('vendor.contacts.read')
+  @RequirePermission('vendor.update')
   @ApiZodBody(contactBody)
   addContact(@Param('id', ParseUUIDPipe) id: string, @Body(zod(contactBody)) body: z.infer<typeof contactBody>) {
     return this.vendors.addContact(id, body);
   }
 
   @Delete('vendors/:id/contacts/:contactId')
-  @RequirePermission('vendor.contacts.read')
+  @RequirePermission('vendor.update')
   @HttpCode(204)
   removeContact(@Param('id', ParseUUIDPipe) id: string, @Param('contactId', ParseUUIDPipe) contactId: string) {
     return this.vendors.removeContact(id, contactId);
@@ -132,7 +133,8 @@ export class VendorsController {
 
   @Get('vendors/:id/assessments')
   @RequirePermission('vendor_assessment.read')
-  vendorAssessments(@Param('id', ParseUUIDPipe) id: string) {
+  async vendorAssessments(@Param('id', ParseUUIDPipe) id: string) {
+    await this.vendors.get(id); // 404 for an unknown or other-tenant vendor, not an empty list
     return this.assessments.list({ page: 1, pageSize: 100, sort: 'createdAt', order: 'desc', vendorId: id });
   }
 

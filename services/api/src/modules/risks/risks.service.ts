@@ -1,8 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { badRequest, conflict, notFound, separationOfDuties, versionConflict } from '../../common/errors.js';
+import { badRequest, conflict, forbidden, notFound, separationOfDuties, versionConflict } from '../../common/errors.js';
 import { pageArgs, toPage } from '../../common/pagination.js';
 import { nextKey } from '../../common/keys.js';
-import { actorId, requireOrgId, requireUserId } from '../../common/request-context.js';
+import { actorId, maybeContext, requireOrgId, requireUserId } from '../../common/request-context.js';
+import { ROLES, type RoleDefinition } from '../../permissions/catalog.js';
 import type { Prisma, RiskStatus, RiskTreatment, Severity } from '../../generated/prisma/client.js';
 import { PrismaService, type Tx } from '../../prisma/prisma.service.js';
 import { AuditService } from '../audit/audit.service.js';
@@ -11,6 +12,17 @@ import { DEFAULT_SETTINGS, type OrganizationSettings } from '../organizations/or
 import { EntityResolver } from '../shared/entity-resolver.service.js';
 import { computeRiskScores, ratingAtLeast, type Rating } from './risk-scoring.js';
 import { ScoringPolicyService } from './scoring-policy.service.js';
+
+/**
+ * Risk owners manage only the risks assigned to them (spec §2, role 5). Members with any other role that
+ * grants risk.update may change any risk in the organization; system jobs are not restricted.
+ */
+function assertCanManage(risk: { riskOwnerId: string | null }): void {
+  const ctx = maybeContext();
+  if (!ctx?.membership || !ctx.user) return;
+  const broad = ctx.membership.roleKeys.some((key) => key !== 'risk_owner' && (ROLES as Record<string, RoleDefinition>)[key]?.permissions.includes('risk.update'));
+  if (!broad && risk.riskOwnerId !== ctx.user.id) throw forbidden('You can only change risks assigned to you.');
+}
 
 export interface RiskInput {
   title: string;
@@ -153,6 +165,7 @@ export class RisksService {
       await this.entities.assertMember(input.riskOwnerId, db);
       const { version, policy } = await this.policies.activeRisk(db, organizationId);
       const scores = this.scores(input, policy);
+      this.assertResidualRationale(scores.residualScore !== null, input.residualRationale);
       const riskKey = await nextKey(db, organizationId, 'RSK');
       const risk = await db.risk.create({
         data: {
@@ -199,6 +212,7 @@ export class RisksService {
     const run = async (tx: Tx) => {
       const risk = await tx.risk.findFirst({ where: { id, organizationId } });
       if (!risk) throw notFound('Risk');
+      assertCanManage(risk);
       if (risk.version !== version) throw versionConflict();
       if (input.status && input.status !== risk.status) {
         if (input.status === 'accepted') throw badRequest('use_acceptance_workflow', 'Risks are accepted only through an approved acceptance request.');
@@ -213,6 +227,8 @@ export class RisksService {
         residualImpact: input.residualImpact !== undefined ? input.residualImpact : risk.residualImpact,
       };
       const scores = this.scores(merged, policy);
+      const residualChanged = merged.residualLikelihood !== risk.residualLikelihood || merged.residualImpact !== risk.residualImpact;
+      this.assertResidualRationale(residualChanged && scores.residualScore !== null, input.residualRationale !== undefined ? input.residualRationale : risk.residualRationale);
       const scoreChanged = scores.inherentScore !== risk.inherentScore || scores.residualScore !== risk.residualScore;
       const updated = await tx.risk.update({
         where: { id },
@@ -261,11 +277,9 @@ export class RisksService {
   }
 
   async archive(id: string, rationale: string) {
-    const organizationId = requireOrgId();
     return this.prisma.tx(async (tx) => {
-      const risk = await tx.risk.findFirst({ where: { id, organizationId, archivedAt: null } });
-      if (!risk) throw notFound('Risk');
-      await tx.risk.update({ where: { id }, data: { archivedAt: new Date(), status: 'closed', version: { increment: 1 } } });
+      const risk = await this.mustGet(tx, id);
+      await tx.risk.update({ where: { id: risk.id }, data: { archivedAt: new Date(), status: 'closed', version: { increment: 1 } } });
       await this.audit.record({ action: 'risk.archived', entityType: 'risk', entityId: id, rationale }, tx);
     });
   }
@@ -288,6 +302,7 @@ export class RisksService {
   async unlinkControl(riskId: string, controlId: string) {
     const organizationId = requireOrgId();
     return this.prisma.tx(async (tx) => {
+      await this.mustGet(tx, riskId);
       const result = await tx.riskControl.deleteMany({ where: { organizationId, riskId, controlId } });
       if (!result.count) throw notFound('Risk control link');
       await this.audit.record({ action: 'risk.control_unlinked', entityType: 'risk', entityId: riskId, before: { controlId } }, tx);
@@ -426,16 +441,30 @@ export class RisksService {
   }
 
   private scores(input: { likelihood: number; impact: number; residualLikelihood?: number | null; residualImpact?: number | null }, policy: Parameters<typeof computeRiskScores>[1]) {
+    let scores: ReturnType<typeof computeRiskScores>;
     try {
-      return computeRiskScores(input, policy);
+      scores = computeRiskScores(input, policy);
     } catch (error) {
       throw badRequest('invalid_score', (error as Error).message);
+    }
+    // Residual is the risk left after verified mitigations, so it can never exceed the inherent risk (spec §6.2).
+    if (scores.residualScore !== null && scores.residualScore > scores.inherentScore) {
+      throw badRequest('residual_exceeds_inherent', `Residual score (${scores.residualScore}) cannot be higher than the inherent score (${scores.inherentScore}).`);
+    }
+    return scores;
+  }
+
+  /** A residual assessment must say why the risk is lower (spec §6.2 residual rationale). */
+  private assertResidualRationale(residualSet: boolean, rationale: string | null | undefined) {
+    if (residualSet && !rationale?.trim()) {
+      throw badRequest('residual_rationale_required', 'Explain the residual score: which verified mitigations reduce the risk.');
     }
   }
 
   private async mustGet(tx: Tx, id: string) {
     const risk = await tx.risk.findFirst({ where: { id, organizationId: requireOrgId(), archivedAt: null } });
     if (!risk) throw notFound('Risk');
+    assertCanManage(risk);
     return risk;
   }
 
