@@ -53,12 +53,22 @@ services:
         sync: false
       - key: EMAIL_PROVIDER
         value: none
-      # AI assistant: off by default. To use Groq, set AI_ENABLED=true, AI_PROVIDER=openai-compatible,
-      # AI_API_KEY and AI_DATA_SHARING_APPROVED=true in the dashboard (see docs/DEPLOY_RENDER.md).
+      # AI assistant and agent with Groq's free tier (docs/DEPLOY_RENDER.md, docs/AI_AGENT.md).
+      # Set the key and the data-sharing approval in the dashboard; without a key, use AI_PROVIDER=mock.
       - key: AI_ENABLED
-        value: "false"
+        value: "true"
       - key: AI_PROVIDER
-        value: mock
+        value: openai-compatible
+      - key: AI_BASE_URL
+        value: https://api.groq.com/openai/v1
+      - key: AI_MODEL
+        value: openai/gpt-oss-120b
+      - key: AI_API_KEY              # Groq key (gsk_...)
+        sync: false
+      - key: AI_DATA_SHARING_APPROVED # "true" once you accept that redacted text is sent to Groq
+        sync: false
+      - key: AI_AGENT_DAILY_TOKEN_BUDGET
+        value: "150000"
 
   - type: web
     name: sentinelgrc-web
