@@ -78,7 +78,7 @@ export class AgentService {
     return {
       ...usage,
       blockedReason: blocked,
-      jobs: jobs.map(({ runs, configuration, ...j }) => ({ id: j.id, key: j.key, name: j.name, description: j.description, enabled: j.enabled, triggerType: j.triggerType, eventType: j.eventType, intervalHours: (configuration as { intervalHours?: number | null }).intervalHours ?? null, lastRunAt: j.lastRunAt, nextRunAt: j.nextRunAt, lastRun: runs[0] ?? null })),
+      jobs: jobs.map(({ runs, configuration, ...j }) => ({ id: j.id, version: j.version, key: j.key, name: j.name, description: j.description, enabled: j.enabled, triggerType: j.triggerType, eventType: j.eventType, intervalHours: (configuration as { intervalHours?: number | null }).intervalHours ?? null, lastRunAt: j.lastRunAt, nextRunAt: j.nextRunAt, lastRun: runs[0] ?? null })),
       pendingReview: Object.fromEntries(pending.map((p) => [p.artifactType, p._count])),
     };
   }

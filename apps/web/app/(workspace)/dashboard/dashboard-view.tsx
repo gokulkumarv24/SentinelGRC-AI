@@ -10,6 +10,7 @@ import { PageHeader, Section } from "@/components/common/page-header";
 import { ErrorState, LoadingState } from "@/components/common/states";
 import { ChartCard, ChartTooltip, StatTile } from "@/components/charts/chart-card";
 import { GettingStarted } from "@/components/onboarding/getting-started";
+import { Welcome } from "@/components/onboarding/welcome";
 import { Button } from "@/components/ui/button";
 import { Tooltip as UiTooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { useActiveOrg, useCan } from "@/hooks/use-me";
@@ -123,7 +124,8 @@ export function DashboardView() {
           ))}
         </nav>
       )}
-      <div className="mb-4">
+      <div className="mb-4 space-y-4">
+        <Welcome />
         <GettingStarted />
       </div>
 

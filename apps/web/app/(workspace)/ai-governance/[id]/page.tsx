@@ -5,6 +5,7 @@ import { CheckCircle2, CircleX, FilePlus2, Pencil, Rocket } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
+import { AiAssist } from "@/components/ai/ai-assist";
 import { AiSystemFormDialog, type AiSystemRecord } from "@/components/ai/ai-system-form";
 import { humanize, SeverityBadge, StatusBadge } from "@/components/common/badges";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
@@ -319,6 +320,9 @@ export default function AiSystemPage({ params }: PageProps<"/ai-governance/[id]"
                   { label: "Deployment", value: `${humanize(s.deploymentType)}${s.deploymentEnvironment ? ` · ${s.deploymentEnvironment}` : ""}` },
                 ]} />
               </Section>
+              <Section title="AI intake review" description="Prepared by the AI agent when the system is registered: a suggested risk tier, registration gaps and what the assessment should focus on.">
+                <AiAssist artifactType="ai_system_prefill" targetId={s.id} title="Intake review" />
+              </Section>
               <Section title="People and data">
                 <DetailList items={[
                   { label: "Intended users", value: s.intendedUsers },
@@ -418,6 +422,11 @@ export default function AiSystemPage({ params }: PageProps<"/ai-governance/[id]"
 
         <TabsContent value="changes">
           <Section title="Model, provider and purpose changes" description="Each change flags the system for reassessment and needs review by someone other than the requester.">
+            {s.changes[0] && (
+              <div className="mb-3">
+                <AiAssist artifactType="ai_change_impact" targetId={s.changes[0].id} title={`Impact of the latest change (${humanize(s.changes[0].changeType)})`} />
+              </div>
+            )}
             {s.changes.length === 0 ? <p className="text-sm text-muted-foreground">No changes recorded.</p> : (
               <ul className="divide-y">
                 {s.changes.map((c) => (

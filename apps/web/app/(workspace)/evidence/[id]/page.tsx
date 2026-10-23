@@ -205,8 +205,11 @@ export default function EvidenceDetailPage({ params }: PageProps<"/evidence/[id]
               {PREVIEWABLE.has(e.mediaType ?? "") && can("evidence.download") && <div className="mt-3"><Preview evidence={e} /></div>}
             </Section>
           )}
-          <Section title="AI assistance" description="Optional drafts from the file text. They never change this evidence or any linked record.">
+          <Section title="AI assistance" description="The AI agent pre-reviews every upload. Drafts never change this evidence or any linked record; the reviewer decides.">
             <div className="space-y-4">
+              <AiAssist artifactType="evidence_review" targetId={e.id} title="Pre-review for the reviewer" />
+              <AiAssist artifactType="vendor_document_analysis" targetId={e.id} title="Third-party document analysis (SOC 2, ISO, pentest, contract)" />
+              <AiAssist artifactType="evidence_request" targetId={e.id} title="Refresh request to the owner" />
               <AiAssist artifactType="evidence_summary" targetId={e.id} />
               <AiAssist artifactType="evidence_statements" targetId={e.id} />
             </div>

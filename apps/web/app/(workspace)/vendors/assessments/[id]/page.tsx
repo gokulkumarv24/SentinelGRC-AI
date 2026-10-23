@@ -1,12 +1,12 @@
 "use client";
 
-import { AiAssist } from "@/components/ai/ai-assist";
+import { AiAssist, suggestionValue, type DraftOutput } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
-import { Copy, FileBarChart, Paperclip, Save, Send, Undo2 } from "lucide-react";
+import { Copy, FileBarChart, Paperclip, Save, Send, Undo2, Wand2 } from "lucide-react";
+import { toast } from "sonner";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useEffect, useMemo, useState } from "react";
-import { toast } from "sonner";
 import { humanize, SeverityBadge, StatusBadge } from "@/components/common/badges";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { DateText, DueDate } from "@/components/common/date-text";
@@ -24,6 +24,8 @@ import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useCan } from "@/hooks/use-me";
 import { api } from "@/lib/api";
 import type { AuditEvent, Severity } from "@/lib/types";
+
+const NL = "\n";
 
 interface Response {
   questionId: string;
@@ -322,8 +324,71 @@ export default function AssessmentPage({ params }: PageProps<"/vendors/assessmen
               </div>
             </Section>
           )}
-          <Section title="AI assistance" description="Draft observations against each question's criteria. The deterministic score above is authoritative.">
-            <AiAssist artifactType="vendor_observations" targetId={assessment.id} />
+          <Section title="AI assistance" description="The AI agent pre-reviews submitted answers and drafts the decision memo. You apply and decide; the deterministic score above is authoritative.">
+            <div className="space-y-4">
+              <AiAssist
+                artifactType="vendor_response_review"
+                targetId={assessment.id}
+                title="Answer pre-review"
+                labelFor={(value, label) => (label === "label" ? (assessment.questions.find((q) => q.questionKey === value)?.questionText.slice(0, 120) ?? value) : humanize(value))}
+                actions={(o: DraftOutput) => (
+                  <>
+                    {reviewing && can("vendor_assessment.review") && (
+                      <Button
+                        size="xs"
+                        variant="outline"
+                        onClick={() => {
+                          const byKey = new Map(assessment.questions.map((q) => [q.questionKey, q.id]));
+                          const next = { ...reviews };
+                          let applied = 0;
+                          for (const sug of o.suggestions) {
+                            const qid = byKey.get(sug.label);
+                            if (!qid || !next[qid] || next[qid].reviewerStatus !== "pending") continue;
+                            next[qid] = { reviewerStatus: sug.value as Response["reviewerStatus"], reviewerNotes: next[qid].reviewerNotes || sug.rationale.slice(0, 2000) };
+                            applied++;
+                          }
+                          setReviews(next);
+                          toast.success(applied ? `${applied} suggestion(s) filled in — check them, then save the review` : "No unreviewed answers to fill in");
+                        }}
+                      >
+                        <Wand2 aria-hidden /> Fill in suggested review
+                      </Button>
+                    )}
+                    {o.points.length > 0 && (
+                      <Button size="xs" variant="outline" onClick={() => navigator.clipboard.writeText(o.points.map((p, i) => `${i + 1}. ${p.text}`).join(NL)).then(() => toast.success("Follow-up questions copied"))}>
+                        <Copy aria-hidden /> Copy follow-up questions
+                      </Button>
+                    )}
+                  </>
+                )}
+              />
+              <AiAssist
+                artifactType="vendor_decision_memo"
+                targetId={assessment.id}
+                title="Decision memo"
+                actions={(o: DraftOutput) => (
+                  <>
+                    {reviewing && can("vendor_assessment.decide") && suggestionValue(o, "decision") && (
+                      <Button size="xs" variant="outline" onClick={() => setDecision(suggestionValue(o, "decision")!)}>
+                        <Wand2 aria-hidden /> Use recommended decision
+                      </Button>
+                    )}
+                    <Button
+                      size="xs"
+                      variant="outline"
+                      onClick={() =>
+                        navigator.clipboard
+                          .writeText([o.summary, ...o.suggestions.filter((x) => x.label === "condition").map((x) => `- ${x.value}`)].join(NL))
+                          .then(() => toast.success("Memo copied — paste it as the decision rationale"))
+                      }
+                    >
+                      <Copy aria-hidden /> Copy memo
+                    </Button>
+                  </>
+                )}
+              />
+              <AiAssist artifactType="vendor_observations" targetId={assessment.id} />
+            </div>
           </Section>
           {assessment.findings.length > 0 && (
             <Section title="Findings from this assessment">

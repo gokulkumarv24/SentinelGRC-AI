@@ -20,9 +20,18 @@ const schema = z.object({
 });
 type Values = z.infer<typeof schema>;
 
-export function TaskFormDialog({ findingId, trigger }: { findingId?: string; trigger: ReactNode }) {
+/** `defaults` pre-fills the form (e.g. from the AI agent's triage); the user still reviews and creates the task. */
+export function TaskFormDialog({ findingId, trigger, defaults, dueInDays }: { findingId?: string; trigger: ReactNode; defaults?: Partial<Values>; dueInDays?: number }) {
   const [open, setOpen] = useState(false);
-  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { title: "", description: "", ownerId: null, priority: "medium", dueDate: "" } });
+  const initial = (): Values => ({
+    title: "",
+    description: "",
+    ownerId: null,
+    priority: "medium",
+    dueDate: dueInDays ? new Date(Date.now() + dueInDays * 86_400_000).toISOString().slice(0, 10) : "",
+    ...defaults,
+  });
+  const form = useForm<Values>({ resolver: zodResolver(schema), defaultValues: { title: "", description: "", ownerId: null, priority: "medium", dueDate: "", ...defaults } });
   const mutation = useApiMutation({
     mutationFn: (v: Values) => api.post("/remediation-tasks", { ...v, description: v.description || null, dueDate: dateInput(v.dueDate), findingId: findingId ?? null }),
     success: "Remediation task created",
@@ -34,7 +43,13 @@ export function TaskFormDialog({ findingId, trigger }: { findingId?: string; tri
     },
   });
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog
+      open={open}
+      onOpenChange={(o) => {
+        if (o) form.reset(initial());
+        setOpen(o);
+      }}
+    >
       <DialogTrigger asChild>{trigger}</DialogTrigger>
       <DialogContent>
         <DialogHeader>

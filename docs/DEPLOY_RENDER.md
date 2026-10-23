@@ -76,17 +76,22 @@ Then either:
 - **Audit Log:** the `auth.login_succeeded` event should show **your** IP address. If it shows a Render (`10.x.x.x`) or Cloudflare (`172.64–172.71.x.x`, `104.16–104.31.x.x`, …) address instead, check that `TRUST_PROXY` on the API is `cloudflare` and redeploy; login rate limiting is per visitor IP.
 - If uploads or report generation fail, check the API logs for `Object storage upload failed (403 AccessDenied)` or similar: the B2 application key must have **Read and Write** access to the bucket.
 
-## Optional: AI assistant with Groq (free)
+## Optional: AI assistant and AI agent with Groq (free)
 
-In the API service's environment, set these, then redeploy:
-- `AI_ENABLED=true`
-- `AI_PROVIDER=openai-compatible`
-- `AI_BASE_URL=https://api.groq.com/openai/v1`
-- `AI_MODEL=openai/gpt-oss-120b`
-- `AI_API_KEY=<your gsk_ key>`
-- `AI_DATA_SHARING_APPROVED=true`
+1. Create a free key at **console.groq.com** → sign in (Google or email) → **API Keys** → **Create API Key**. Copy it once (it starts with `gsk_`); Groq never shows it again. No card is needed.
+2. In the API service's environment, set these, then redeploy:
+   - `AI_ENABLED=true`
+   - `AI_PROVIDER=openai-compatible`
+   - `AI_BASE_URL=https://api.groq.com/openai/v1`
+   - `AI_MODEL=openai/gpt-oss-120b`
+   - `AI_API_KEY=<your gsk_ key>`
+   - `AI_DATA_SHARING_APPROVED=true` (only after you accept that redacted record and document text is sent to Groq)
+3. Optional: `AI_AGENT_DAILY_TOKEN_BUDGET` (default `150000`) caps what the background agent uses per 24 hours, so it stays inside Groq's free daily limit (about 200,000 tokens for this model). People asking for drafts on demand are not capped by it.
+4. Optional backup provider for when Groq's daily limit is reached: `AI_FALLBACK_BASE_URL`, `AI_FALLBACK_MODEL`, `AI_FALLBACK_API_KEY` (any OpenAI-compatible endpoint, for example NVIDIA NIM or OpenRouter).
 
-Only set the last one after you accept that redacted document text is sent to Groq.
+Note: "Grok" (xAI) is a different, paid service. It also works (`AI_BASE_URL=https://api.x.ai/v1` and its model name), but Groq is the free option.
+
+Then open **AI Agent** in the app: the status should say "Working". See [AI_AGENT.md](AI_AGENT.md) for what each agent job does.
 
 ## Updating
 

@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Fragment, type ReactNode } from "react";
+import { PageHelp } from "@/components/help/page-help";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 
 export interface Crumb {
@@ -7,7 +8,7 @@ export interface Crumb {
   href?: string;
 }
 
-/** Breadcrumb → title + description → primary actions (spec §14.1). */
+/** Breadcrumb → title + description → primary actions (spec §14.1), then the page's "How this page works" guide. */
 export function PageHeader({ title, description, crumbs, actions, meta }: { title: ReactNode; description?: ReactNode; crumbs?: Crumb[]; actions?: ReactNode; meta?: ReactNode }) {
   return (
     <header className="mb-6 space-y-3">
@@ -39,6 +40,7 @@ export function PageHeader({ title, description, crumbs, actions, meta }: { titl
         </div>
         {actions && <div className="flex shrink-0 flex-wrap items-center gap-2">{actions}</div>}
       </div>
+      <PageHelp />
     </header>
   );
 }

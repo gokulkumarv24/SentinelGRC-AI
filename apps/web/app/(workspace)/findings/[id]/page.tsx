@@ -1,8 +1,8 @@
 "use client";
 
-import { AiAssist } from "@/components/ai/ai-assist";
+import { AiAssist, suggestionValue, type DraftOutput } from "@/components/ai/ai-assist";
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { Plus, Wand2 } from "lucide-react";
 import Link from "next/link";
 import { use, useState } from "react";
 import { SeverityBadge, StatusBadge } from "@/components/common/badges";
@@ -17,7 +17,7 @@ import { TaskFormDialog } from "@/components/remediation/task-form";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useApiMutation } from "@/hooks/use-api-mutation";
-import { useCan } from "@/hooks/use-me";
+import { useCan, useDirectory } from "@/hooks/use-me";
 import { api } from "@/lib/api";
 import type { FindingDetail } from "@/lib/types";
 
@@ -36,6 +36,7 @@ const LABELS: Record<string, string> = { triaged: "Triage", in_remediation: "Sta
 export default function FindingDetailPage({ params }: PageProps<"/findings/[id]">) {
   const { id } = use(params);
   const can = useCan();
+  const directory = useDirectory();
   const query = useQuery({ queryKey: ["findings", id], queryFn: () => api.get<FindingDetail>(`/findings/${id}`) });
   const [closureEvidence, setClosureEvidence] = useState<PickerOption | null>(null);
   const invalidate = [["findings"], ["remediation"], ["risks"], ["controls"]];
@@ -161,6 +162,46 @@ export default function FindingDetailPage({ params }: PageProps<"/findings/[id]"
 
           <Section title="AI assistance" description="Advisory drafts. Severity and status change only through the normal, audited actions above.">
             <div className="space-y-4">
+              <AiAssist
+                artifactType="finding_triage"
+                targetId={f.id}
+                title="Triage (prepared by the AI agent)"
+                labelFor={(value, label) => (label === "owner" ? (directory.data?.find((u) => u.id === value)?.displayName ?? value) : label === "linkRisk" ? (value === "none" ? "No related risk" : "Existing risk (see rationale)") : value)}
+                actions={(o: DraftOutput) => {
+                  const due = Number(suggestionValue(o, "dueInDays") ?? 30);
+                  const owner = suggestionValue(o, "owner") ?? null;
+                  const risk = suggestionValue(o, "linkRisk");
+                  return (
+                    <>
+                      {can("finding.update") && (
+                        <Button
+                          size="xs"
+                          variant="outline"
+                          disabled={update.isPending}
+                          onClick={() =>
+                            update.mutate({
+                              category: suggestionValue(o, "category")?.replace(/_/g, " "),
+                              ...(owner && !f.assignedTo ? { assignedTo: owner } : {}),
+                              ...(risk && risk !== "none" && !f.riskId ? { riskId: risk } : {}),
+                              ...(!f.dueDate ? { dueDate: new Date(Date.now() + due * 86_400_000).toISOString() } : {}),
+                            })
+                          }
+                        >
+                          <Wand2 aria-hidden /> Apply triage
+                        </Button>
+                      )}
+                      {can("remediation.create") && (
+                        <TaskFormDialog
+                          findingId={f.id}
+                          defaults={{ title: suggestionValue(o, "remediationTitle") ?? "", description: suggestionValue(o, "remediationPlan") ?? "", ownerId: owner, priority: (suggestionValue(o, "priority") as "low" | "medium" | "high" | "urgent") ?? "medium" }}
+                          dueInDays={due}
+                          trigger={<Button size="xs" variant="outline"><Plus aria-hidden /> Create suggested remediation task</Button>}
+                        />
+                      )}
+                    </>
+                  );
+                }}
+              />
               <AiAssist artifactType="finding_draft" targetId={f.id} />
               <AiAssist artifactType="remediation_options" targetId={f.id} />
             </div>

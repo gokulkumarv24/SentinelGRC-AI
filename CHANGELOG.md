@@ -4,6 +4,13 @@ All notable changes are listed here. Versions follow [Semantic Versioning](https
 
 ## [1.0.0] — unreleased (release candidate)
 
+### Added: AI agent and new-user guidance (2026-10-23)
+- **AI agent:** 14 background jobs as workflow definitions (switch each on or off). Evidence pre-review and vendor document analysis, vendor questionnaire pre-review, decision memo, vendor profile check, reassessment preparation, weekly vendor digest, finding triage, evidence chaser, report narrative, risk spotting, AI system intake, AI change impact, customer questionnaire answering, framework mapping suggestions. Drafts only, with one-click "Apply" actions in the UI. Daily token budget (`AI_AGENT_DAILY_TOKEN_BUDGET`), optional fallback provider (`AI_FALLBACK_*`), deterministic rules when no AI key is configured. See docs/AI_AGENT.md.
+- **Trust desk:** customer security questionnaires answered from an approved-answer library, controls and evidence; per-answer approval; CSV export.
+- **Ask the platform**, **policy drafting** saved as evidence, **bulk mapping review**.
+- **Guidance for new users:** a "How this page works" panel on every page (opens on first visit), a Help & Guide page with role-based first steps, a glossary and the AI agent explained, and a role-based welcome card on the dashboard.
+- Fixed: the Mappings page tabs pointed to a missing tab panel (critical WCAG violation, found by the extended accessibility check).
+
 ### Fixed after the first hosted QA pass (2026-10-22)
 - Object storage: uploads to S3-compatible providers that do not support conditional writes (e.g. Backblaze B2) failed, and a failing bucket hung requests through ten retries. Writes are now unconditional, with two retries and a 30-second timeout, and log the provider's error code. A missing stored file returns 404 `file_not_found` instead of 500.
 - Evidence previews load through the same-origin API instead of a presigned bucket URL, so the web app's CSP no longer blocks them.

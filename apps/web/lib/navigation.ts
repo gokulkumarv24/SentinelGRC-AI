@@ -1,11 +1,15 @@
 import {
   Activity,
   BadgeCheck,
+  BookCheck,
   Bot,
+  BrainCircuit,
   Building,
   Building2,
   ClipboardCheck,
+  CircleHelp,
   ClipboardList,
+  FileQuestion,
   FileArchive,
   FileBarChart,
   FileCheck2,
@@ -48,7 +52,13 @@ export interface NavSection {
 
 /** Sidebar structure from spec §14.2. Items are hidden unless the member holds the permission. */
 export const NAVIGATION: NavSection[] = [
-  { title: "Overview", items: [{ title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "dashboard.read" }] },
+  {
+    title: "Overview",
+    items: [
+      { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, permission: "dashboard.read" },
+      { title: "Help & Guide", href: "/help", icon: CircleHelp, permission: "dashboard.read" },
+    ],
+  },
   {
     title: "Compliance",
     items: [
@@ -92,6 +102,14 @@ export const NAVIGATION: NavSection[] = [
       { title: "Workflows", href: "/workflows", icon: Network, permission: "workflow.read" },
       { title: "Runs and Failures", href: "/workflows/runs", icon: History, permission: "workflow.read" },
       { title: "Integrations", href: "/integrations", icon: Plug, permission: "integration.read" },
+    ],
+  },
+  {
+    title: "AI Agent",
+    items: [
+      { title: "AI Agent", href: "/agent", icon: BrainCircuit, permission: "assistant.use" },
+      { title: "Customer Questionnaires", href: "/trust/questionnaires", icon: FileQuestion, permission: "trust.read" },
+      { title: "Answer Library", href: "/trust/library", icon: BookCheck, permission: "trust.read" },
     ],
   },
   {

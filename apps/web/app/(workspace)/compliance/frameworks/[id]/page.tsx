@@ -8,6 +8,7 @@ import { use, useMemo, useState } from "react";
 import { IllustrativeBadge, StatusBadge } from "@/components/common/badges";
 import { DateText } from "@/components/common/date-text";
 import { LinkDialog } from "@/components/common/link-dialog";
+import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { DetailList, PageHeader, Section } from "@/components/common/page-header";
 import { controlOption } from "@/components/common/record-picker";
 import { ErrorState, LoadingState } from "@/components/common/states";
@@ -65,6 +66,7 @@ export default function FrameworkDetailPage({ params }: PageProps<"/compliance/f
     success: "Mapping proposed — it needs review by another person",
     invalidate: [["frameworks"], ["compliance"], ["mappings"]],
   });
+  const suggestAll = useApiMutation({ mutationFn: () => api.post(`/ai/agent/frameworks/${id}/suggest-mappings`), success: "The AI agent is proposing mappings for every unmapped requirement. They will appear in the Mappings review queue." });
   const statusBy = useMemo(() => new Map((compliance.data?.requirementStatus ?? []).map((r) => [r.id, r])), [compliance.data]);
 
   if (query.isPending) return <LoadingState rows={8} />;
@@ -88,6 +90,17 @@ export default function FrameworkDetailPage({ params }: PageProps<"/compliance/f
             {fw.inScope ? <StatusBadge status="active" label="In scope" /> : <StatusBadge status="unreviewed" label="Not in scope" />}
             {fw.isIllustrative && <IllustrativeBadge />}
           </>
+        }
+        actions={
+          can("mapping.manage") && ai.data?.enabled ? (
+            <ConfirmDialog
+              trigger={<Button variant="outline"><Sparkles aria-hidden /> Suggest mappings with the AI agent</Button>}
+              title="Propose mappings for every unmapped requirement?"
+              description="The AI agent proposes up to three of your controls per requirement into the review queue. Nothing counts until another person approves it on the Mappings page (bulk review is available). It works in batches within today's AI budget."
+              confirmLabel="Start"
+              onConfirm={() => suggestAll.mutateAsync(undefined)}
+            />
+          ) : undefined
         }
       />
       <div className="grid gap-4 lg:grid-cols-3">

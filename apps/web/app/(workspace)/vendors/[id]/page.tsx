@@ -1,7 +1,9 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { ClipboardCheck, Pencil, Plus, Trash2 } from "lucide-react";
+import { ClipboardCheck, Copy, Pencil, Plus, Trash2, Wand2 } from "lucide-react";
+import { toast } from "sonner";
+import { AiAssist, type DraftOutput } from "@/components/ai/ai-assist";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { use, useState } from "react";
@@ -106,6 +108,7 @@ export default function VendorDetailPage({ params }: PageProps<"/vendors/[id]">)
   const transition = useApiMutation({ mutationFn: (rationale: string) => api.post(`/vendors/${id}/transition`, { to: transitionTo, rationale }), success: "Lifecycle updated", invalidate });
   const addContact = useApiMutation({ mutationFn: () => api.post(`/vendors/${id}/contacts`, { ...contact, role: contact.role || undefined }), success: "Contact added", invalidate, onSuccess: () => setContact({ name: "", email: "", role: "", contactType: "security" }) });
   const removeContact = useApiMutation({ mutationFn: (cid: string) => api.delete(`/vendors/${id}/contacts/${cid}`), success: "Contact removed", invalidate });
+  const applyProfile = useApiMutation({ mutationFn: (patch: Record<string, string>) => api.patch(`/vendors/${id}`, { ...patch, version: query.data?.version, rationale: "Profile corrected from the AI agent's profile check" }), success: "Profile updated; inherent risk recalculated", invalidate });
 
   if (query.isPending) return <LoadingState rows={8} />;
   if (query.isError) return <ErrorState error={query.error} onRetry={() => query.refetch()} />;
@@ -256,6 +259,33 @@ export default function VendorDetailPage({ params }: PageProps<"/vendors/[id]">)
               ]}
             />
             {v.notes && <p className="mt-3 text-xs whitespace-pre-wrap">{v.notes}</p>}
+          </Section>
+          <Section title="AI assistance" description="The AI agent checks new vendor profiles and drafts follow-ups. Nothing is changed or sent until you do it.">
+            <div className="space-y-4">
+              <AiAssist
+                artifactType="vendor_profile_review"
+                targetId={v.id}
+                title="Profile check"
+                actions={(o: DraftOutput) => {
+                  const patch = Object.fromEntries(o.suggestions.filter((x) => ["criticality", "dataClassification", "accessLevel"].includes(x.label)).map((x) => [x.label, x.value]));
+                  return can("vendor.update") && Object.keys(patch).length ? (
+                    <Button size="xs" variant="outline" disabled={applyProfile.isPending} onClick={() => applyProfile.mutate(patch)}>
+                      <Wand2 aria-hidden /> Apply {Object.keys(patch).length} correction(s)
+                    </Button>
+                  ) : null;
+                }}
+              />
+              <AiAssist
+                artifactType="vendor_followup"
+                targetId={v.id}
+                title="Follow-up message to the vendor"
+                actions={(o: DraftOutput) => (
+                  <Button size="xs" variant="outline" onClick={() => navigator.clipboard.writeText(o.summary).then(() => toast.success("Message copied — send it from your email"))}>
+                    <Copy aria-hidden /> Copy message
+                  </Button>
+                )}
+              />
+            </div>
           </Section>
           {can("vendor.lifecycle") && v.allowedTransitions.length > 0 && (
             <Section title="Lifecycle" description="Approval and rejection happen through an assessment decision.">

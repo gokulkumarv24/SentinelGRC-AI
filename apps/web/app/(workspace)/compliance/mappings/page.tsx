@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Plus } from "lucide-react";
+import { CheckCheck, Plus, X } from "lucide-react";
 import Link from "next/link";
 import { Suspense, useState } from "react";
 import { IllustrativeBadge, StatusBadge } from "@/components/common/badges";
@@ -10,11 +10,12 @@ import { DataTable, FilterBar, options, type Column } from "@/components/common/
 import { PageHeader } from "@/components/common/page-header";
 import { controlOption, RecordPicker, type PickerOption } from "@/components/common/record-picker";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { useApiMutation } from "@/hooks/use-api-mutation";
 import { useListParams } from "@/hooks/use-list-params";
@@ -150,9 +151,41 @@ function Mappings() {
   const query = useQuery({ queryKey: ["mappings", params], queryFn: () => api.get<Page<Mapping>>("/control-mappings", params) });
   const review = useApiMutation({ mutationFn: (v: { id: string; decision: string; notes: string }) => api.post(`/control-mappings/${v.id}/review`, { decision: v.decision, notes: v.notes }), success: "Review recorded", invalidate: [["mappings"], ["frameworks"], ["compliance"]] });
   const adopt = useApiMutation({ mutationFn: (id: string) => api.post(`/control-mappings/${id}/adopt`), success: "Adopted as a proposal for your organization", invalidate: [["mappings"]] });
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const bulk = useApiMutation({
+    mutationFn: (v: { decision: "approved" | "rejected"; notes: string }) => api.post<{ reviewed: number; failed: Array<{ id: string; error: string }> }>("/control-mappings/bulk-review", { ids: [...selected], ...v }),
+    success: (r) => `${r.reviewed} mapping(s) reviewed${r.failed.length ? `, ${r.failed.length} skipped (for example ones you proposed yourself)` : ""}`,
+    invalidate: [["mappings"], ["frameworks"], ["compliance"]],
+    onSuccess: () => setSelected(new Set()),
+  });
+  const reviewable = (m: Mapping) => m.scope !== "platform" && can("mapping.review") && ["unreviewed", "pending_review"].includes(m.reviewStatus) && m.createdBy !== me?.user.id;
+  const pageReviewable = (query.data?.items ?? []).filter(reviewable);
 
   const ref = (r: ReqRef | null) => (r ? <span><span className="font-mono text-xs">{r.framework.key} {r.requirementCode}</span><span className="block max-w-xs truncate text-xs text-muted-foreground">{r.title}</span></span> : null);
   const columns: Column<Mapping>[] = [
+    ...(pageReviewable.length
+      ? [
+          {
+            id: "select",
+            header: "Select",
+            cell: (m: Mapping) =>
+              reviewable(m) ? (
+                <Checkbox
+                  aria-label="Select for bulk review"
+                  checked={selected.has(m.id)}
+                  onCheckedChange={(v) =>
+                    setSelected((s) => {
+                      const n = new Set(s);
+                      if (v) n.add(m.id);
+                      else n.delete(m.id);
+                      return n;
+                    })
+                  }
+                />
+              ) : null,
+          } satisfies Column<Mapping>,
+        ]
+      : []),
     { id: "source", header: "Requirement", cell: (m) => ref(m.source) },
     { id: "target", header: "Maps to", cell: (m) => (m.control ? <Link className="text-primary hover:underline" href={`/controls/${m.control.id}`}><span className="font-mono text-xs">{m.control.controlCode}</span> {m.control.title}</Link> : ref(m.target)) },
     { id: "type", header: "Type", cell: (m) => <span className="text-xs">{m.mappingType.replace(/_/g, " ")} · {m.confidence}%</span>, hideOnMobile: true },
@@ -178,15 +211,32 @@ function Mappings() {
   return (
     <>
       <PageHeader title="Control mappings" description="Requirement-to-control and cross-framework mappings with rationale, confidence and review status. Unreviewed mappings are illustrative." crumbs={[{ label: "Compliance" }, { label: "Mappings" }]} actions={can("mapping.manage") && <NewMappingDialog />} />
-      <Tabs value={tab} onValueChange={(v) => setParams({ queue: v === "queue" ? "true" : undefined, scope: v === "platform" ? "platform" : undefined })} className="mb-3">
-        <TabsList>
+      <Tabs value={tab} onValueChange={(v) => setParams({ queue: v === "queue" ? "true" : undefined, scope: v === "platform" ? "platform" : undefined })}>
+        <TabsList className="mb-3">
           <TabsTrigger value="all">All</TabsTrigger>
           <TabsTrigger value="queue">Review queue</TabsTrigger>
           <TabsTrigger value="platform">Platform illustrative</TabsTrigger>
         </TabsList>
+        {/* One panel shows the current view, so each tab points at a real panel (ARIA tabs pattern). */}
+        <TabsContent value={tab}>
+          <FilterBar params={params} setParams={setParams} searchPlaceholder="Search code, control or rationale" filters={tab === "queue" ? [] : [{ key: "reviewStatus", label: "Review", options: options(["unreviewed", "pending_review", "approved", "rejected"]) }]} />
+          {pageReviewable.length > 0 && (
+            <div className="mb-3 flex flex-wrap items-center gap-2 text-sm">
+              <Button size="xs" variant="outline" onClick={() => setSelected(selected.size === pageReviewable.length ? new Set() : new Set(pageReviewable.map((m) => m.id)))}>
+                {selected.size === pageReviewable.length ? "Clear selection" : `Select all ${pageReviewable.length} on this page`}
+              </Button>
+              {selected.size > 0 && (
+                <>
+                  <span className="text-muted-foreground">{selected.size} selected</span>
+                  <ConfirmDialog trigger={<Button size="xs"><CheckCheck aria-hidden /> Approve selected</Button>} title={`Approve ${selected.size} mapping(s)?`} description="Each is approved under your name with these notes. Read the rationale of each one first." requireRationale rationaleLabel="Review notes" confirmLabel="Approve" onConfirm={(notes) => bulk.mutateAsync({ decision: "approved", notes })} />
+                  <ConfirmDialog trigger={<Button size="xs" variant="outline"><X aria-hidden /> Reject selected</Button>} title={`Reject ${selected.size} mapping(s)?`} requireRationale rationaleLabel="Why are they rejected?" destructive confirmLabel="Reject" onConfirm={(notes) => bulk.mutateAsync({ decision: "rejected", notes })} />
+                </>
+              )}
+            </div>
+          )}
+          <DataTable caption="Control mappings" columns={columns} query={query} params={params} setParams={setParams} rowKey={(m) => m.id} empty={{ title: tab === "queue" ? "Nothing to review" : "No mappings yet", description: "Map framework requirements to your controls from a framework page or with Propose mapping." }} />
+        </TabsContent>
       </Tabs>
-      <FilterBar params={params} setParams={setParams} searchPlaceholder="Search code, control or rationale" filters={tab === "queue" ? [] : [{ key: "reviewStatus", label: "Review", options: options(["unreviewed", "pending_review", "approved", "rejected"]) }]} />
-      <DataTable caption="Control mappings" columns={columns} query={query} params={params} setParams={setParams} rowKey={(m) => m.id} empty={{ title: tab === "queue" ? "Nothing to review" : "No mappings yet", description: "Map framework requirements to your controls from a framework page or with Propose mapping." }} />
     </>
   );
 }

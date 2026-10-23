@@ -1042,7 +1042,8 @@
                       "workflow.failed",
                       "integration.failed",
                       "report.ready",
-                      "approval.requested"
+                      "approval.requested",
+                      "ai.agent_ready"
                     ]
                   },
                   "inApp": {
@@ -3444,6 +3445,60 @@
                 },
                 "required": [
                   "version"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "compliance"
+        ]
+      }
+    },
+    "/api/v1/control-mappings/bulk-review": {
+      "post": {
+        "operationId": "ComplianceController_bulkReviewMappings",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "decision": {
+                    "type": "string",
+                    "enum": [
+                      "approved",
+                      "rejected"
+                    ]
+                  },
+                  "notes": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 5000
+                  },
+                  "ids": {
+                    "minItems": 1,
+                    "maxItems": 200,
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "uuid",
+                      "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                    }
+                  }
+                },
+                "required": [
+                  "decision",
+                  "notes",
+                  "ids"
                 ]
               }
             }
@@ -10344,7 +10399,22 @@
                       "risk_summary",
                       "report_draft",
                       "mapping_suggestions",
-                      "control_failure_explanation"
+                      "control_failure_explanation",
+                      "evidence_review",
+                      "vendor_document_analysis",
+                      "vendor_response_review",
+                      "vendor_decision_memo",
+                      "vendor_profile_review",
+                      "vendor_followup",
+                      "vendor_portfolio_digest",
+                      "finding_triage",
+                      "evidence_request",
+                      "risk_proposals",
+                      "ai_system_prefill",
+                      "ai_change_impact",
+                      "policy_draft",
+                      "platform_answer",
+                      "questionnaire_answers"
                     ]
                   },
                   "targetId": {
@@ -10356,6 +10426,24 @@
                     "type": "string",
                     "format": "uuid",
                     "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                  },
+                  "options": {
+                    "type": "object",
+                    "properties": {
+                      "topic": {
+                        "type": "string",
+                        "maxLength": 200
+                      },
+                      "controlIds": {
+                        "maxItems": 40,
+                        "type": "array",
+                        "items": {
+                          "type": "string",
+                          "format": "uuid",
+                          "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+                        }
+                      }
+                    }
                   }
                 },
                 "required": [
@@ -10449,7 +10537,22 @@
                 "risk_summary",
                 "report_draft",
                 "mapping_suggestions",
-                "control_failure_explanation"
+                "control_failure_explanation",
+                "evidence_review",
+                "vendor_document_analysis",
+                "vendor_response_review",
+                "vendor_decision_memo",
+                "vendor_profile_review",
+                "vendor_followup",
+                "vendor_portfolio_digest",
+                "finding_triage",
+                "evidence_request",
+                "risk_proposals",
+                "ai_system_prefill",
+                "ai_change_impact",
+                "policy_draft",
+                "platform_answer",
+                "questionnaire_answers"
               ]
             }
           },
@@ -10486,6 +10589,30 @@
               "enum": [
                 "true",
                 "false"
+              ]
+            }
+          },
+          {
+            "name": "origin",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "user",
+                "agent"
+              ]
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "draft",
+                "failed"
               ]
             }
           }
@@ -10560,7 +10687,7 @@
                         "maxLength": 4000
                       },
                       "points": {
-                        "maxItems": 30,
+                        "maxItems": 40,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -10598,7 +10725,7 @@
                       },
                       "suggestions": {
                         "default": [],
-                        "maxItems": 20,
+                        "maxItems": 60,
                         "type": "array",
                         "items": {
                           "type": "object",
@@ -10690,6 +10817,64 @@
         ]
       }
     },
+    "/api/v1/ai/ask": {
+      "post": {
+        "operationId": "AssistantController_ask",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "question": {
+                    "type": "string",
+                    "minLength": 3,
+                    "maxLength": 500
+                  }
+                },
+                "required": [
+                  "question"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/drafts/{id}/save-policy": {
+      "post": {
+        "operationId": "AssistantController_savePolicy",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-assistant"
+        ]
+      }
+    },
     "/api/v1/ai/drafts/{id}/use": {
       "post": {
         "operationId": "AssistantController_use",
@@ -10736,6 +10921,486 @@
         },
         "tags": [
           "ai-assistant"
+        ]
+      }
+    },
+    "/api/v1/ai/agent": {
+      "get": {
+        "operationId": "AgentController_overview",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-agent"
+        ]
+      }
+    },
+    "/api/v1/ai/agent/frameworks/{id}/suggest-mappings": {
+      "post": {
+        "operationId": "AgentController_suggestMappings",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "ai-agent"
+        ]
+      }
+    },
+    "/api/v1/trust/questionnaires": {
+      "get": {
+        "operationId": "TrustController_list",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "createdAt",
+              "type": "string",
+              "enum": [
+                "createdAt",
+                "updatedAt",
+                "dueDate",
+                "customerName"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          },
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      },
+      "post": {
+        "operationId": "TrustController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "title": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "customerName": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 200
+                  },
+                  "dueDate": {
+                    "anyOf": [
+                      {},
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "notes": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 2000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "questions": {
+                    "maxItems": 500,
+                    "type": "array",
+                    "items": {
+                      "type": "object",
+                      "properties": {
+                        "section": {
+                          "anyOf": [
+                            {
+                              "type": "string",
+                              "maxLength": 200
+                            },
+                            {
+                              "type": "null"
+                            }
+                          ]
+                        },
+                        "questionText": {
+                          "type": "string",
+                          "minLength": 1,
+                          "maxLength": 2000
+                        }
+                      },
+                      "required": [
+                        "questionText"
+                      ]
+                    }
+                  },
+                  "text": {
+                    "type": "string",
+                    "maxLength": 400000
+                  }
+                },
+                "required": [
+                  "title",
+                  "customerName"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/questionnaires/{id}": {
+      "get": {
+        "operationId": "TrustController_get",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/questionnaires/{id}/reanswer": {
+      "post": {
+        "operationId": "TrustController_reanswer",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "202": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/questionnaires/{id}/approve-drafted": {
+      "post": {
+        "operationId": "TrustController_approveDrafted",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/questionnaires/{id}/items/{itemId}": {
+      "patch": {
+        "operationId": "TrustController_updateItem",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "itemId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$schema": "https://json-schema.org/draft/2020-12/schema",
+                "type": "object",
+                "properties": {
+                  "action": {
+                    "type": "string",
+                    "enum": [
+                      "save",
+                      "approve",
+                      "reopen"
+                    ]
+                  },
+                  "finalAnswer": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "maxLength": 4000
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  },
+                  "shortAnswer": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": [
+                          "yes",
+                          "no",
+                          "partial",
+                          "not_applicable",
+                          "unknown"
+                        ]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "action"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/questionnaires/{id}/export.csv": {
+      "get": {
+        "operationId": "TrustController_export",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/answers": {
+      "get": {
+        "operationId": "TrustController_library",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 1,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 9007199254740991
+            }
+          },
+          {
+            "name": "pageSize",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": 25,
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100
+            }
+          },
+          {
+            "name": "sort",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "updatedAt",
+              "type": "string",
+              "enum": [
+                "updatedAt",
+                "usageCount",
+                "createdAt"
+              ]
+            }
+          },
+          {
+            "name": "order",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "default": "desc",
+              "type": "string",
+              "enum": [
+                "asc",
+                "desc"
+              ]
+            }
+          },
+          {
+            "name": "q",
+            "required": false,
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "maxLength": 200
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
+        ]
+      }
+    },
+    "/api/v1/trust/answers/{id}": {
+      "delete": {
+        "operationId": "TrustController_retire",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "trust"
         ]
       }
     }

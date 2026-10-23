@@ -1,9 +1,10 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { Check, Sparkles, X } from "lucide-react";
+import { Bot, Check, Sparkles, X } from "lucide-react";
+import type { ReactNode } from "react";
 import { DateText } from "@/components/common/date-text";
-import { StatusBadge } from "@/components/common/badges";
+import { humanize, StatusBadge } from "@/components/common/badges";
 import { ConfirmDialog } from "@/components/common/confirm-dialog";
 import { Button } from "@/components/ui/button";
 import { useApiMutation } from "@/hooks/use-api-mutation";
@@ -20,13 +21,28 @@ export type ArtifactType =
   | "risk_summary"
   | "report_draft"
   | "mapping_suggestions"
-  | "control_failure_explanation";
+  | "control_failure_explanation"
+  | "evidence_review"
+  | "vendor_document_analysis"
+  | "vendor_response_review"
+  | "vendor_decision_memo"
+  | "vendor_profile_review"
+  | "vendor_followup"
+  | "vendor_portfolio_digest"
+  | "finding_triage"
+  | "evidence_request"
+  | "risk_proposals"
+  | "ai_system_prefill"
+  | "ai_change_impact"
+  | "policy_draft"
+  | "platform_answer"
+  | "questionnaire_answers";
 
-interface SourceRef {
+export interface SourceRef {
   sourceId: string;
   locator?: string;
 }
-interface DraftOutput {
+export interface DraftOutput {
   summary: string;
   points: Array<{ text: string; sourceRefs: SourceRef[] }>;
   suggestions: Array<{ label: string; value: string; rationale: string; sourceRefs: SourceRef[] }>;
@@ -39,6 +55,9 @@ export interface AiArtifact {
   status: "draft" | "failed";
   schemaValid: boolean;
   decision: "pending" | "accepted" | "edited_and_accepted" | "rejected";
+  origin: "user" | "agent";
+  agentJob: string | null;
+  targetId: string | null;
   provider: string;
   model: string;
   promptVersion: string;
@@ -46,7 +65,8 @@ export interface AiArtifact {
   errorCode: string | null;
   validationErrors: string[] | null;
   limitations: string | null;
-  sourceRecords: Array<{ ref: string; type: string; label: string }>;
+  sourceRecords: Array<{ ref: string; type: string; label: string; recordId?: string }>;
+  usedInRecordId: string | null;
   createdAt: string;
   reviewedAt: string | null;
 }
@@ -63,10 +83,37 @@ export function useAiStatus() {
   return useQuery({ queryKey: ["ai", "status"], queryFn: () => api.get<AiStatus>("/ai/status"), enabled: can("assistant.use"), staleTime: 60_000 });
 }
 
-const isDraft = (o: AiArtifact["output"]): o is DraftOutput => !!o && "summary" in o;
+export const isDraft = (o: AiArtifact["output"]): o is DraftOutput => !!o && "summary" in o;
+
+/** Values the agent encodes as JSON (risk proposals) are shown as readable fields. */
+function readableValue(value: string): ReactNode {
+  if (!value.startsWith("{")) return value;
+  try {
+    const v = JSON.parse(value) as Record<string, unknown>;
+    return (
+      <span className="block">
+        {typeof v.title === "string" && <span className="font-medium">{v.title}</span>}
+        <span className="block text-xs text-muted-foreground">
+          {Object.entries(v)
+            .filter(([k]) => k !== "title" && k !== "riskId")
+            .map(([k, x]) => `${humanize(k)}: ${String(x)}`)
+            .join(" · ")}
+        </span>
+      </span>
+    );
+  } catch {
+    return value;
+  }
+}
+
+const SUGGESTION_LABELS: Partial<Record<ArtifactType, string>> = {
+  mapping_suggestions: "Candidate control",
+  vendor_response_review: "Question",
+  questionnaire_answers: "Question",
+};
 
 /** Renders one AI draft. Always labelled as a draft; sources and limitations are always visible (spec §11). */
-export function DraftView({ artifact, labelFor }: { artifact: AiArtifact; labelFor?: (value: string) => string }) {
+export function DraftView({ artifact, labelFor, actions }: { artifact: AiArtifact; labelFor?: (value: string, label: string) => string; actions?: (output: DraftOutput, artifact: AiArtifact) => ReactNode }) {
   const can = useCan();
   const review = useApiMutation({
     mutationFn: (v: { decision: "accepted" | "rejected"; rationale: string }) => api.post(`/ai/drafts/${artifact.id}/review`, v),
@@ -75,7 +122,7 @@ export function DraftView({ artifact, labelFor }: { artifact: AiArtifact; labelF
   });
   const refLabel = (r: SourceRef) => {
     const s = artifact.sourceRecords.find((x) => x.ref === r.sourceId);
-    return `${s?.label ?? r.sourceId}${r.locator ? ` · ${r.locator}` : ""}`;
+    return `${s?.label ?? r.sourceId}${r.locator && r.locator !== s?.label ? ` · ${r.locator.length > 40 ? `${r.locator.slice(0, 8)}…` : r.locator}` : ""}`;
   };
   if (artifact.status === "failed" || !isDraft(artifact.output)) {
     return (
@@ -87,13 +134,17 @@ export function DraftView({ artifact, labelFor }: { artifact: AiArtifact; labelF
     );
   }
   const o = artifact.output;
+  const special = SUGGESTION_LABELS[artifact.artifactType];
   return (
     <article className="space-y-3 rounded-md border border-dashed bg-muted/30 p-3 text-sm" aria-label="AI draft">
       <header className="flex flex-wrap items-center gap-2 text-xs">
-        <span className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 font-medium"><Sparkles className="size-3" aria-hidden /> AI draft — {artifact.decision === "pending" ? "not reviewed" : artifact.decision.replace(/_/g, " ")}</span>
+        <span className="inline-flex items-center gap-1 rounded bg-secondary px-1.5 py-0.5 font-medium">
+          {artifact.origin === "agent" ? <Bot className="size-3" aria-hidden /> : <Sparkles className="size-3" aria-hidden />}
+          {artifact.origin === "agent" ? "Prepared by the AI agent" : "AI draft"} — {artifact.decision === "pending" ? "not reviewed" : artifact.decision.replace(/_/g, " ")}
+        </span>
         <span className="text-muted-foreground">Confidence {o.confidence} · {artifact.provider}/{artifact.model} · <DateText value={artifact.createdAt} relative /></span>
       </header>
-      <p>{o.summary}</p>
+      <p className="whitespace-pre-line">{o.summary}</p>
       {o.points.length > 0 && (
         <ul className="space-y-1.5">
           {o.points.map((p, i) => (
@@ -108,10 +159,10 @@ export function DraftView({ artifact, labelFor }: { artifact: AiArtifact; labelF
         <dl className="space-y-1.5">
           {o.suggestions.map((s, i) => (
             <div key={i}>
-              <dt className="text-xs font-medium text-muted-foreground">{artifact.artifactType === "mapping_suggestions" ? "Candidate control" : s.label}</dt>
+              <dt className="text-xs font-medium text-muted-foreground">{artifact.artifactType === "mapping_suggestions" ? "Candidate control" : special && labelFor ? labelFor(s.label, "label") : humanize(s.label)}</dt>
               <dd>
-                <span className="font-medium">{artifact.artifactType === "mapping_suggestions" ? s.label : labelFor ? labelFor(s.value) : s.value}</span>
-                <span className="block text-xs text-muted-foreground">{s.rationale}</span>
+                <span className="font-medium">{artifact.artifactType === "mapping_suggestions" ? s.label : labelFor ? labelFor(s.value, s.label) : readableValue(s.value)}</span>
+                <span className="block text-xs whitespace-pre-line text-muted-foreground">{s.rationale}</span>
               </dd>
             </div>
           ))}
@@ -123,6 +174,7 @@ export function DraftView({ artifact, labelFor }: { artifact: AiArtifact; labelF
           <ul className="list-disc pl-5 text-muted-foreground">{o.limitations.map((l) => <li key={l}>{l}</li>)}</ul>
         </div>
       )}
+      {actions && <div className="flex flex-wrap gap-2 border-t pt-2">{actions(o, artifact)}</div>}
       {artifact.decision === "pending" && can("assistant.review") && (
         <div className="flex gap-2">
           <ConfirmDialog trigger={<Button size="xs" variant="outline"><Check /> Accept draft</Button>} title="Accept this AI draft?" description="Accepting records your review. It does not change any record; apply the content yourself where it is useful." requireRationale rationaleLabel="Review note" confirmLabel="Accept" onConfirm={(r) => review.mutateAsync({ decision: "accepted", rationale: r })} />
@@ -134,7 +186,22 @@ export function DraftView({ artifact, labelFor }: { artifact: AiArtifact; labelF
 }
 
 /** "Draft with AI" panel for a record. Hidden entirely when AI is disabled or the user lacks permission. */
-export function AiAssist({ artifactType, targetId, controlId, title, labelFor }: { artifactType: ArtifactType; targetId: string; controlId?: string; title?: string; labelFor?: (value: string) => string }) {
+export function AiAssist({
+  artifactType,
+  targetId,
+  controlId,
+  title,
+  labelFor,
+  actions,
+}: {
+  artifactType: ArtifactType;
+  targetId: string;
+  controlId?: string;
+  title?: string;
+  labelFor?: (value: string, label: string) => string;
+  /** One-click ways to apply the draft through the normal, permission-checked APIs. */
+  actions?: (output: DraftOutput, artifact: AiArtifact) => ReactNode;
+}) {
   const status = useAiStatus();
   const task = status.data?.tasks.find((t) => t.type === artifactType);
   const drafts = useQuery({
@@ -158,8 +225,11 @@ export function AiAssist({ artifactType, targetId, controlId, title, labelFor }:
         </Button>
       </div>
       {status.data.sendsDataExternally && <p className="text-xs text-muted-foreground">Redacted content is sent to {status.data.provider} ({status.data.model}). Restricted evidence is never sent.</p>}
-      {latest ? <DraftView artifact={latest} labelFor={labelFor} /> : <p className="text-xs text-muted-foreground">AI drafts are suggestions only and never change records.</p>}
+      {latest ? <DraftView artifact={latest} labelFor={labelFor} actions={actions} /> : <p className="text-xs text-muted-foreground">AI drafts are suggestions only and never change records.</p>}
       {latest && latest.decision !== "pending" && <StatusBadge status={latest.decision === "rejected" ? "rejected" : "approved"} label={`Reviewed: ${latest.decision.replace(/_/g, " ")}`} />}
     </section>
   );
 }
+
+/** Reads one structured suggestion from a draft. */
+export const suggestionValue = (o: DraftOutput, label: string) => o.suggestions.find((s) => s.label === label)?.value;

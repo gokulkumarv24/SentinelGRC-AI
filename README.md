@@ -33,6 +33,8 @@
 - **Automation:** a database-backed workflow engine (schedules, events, retries, visible failures), integration adapters, and in-app and email notifications.
 - **Reporting:** twelve report types in PDF, CSV and Excel, with draft/final status, definitions and a source appendix.
 - **AI assistant (optional):** grounded, redacted drafts with citations and limitations. Every draft needs human review and never changes records.
+- **AI agent (optional):** background jobs that pre-review evidence and vendor answers, triage findings, draft decision memos and remediation tasks, answer customer security questionnaires (with an approved-answer library), propose framework mappings and risks, chase expiring evidence and send a weekly vendor digest. People apply its drafts with one click; it never approves or decides. Works on Groq's free tier with a daily token budget and an optional fallback provider. See [docs/AI_AGENT.md](docs/AI_AGENT.md).
+- **Built-in guidance:** every page has a "How this page works" panel, a Help & Guide page with role-based first steps and a glossary, and a welcome card for new users.
 - **Security:**
   - Cookie sessions with CSRF protection, default-deny RBAC (eight roles), and separation of duties.
   - Tenant isolation tested in every suite, and an append-only audit trail.

@@ -2,7 +2,7 @@ import { expect, test, type Page } from "@playwright/test";
 import { createRequire } from "node:module";
 import { signIn } from "./helpers";
 
-const PAGES = ["/dashboard", "/controls", "/evidence", "/risks", "/findings", "/remediation", "/vendors", "/ai-governance", "/reports", "/workflows/runs", "/audit-log", "/settings/members"];
+const PAGES = ["/dashboard", "/help", "/controls", "/evidence", "/compliance/mappings", "/risks", "/findings", "/remediation", "/vendors", "/vendors/assessments", "/ai-governance", "/agent", "/trust/questionnaires", "/trust/library", "/reports", "/workflows/runs", "/audit-log", "/settings/members"];
 const axePath = createRequire(__filename).resolve("axe-core/axe.min.js");
 
 async function open(page: Page, path: string) {
